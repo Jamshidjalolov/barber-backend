@@ -1,0 +1,392 @@
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import FmdGoodRoundedIcon from "@mui/icons-material/FmdGoodRounded";
+import MyLocationRoundedIcon from "@mui/icons-material/MyLocationRounded";
+import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
+import SellRoundedIcon from "@mui/icons-material/SellRounded";
+import {
+  alpha,
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { BarberProfile, BarberSettingsPayload } from "../../types";
+import { BarberLocationPickerMap } from "../maps/BarberLocationPickerMap";
+
+interface BarberSettingsDialogProps {
+  open: boolean;
+  barber: BarberProfile;
+  onClose: () => void;
+  onSubmit: (payload: BarberSettingsPayload) => Promise<unknown>;
+}
+
+interface FormValues {
+  workStartTime: string;
+  workEndTime: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  priceHaircut: string;
+  priceFade: string;
+  priceHairBeard: string;
+  pricePremium: string;
+  priceBeard: string;
+}
+
+function toFormValues(barber: BarberProfile): FormValues {
+  return {
+    workStartTime: barber.workStartTime,
+    workEndTime: barber.workEndTime,
+    address: barber.address ?? "",
+    latitude: barber.latitude?.toString() ?? "",
+    longitude: barber.longitude?.toString() ?? "",
+    priceHaircut: barber.priceHaircut.toString(),
+    priceFade: barber.priceFade.toString(),
+    priceHairBeard: barber.priceHairBeard.toString(),
+    pricePremium: barber.pricePremium.toString(),
+    priceBeard: barber.priceBeard.toString(),
+  };
+}
+
+export function BarberSettingsDialog({
+  open,
+  barber,
+  onClose,
+  onSubmit,
+}: BarberSettingsDialogProps) {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const [formValues, setFormValues] = useState<FormValues>(() => toFormValues(barber));
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setFormValues(toFormValues(barber));
+      setError("");
+    }
+  }, [barber, open]);
+
+  const handleLocationChange = (coords: { latitude: number; longitude: number }) => {
+    setFormValues((current) => ({
+      ...current,
+      latitude: coords.latitude.toFixed(6),
+      longitude: coords.longitude.toFixed(6),
+    }));
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setError("Brauzer lokatsiyani o'qiy olmadi.");
+      return;
+    }
+
+    setError("");
+    setLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        handleLocationChange({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+        setError("Joriy joylashuvni olib bo'lmadi.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: 5 * 60 * 1000,
+      },
+    );
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const priceHaircut = Number(formValues.priceHaircut);
+    const priceFade = Number(formValues.priceFade);
+    const priceHairBeard = Number(formValues.priceHairBeard);
+    const pricePremium = Number(formValues.pricePremium);
+    const priceBeard = Number(formValues.priceBeard);
+    const latitude = formValues.latitude ? Number(formValues.latitude) : undefined;
+    const longitude = formValues.longitude ? Number(formValues.longitude) : undefined;
+
+    if (!formValues.workStartTime || !formValues.workEndTime) {
+      setError("Ish vaqtini to'liq kiriting.");
+      return;
+    }
+
+    if (formValues.workEndTime <= formValues.workStartTime) {
+      setError("Ish tugash vaqti boshlanishdan keyin bo'lishi kerak.");
+      return;
+    }
+
+    if ([priceHaircut, priceFade, priceHairBeard, pricePremium, priceBeard].some((value) => !Number.isFinite(value) || value < 0)) {
+      setError("Narxlar 0 dan katta yoki teng bo'lishi kerak.");
+      return;
+    }
+
+    if ((latitude !== undefined && !Number.isFinite(latitude)) || (longitude !== undefined && !Number.isFinite(longitude))) {
+      setError("Lokatsiya koordinatalari noto'g'ri.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await onSubmit({
+        workStartTime: formValues.workStartTime,
+        workEndTime: formValues.workEndTime,
+        address: formValues.address.trim() || undefined,
+        latitude,
+        longitude,
+        priceHaircut,
+        priceFade,
+        priceHairBeard,
+        pricePremium,
+        priceBeard,
+      });
+      onClose();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Sozlamalarni saqlab bo'lmadi.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      fullScreen={fullScreen}
+      PaperProps={{
+        component: "form",
+        onSubmit: handleSubmit,
+        sx: {
+          borderRadius: fullScreen ? 0 : "28px",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <DialogTitle sx={{ px: { xs: 2.2, md: 2.6 }, py: { xs: 1.8, md: 2.1 } }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography variant="h5">Ish sozlamalari</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Ish vaqti, narxlar va lokatsiyani shu yerda boshqaring.
+            </Typography>
+          </Box>
+          <IconButton onClick={onClose}>
+            <CloseRoundedIcon />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+
+      <DialogContent sx={{ px: { xs: 2.2, md: 2.6 }, py: { xs: 2, md: 2.3 } }}>
+        <Stack spacing={1.6}>
+          <Panel
+            icon={<ScheduleRoundedIcon sx={{ fontSize: "1rem" }} />}
+            title="Ish vaqti"
+          >
+            <GridFields>
+              <Field label="Boshlanish" type="time" value={formValues.workStartTime} onChange={(value) => setFormValues((current) => ({ ...current, workStartTime: value }))} />
+              <Field label="Tugash" type="time" value={formValues.workEndTime} onChange={(value) => setFormValues((current) => ({ ...current, workEndTime: value }))} />
+            </GridFields>
+          </Panel>
+
+          <Panel
+            icon={<SellRoundedIcon sx={{ fontSize: "1rem" }} />}
+            title="Xizmat narxlari"
+          >
+            <GridFields>
+              <Field label="Soch olish" type="number" value={formValues.priceHaircut} onChange={(value) => setFormValues((current) => ({ ...current, priceHaircut: value }))} />
+              <Field label="Fade qirqim" type="number" value={formValues.priceFade} onChange={(value) => setFormValues((current) => ({ ...current, priceFade: value }))} />
+              <Field label="Soch + soqol" type="number" value={formValues.priceHairBeard} onChange={(value) => setFormValues((current) => ({ ...current, priceHairBeard: value }))} />
+              <Field label="Premium paket" type="number" value={formValues.pricePremium} onChange={(value) => setFormValues((current) => ({ ...current, pricePremium: value }))} />
+              <Field label="Soqol dizayni" type="number" value={formValues.priceBeard} onChange={(value) => setFormValues((current) => ({ ...current, priceBeard: value }))} />
+            </GridFields>
+          </Panel>
+
+          <Panel
+            icon={<FmdGoodRoundedIcon sx={{ fontSize: "1rem" }} />}
+            title="Lokatsiya"
+          >
+            <Stack spacing={1.2}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="space-between">
+                <Typography variant="body2" color="text.secondary">
+                  Xarita ustidan nuqtani bosing yoki markerni suring.
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={handleUseCurrentLocation}
+                  disabled={locating}
+                  startIcon={<MyLocationRoundedIcon />}
+                  sx={{ alignSelf: { xs: "stretch", sm: "center" }, borderRadius: "14px", textTransform: "none" }}
+                >
+                  {locating ? "Joy olinmoqda..." : "Mening joyim"}
+                </Button>
+              </Stack>
+
+              <BarberLocationPickerMap
+                value={
+                  formValues.latitude && formValues.longitude
+                    ? {
+                        latitude: Number(formValues.latitude),
+                        longitude: Number(formValues.longitude),
+                      }
+                    : null
+                }
+                address={formValues.address}
+                onChange={handleLocationChange}
+              />
+
+              <GridFields columns={{ xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }}>
+              <Box sx={{ gridColumn: { md: "1 / -1" } }}>
+                <Field label="Manzil" value={formValues.address} onChange={(value) => setFormValues((current) => ({ ...current, address: value }))} placeholder="Masalan, Chilonzor 5-kvartal" />
+              </Box>
+              <Field label="Latitude" type="number" value={formValues.latitude} onChange={(value) => setFormValues((current) => ({ ...current, latitude: value }))} placeholder="41.2995" />
+              <Field label="Longitude" type="number" value={formValues.longitude} onChange={(value) => setFormValues((current) => ({ ...current, longitude: value }))} placeholder="69.2401" />
+              </GridFields>
+            </Stack>
+          </Panel>
+
+          {error ? (
+            <Alert severity="error" sx={{ borderRadius: "16px" }}>
+              {error}
+            </Alert>
+          ) : null}
+
+          <Stack direction={{ xs: "column-reverse", sm: "row" }} spacing={1.2} justifyContent="flex-end">
+            <Button
+              variant="outlined"
+              onClick={onClose}
+              sx={{ minWidth: 160, minHeight: 48, borderRadius: "16px", textTransform: "none" }}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={saving}
+              sx={{ minWidth: 220, minHeight: 48, borderRadius: "16px", textTransform: "none", fontWeight: 700 }}
+            >
+              {saving ? "Saqlanmoqda..." : "Saqlash"}
+            </Button>
+          </Stack>
+        </Stack>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Panel({
+  icon,
+  title,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <Box
+      sx={{
+        p: 1.35,
+        borderRadius: "22px",
+        background: "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(247,239,226,0.94) 100%)",
+        border: `1px solid ${alpha("#111111", 0.05)}`,
+      }}
+    >
+      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1.2 }}>
+        <Box
+          sx={{
+            width: 34,
+            height: 34,
+            borderRadius: "12px",
+            display: "grid",
+            placeItems: "center",
+            backgroundColor: alpha("#111111", 0.05),
+            color: "#a37a22",
+          }}
+        >
+          {icon}
+        </Box>
+        <Typography variant="subtitle1">{title}</Typography>
+      </Stack>
+      {children}
+    </Box>
+  );
+}
+
+function GridFields({
+  children,
+  columns = { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+}: {
+  children: ReactNode;
+  columns?: { xs: string; md: string };
+}) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: columns,
+        gap: 1.1,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <Stack spacing={0.7}>
+      <Typography variant="subtitle2" sx={{ color: "#4a4338" }}>
+        {label}
+      </Typography>
+      <TextField
+        fullWidth
+        size="small"
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            minHeight: 48,
+            borderRadius: "16px",
+            backgroundColor: alpha("#fffaf3", 0.85),
+          },
+        }}
+      />
+    </Stack>
+  );
+}
