@@ -2,10 +2,25 @@ services:
   - type: web
     name: barber-backend
     runtime: python
+    plan: free
+    healthCheckPath: /health
     buildCommand: cd backend && POETRY_VIRTUALENVS_IN_PROJECT=true poetry install --no-root
-    startCommand: cd backend && poetry run alembic upgrade head && poetry run python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    preDeployCommand: cd backend && poetry run alembic upgrade head
+    startCommand: cd backend && poetry run python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: POETRY_VIRTUALENVS_IN_PROJECT
         value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: barber-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+databases:
+  - name: barber-db
+    plan: free
+    databaseName: barbershop
+    user: barbershop_user
