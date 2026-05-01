@@ -1,0 +1,32 @@
+[tool.poetry]
+package-mode = false
+
+[project]
+name = "barbershop-backend"
+version = "0.1.0"
+description = "Realtime-ready backend for admin, barber and customer flows"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "sqlalchemy>=2.0.35",
+  "asyncpg>=0.29.0",
+  "alembic>=1.13.2",
+  "pydantic-settings>=2.5.2",
+  "python-jose[cryptography]>=3.3.0",
+  "passlib[bcrypt]>=1.7.4",
+  "python-multipart>=0.0.9",
+  "httpx>=0.27.2",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.alembic]
+script_location = "alembic"
