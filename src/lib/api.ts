@@ -15,15 +15,14 @@ import {
 import { getSafeImageUrl } from "./media";
 
 const LOCAL_API_URL_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/;
-const LOCAL_API_BASE_URL = "http://127.0.0.1:8000/api/v1";
 const PRODUCTION_API_BASE_URL = "https://barber-backend.onrender.com/api/v1";
 
 function resolveApiBaseUrl() {
   const configuredUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "");
   if (!configuredUrl) {
-    return import.meta.env.DEV ? LOCAL_API_BASE_URL : PRODUCTION_API_BASE_URL;
+    return PRODUCTION_API_BASE_URL;
   }
-  if (import.meta.env.PROD && LOCAL_API_URL_PATTERN.test(configuredUrl)) {
+  if (LOCAL_API_URL_PATTERN.test(configuredUrl)) {
     return PRODUCTION_API_BASE_URL;
   }
   return configuredUrl;
