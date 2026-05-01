@@ -1,2 +1,10 @@
-# This file is auto-generated during build
-# See backend/pyproject.toml for actual configuration
+[tool.poetry]
+name = "barbershop"
+version = "0.1.0"
+package-mode = false
+description = "Barbershop full-stack app"
+readme = "README.md"
+dependencies = []
+
+[tool.poetry.group.dev.dependencies]
+
