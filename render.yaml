@@ -2,7 +2,7 @@ services:
   - type: web
     name: barber-backend
     runtime: python
-    buildCommand: POETRY_VIRTUALENVS_IN_PROJECT=true poetry install --no-dev
+    buildCommand: cd backend && POETRY_VIRTUALENVS_IN_PROJECT=true poetry install --no-dev
     startCommand: >-
       bash -lc "POETRY_VIRTUALENVS_IN_PROJECT=true poetry run python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT"
     envVars:
