@@ -1,8 +1,5 @@
 node_modules/
 dist/
-backend/
-!backend/
-!backend/pyproject.toml
 
 *.tsbuildinfo
 
