@@ -12,6 +12,14 @@ npm run start
 
 Expo Go orqali QR kodni scan qiling yoki Android/iOS emulatorni tanlang.
 
+Agar Expo Go oldingi SDK xatosini cache’dan ko'rsatsa:
+
+```bash
+npm run start -- --clear
+```
+
+Telefoningizda Expo Go ilovasini to'liq yopib qayta oching va yangi QR kodni scan qiling.
+
 ## Backend URL
 
 Default API:
