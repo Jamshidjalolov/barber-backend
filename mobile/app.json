@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Barber Mobile",
+    "slug": "barber-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#111111"
+      }
+    },
+    "extra": {
+      "apiBaseUrl": "https://barber-backend.onrender.com/api/v1"
+    }
+  }
+}
