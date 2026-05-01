@@ -2,9 +2,8 @@ services:
   - type: web
     name: barber-backend
     runtime: python_3_11
-    rootDir: backend
-    buildCommand: poetry install --no-root
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: ./build.sh
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
