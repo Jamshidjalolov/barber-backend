@@ -1,11 +1,9 @@
 [tool.poetry]
-package-mode = false
-
-[project]
 name = "barbershop-backend"
 version = "0.1.0"
 description = "Realtime-ready backend for admin, barber and customer flows"
 readme = "README.md"
+package-mode = false
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",

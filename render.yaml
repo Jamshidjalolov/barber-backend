@@ -1,13 +1,11 @@
 services:
   - type: web
     name: barber-backend
-    runtime: python_3_11
+    runtime: python
     buildCommand: sh build.sh
     startCommand: cd backend && poetry run uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
-      - key: DATABASE_URL
-        scope: project
       - key: POETRY_VIRTUALENVS_IN_PROJECT
         value: "true"
