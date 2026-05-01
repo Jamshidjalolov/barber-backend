@@ -10,6 +10,10 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: FRONTEND_URL
+        value: https://barber-fron-kxb7codgp-jamshidjalolovs-projects.vercel.app
+      - key: CORS_ALLOWED_ORIGIN_REGEX
+        value: https://.*\.vercel\.app
       - key: PYTHON_VERSION
         value: 3.11.11
       - key: POETRY_VIRTUALENVS_IN_PROJECT

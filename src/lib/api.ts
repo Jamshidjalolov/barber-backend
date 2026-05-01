@@ -14,9 +14,13 @@ import {
 } from "../types";
 import { getSafeImageUrl } from "./media";
 
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://127.0.0.1:8000/api/v1"
+  : "https://barber-backend.onrender.com/api/v1";
+
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ??
-  "http://127.0.0.1:8000/api/v1";
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
+  DEFAULT_API_BASE_URL;
 
 interface RequestOptions extends RequestInit {
   token?: string;

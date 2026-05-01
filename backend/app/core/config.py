@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
     frontend_url: str = "http://localhost:5173"
+    cors_allowed_origins: str = ""
+    cors_allowed_origin_regex: str | None = r"https://.*\.vercel\.app"
 
     postgres_host: str = "localhost"
     postgres_port: int = 5432
@@ -72,6 +74,20 @@ class Settings(BaseSettings):
             query["ssl"] = sslmode
 
         return urlunsplit(parts._replace(query=urlencode(query)))
+
+    @property
+    def allowed_cors_origins(self) -> list[str]:
+        origins = [
+            self.frontend_url,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+        origins.extend(
+            origin.strip()
+            for origin in self.cors_allowed_origins.split(",")
+            if origin.strip()
+        )
+        return list(dict.fromkeys(origins))
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_PATH),
