@@ -5,6 +5,3 @@ package-mode = false
 description = "Barbershop full-stack app"
 readme = "README.md"
 dependencies = []
-
-[tool.poetry.group.dev.dependencies]
-
