@@ -1,5 +1,7 @@
 node_modules/
 .expo/
+.expo-home/
+.expo-export-test/
 dist/
 *.tsbuildinfo
 .env
