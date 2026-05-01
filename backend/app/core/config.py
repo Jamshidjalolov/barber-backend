@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,7 +23,10 @@ class Settings(BaseSettings):
     postgres_db: str = "barbershop"
     postgres_user: str = "postgres"
     postgres_password: str = "postgres"
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/barbershop"
+    database_url: str = Field(
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/barbershop",
+        repr=False,
+    )
 
     jwt_secret_key: str = "change-this-secret"
     jwt_algorithm: str = "HS256"
@@ -43,12 +46,26 @@ class Settings(BaseSettings):
     def normalize_database_url(cls, value: Any) -> Any:
         if not isinstance(value, str):
             return value
+        value = value.strip().strip("\"'")
+        if value.startswith("DATABASE_URL="):
+            value = value.split("=", 1)[1].strip().strip("\"'")
+        for prefix in ("postgresql://", "postgres://", "postgresql+asyncpg://"):
+            index = value.find(prefix)
+            if index > 0:
+                value = value[index:].split()[0].strip().strip("\"'")
+                break
         if value.startswith("postgres://"):
             value = value.replace("postgres://", "postgresql+asyncpg://", 1)
         elif value.startswith("postgresql://"):
             value = value.replace("postgresql://", "postgresql+asyncpg://", 1)
 
         parts = urlsplit(value)
+        if parts.scheme != "postgresql+asyncpg" or not parts.netloc or not parts.path.strip("/"):
+            raise ValueError(
+                "DATABASE_URL must be the Render PostgreSQL Internal Database URL, "
+                "for example postgresql://user:password@host:5432/database. "
+                "Do not paste the psql command or the DATABASE_URL= prefix."
+            )
         query = dict(parse_qsl(parts.query, keep_blank_values=True))
         sslmode = query.pop("sslmode", None)
         if sslmode and "ssl" not in query:
@@ -60,6 +77,7 @@ class Settings(BaseSettings):
         env_file=str(ENV_PATH),
         env_file_encoding="utf-8",
         extra="ignore",
+        hide_input_in_errors=True,
     )
 
 
