@@ -29,6 +29,7 @@ function resolveApiBaseUrl() {
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
+const API_REQUEST_TIMEOUT_MS = 20_000;
 
 interface RequestOptions extends RequestInit {
   token?: string;
@@ -65,15 +66,32 @@ function formatApiDetail(detail: unknown) {
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { token, headers, ...rest } = options;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-  });
+  const { token, headers, signal, ...rest } = options;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+  const abortRequest = () => controller.abort();
+  signal?.addEventListener("abort", abortRequest, { once: true });
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...rest,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Backend javob bermayapti. Render deploy holatini tekshiring.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+    signal?.removeEventListener("abort", abortRequest);
+  }
 
   if (!response.ok) {
     let message = "So'rovni bajarib bo'lmadi.";
