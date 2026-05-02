@@ -51,7 +51,8 @@ export function RejectBookingDialog({
           borderRadius: "28px",
           p: 0.3,
           background:
-            "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(255,255,255,1) 100%)",
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: (theme) => `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -72,7 +73,7 @@ export function RejectBookingDialog({
           </Stack>
           <div>
             <Typography variant="h6">Bronni rad etish</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.primary">
               {booking ? `${booking.customer} uchun sabab yozing.` : "Sebab ko'rsating."}
             </Typography>
           </div>
@@ -107,6 +108,19 @@ export function RejectBookingDialog({
             placeholder="Masalan, shu vaqtda boshqa mijoz bilan bandman. Iltimos, boshqa slot tanlang."
             value={reason}
             onChange={(event) => setReason(event.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark" ? alpha("#ffffff", 0.06) : alpha("#f7efe8", 0.95),
+                borderRadius: "12px",
+              },
+              "& .MuiInputBase-input": {
+                color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.92)"),
+              },
+              "& .MuiInputBase-input::placeholder": {
+                color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.58)" : "rgba(0,0,0,0.5)"),
+              },
+            }}
           />
         </Stack>
       </DialogContent>

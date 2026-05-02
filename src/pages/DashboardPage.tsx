@@ -47,12 +47,13 @@ export function DashboardPage({
             px: 1.35,
             py: 1.15,
             borderRadius: "20px",
-            border: `1px solid ${alpha("#3aa66f", 0.12)}`,
-            backgroundColor: alpha("#3aa66f", 0.06),
+            border: `1px solid ${alpha("#34d399", 0.16)}`,
+            backgroundColor: alpha("#34d399", 0.08),
+            backdropFilter: "blur(14px)",
           }}
         >
-          <LocalOfferRoundedIcon sx={{ color: "#2d8b58" }} />
-          <Typography variant="body2" sx={{ color: "#24513a", fontWeight: 700 }}>
+          <LocalOfferRoundedIcon sx={{ color: "#86efac" }} />
+          <Typography variant="body2" sx={{ color: "#bbf7d0", fontWeight: 700 }}>
             Hozir {activeDiscounts.length} ta faol skidka bor.
           </Typography>
         </Stack>

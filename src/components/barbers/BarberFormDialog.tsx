@@ -114,7 +114,7 @@ function Field({
 }) {
   return (
     <Stack spacing={0.85}>
-      <Typography variant="subtitle2" sx={{ color: "#3b352b" }}>
+      <Typography variant="subtitle2" sx={{ color: (theme) => theme.palette.text.primary }}>
         {label}
       </Typography>
       <TextField
@@ -126,13 +126,17 @@ function Field({
           "& .MuiOutlinedInput-root": {
             minHeight: props.multiline ? "unset" : 50,
             borderRadius: "16px",
-            backgroundColor: alpha("#fffaf3", 0.78),
+            backgroundColor: (theme) => theme.palette.background.paper,
           },
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: alpha("#7a5d31", 0.1),
           },
           "& .MuiInputBase-input": {
             py: 1.6,
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.92)"),
+          },
+          "& .MuiInputBase-input::placeholder": {
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.58)" : "rgba(0,0,0,0.5)"),
           },
         }}
         InputProps={
@@ -286,7 +290,7 @@ export function BarberFormDialog({
             <Typography variant="h5" sx={{ mb: 0.35 }}>
               {title}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.primary" sx={{ opacity: 0.95 }}>
               {subtitle}
             </Typography>
           </Box>

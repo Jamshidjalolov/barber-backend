@@ -1,5 +1,6 @@
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import { AppBar, Box, Drawer, IconButton, Toolbar } from "@mui/material";
+import { alpha, AppBar, Box, Drawer, IconButton, Toolbar } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode, useState } from "react";
 import { BrandLogo } from "../components/common/BrandLogo";
 import { Sidebar } from "../components/navigation/Sidebar";
@@ -41,20 +42,35 @@ export function AdminLayout({
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at 34% -12%, rgba(139,92,246,0.18), transparent 30%), radial-gradient(circle at 96% 12%, rgba(34,211,238,0.12), transparent 24%)",
+      }}
+    >
       <AppBar
         position="fixed"
         color="transparent"
         elevation={0}
         sx={{
           display: { md: "none" },
-          backdropFilter: "blur(14px)",
+          backdropFilter: "blur(18px)",
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between", px: 1.5 }}>
-          <BrandLogo badgeSize={42} />
-          <IconButton onClick={() => setMobileOpen(true)}>
+          <BrandLogo badgeSize={42} tone="light" />
+          <IconButton
+            onClick={() => setMobileOpen(true)}
+            sx={{
+              width: 42,
+              height: 42,
+              backgroundColor: alpha("#ffffff", 0.07),
+              border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+            }}
+          >
             <MenuRoundedIcon />
           </IconButton>
         </Toolbar>
@@ -102,7 +118,18 @@ export function AdminLayout({
           pb: { xs: 2.5, md: 4 },
         }}
       >
-        {children}
+        <AnimatePresence mode="wait">
+          <Box
+            key={activePage}
+            component={motion.div}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {children}
+          </Box>
+        </AnimatePresence>
       </Box>
     </Box>
   );

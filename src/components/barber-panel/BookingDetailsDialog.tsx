@@ -72,7 +72,7 @@ function InfoRow({
       sx={{
         p: 1.05,
         borderRadius: "16px",
-        backgroundColor: "#fff",
+        backgroundColor: (theme) => theme.palette.background.paper,
         border: `1px solid ${alpha("#111111", 0.05)}`,
       }}
     >
@@ -91,10 +91,12 @@ function InfoRow({
         {icon}
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" sx={{ color: "#8b92a5" }}>
+        <Typography variant="caption" sx={{ color: (theme) => theme.palette.text.secondary }}>
           {label}
         </Typography>
-        <Typography variant="subtitle2">{value}</Typography>
+        <Typography variant="subtitle2" sx={{ color: (theme) => theme.palette.text.primary }}>
+          {value}
+        </Typography>
       </Box>
     </Stack>
   );
@@ -128,7 +130,7 @@ export function BookingDetailsDialog({
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1.2}>
           <Box>
             <Typography variant="h5">Bron tafsiloti</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.primary">
               Kim band qilgani va to'liq ma'lumot shu yerda.
             </Typography>
           </Box>
@@ -144,8 +146,7 @@ export function BookingDetailsDialog({
             sx={{
               p: 1.35,
               borderRadius: "22px",
-              background:
-                "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(247,239,226,0.94) 100%)",
+              backgroundColor: (theme) => theme.palette.background.paper,
               border: `1px solid ${alpha("#111111", 0.05)}`,
             }}
           >
@@ -157,7 +158,7 @@ export function BookingDetailsDialog({
             >
               <Box>
                 <Typography variant="h6">{booking.customer}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   #{booking.id}
                 </Typography>
               </Box>

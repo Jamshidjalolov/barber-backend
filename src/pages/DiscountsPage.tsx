@@ -35,23 +35,23 @@ function buildStatus(item: DiscountItem) {
   if (startsAt > now) {
     return {
       label: "Kutilmoqda",
-      color: "#8f6a0c",
-      bg: alpha("#d5a546", 0.14),
+      color: "#fde68a",
+      bg: alpha("#f6c85f", 0.14),
     };
   }
 
   if (endsAt < now) {
     return {
       label: "Tugagan",
-      color: "#6d7486",
-      bg: alpha("#111111", 0.06),
+      color: "#cbd5e1",
+      bg: alpha("#ffffff", 0.06),
     };
   }
 
   return {
     label: "Faol",
-    color: "#207a49",
-    bg: alpha("#3aa66f", 0.12),
+    color: "#86efac",
+    bg: alpha("#34d399", 0.12),
   };
 }
 
@@ -69,8 +69,11 @@ function StatTile({
       sx={{
         p: 1.35,
         borderRadius: "18px",
-        border: `1px solid ${alpha("#111111", 0.05)}`,
-        background: "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(248,242,232,0.95) 100%)",
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
+        background:
+          "linear-gradient(180deg, rgba(20,20,34,0.84) 0%, rgba(11,12,24,0.72) 100%)",
+        boxShadow: "0 16px 34px rgba(0,0,0,0.18)",
+        backdropFilter: "blur(16px)",
       }}
     >
       <Stack direction="row" spacing={0.95} alignItems="center">
@@ -81,8 +84,8 @@ function StatTile({
             borderRadius: "12px",
             display: "grid",
             placeItems: "center",
-            color: "#a37a22",
-            backgroundColor: alpha("#d5a546", 0.14),
+            color: "#67e8f9",
+            backgroundColor: alpha("#22d3ee", 0.12),
             flexShrink: 0,
           }}
         >
@@ -192,9 +195,11 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
                 sx={{
                   p: 1.35,
                   borderRadius: "22px",
-                  backgroundColor: "#fff",
-                  border: `1px solid ${alpha("#111111", 0.05)}`,
-                  boxShadow: "0 12px 28px rgba(17,17,17,0.04)",
+                  background:
+                    "linear-gradient(180deg, rgba(20,20,34,0.84) 0%, rgba(11,12,24,0.72) 100%)",
+                  border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
+                  boxShadow: "0 18px 42px rgba(0,0,0,0.22)",
+                  backdropFilter: "blur(16px)",
                 }}
               >
                 <Stack spacing={1.15}>
@@ -215,8 +220,9 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
                           sx={{
                             height: 26,
                             borderRadius: "999px",
-                            backgroundColor: alpha("#3aa66f", 0.12),
-                            color: "#207a49",
+                            backgroundColor: alpha("#34d399", 0.12),
+                            color: "#86efac",
+                            border: `1px solid ${alpha("#34d399", 0.16)}`,
                             "& .MuiChip-label": { px: 1, fontWeight: 800 },
                           }}
                         />
@@ -245,8 +251,8 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
                         width: 38,
                         height: 38,
                         borderRadius: "12px",
-                        border: `1px solid ${alpha("#b65b5b", 0.18)}`,
-                        color: "#b65b5b",
+                        border: `1px solid ${alpha("#fb7185", 0.18)}`,
+                        color: "#fecdd3",
                       }}
                     >
                       <DeleteOutlineRoundedIcon fontSize="small" />
@@ -260,7 +266,8 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
                       sx={{
                         height: 30,
                         borderRadius: "999px",
-                        backgroundColor: alpha("#111111", 0.05),
+                        backgroundColor: alpha("#ffffff", 0.06),
+                        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                         "& .MuiChip-label": { px: 1.05, fontWeight: 700 },
                       }}
                     />
@@ -269,8 +276,9 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
                       sx={{
                         height: 30,
                         borderRadius: "999px",
-                        backgroundColor: alpha("#d5a546", 0.1),
-                        color: "#8f6a0c",
+                        backgroundColor: alpha("#f6c85f", 0.12),
+                        color: "#fde68a",
+                        border: `1px solid ${alpha("#f6c85f", 0.16)}`,
                         "& .MuiChip-label": { px: 1.05, fontWeight: 700 },
                       }}
                     />
@@ -285,8 +293,8 @@ export function DiscountsPage({ items, onDeleteDiscount }: DiscountsPageProps) {
           sx={{
             p: 2,
             borderRadius: "24px",
-            border: `1px dashed ${alpha("#111111", 0.12)}`,
-            backgroundColor: alpha("#111111", 0.02),
+            border: `1px dashed ${alpha("#c4b5fd", 0.22)}`,
+            backgroundColor: alpha("#ffffff", 0.04),
             color: "text.secondary",
           }}
         >

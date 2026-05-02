@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { BarberProfile, CustomerProfile } from "../../types";
 
@@ -47,7 +48,13 @@ export function CustomerProfileCard({
   onSubmit,
 }: CustomerProfileCardProps) {
   return (
-    <Stack spacing={{ xs: 2.2, md: 2.5 }}>
+    <Stack
+      component={motion.div}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      spacing={{ xs: 2.2, md: 2.5 }}
+    >
       <Stack direction="row" spacing={0.7} alignItems="flex-start">
         <IconButtonEdge onClick={onBack} />
         <Box>
@@ -72,16 +79,19 @@ export function CustomerProfileCard({
           sx={{
             p: 1.35,
             borderRadius: "22px",
-            backgroundColor: "#f8f9fd",
-            border: `1px solid ${alpha("#111111", 0.05)}`,
+            background:
+              "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+            border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+            boxShadow: "0 18px 42px rgba(0,0,0,0.22)",
+            backdropFilter: "blur(18px)",
           }}
         >
           <Typography
             variant="caption"
             sx={{
-              color: "#9aa2ba",
+              color: "#8d96ad",
               textTransform: "uppercase",
-              letterSpacing: "0.08em",
+              letterSpacing: 0,
               fontWeight: 700,
             }}
           >
@@ -113,7 +123,7 @@ export function CustomerProfileCard({
             </Box>
           </Stack>
 
-          <Box sx={{ height: 1, bgcolor: alpha("#111111", 0.06), mb: 1.05 }} />
+          <Box sx={{ height: 1, bgcolor: alpha("#c4b5fd", 0.12), mb: 1.05 }} />
 
           <Stack spacing={0.9}>
             <SummaryRow icon={<CalendarTodayRoundedIcon />} label={dateLabel} />
@@ -126,8 +136,8 @@ export function CustomerProfileCard({
               mt: 1.1,
               p: 1,
               borderRadius: "18px",
-              backgroundColor: alpha("#d5a546", 0.08),
-              border: `1px solid ${alpha("#d5a546", 0.12)}`,
+              backgroundColor: alpha("#f6c85f", 0.1),
+              border: `1px solid ${alpha("#f6c85f", 0.16)}`,
             }}
           >
             <Stack direction="row" justifyContent="space-between" spacing={1}>
@@ -139,10 +149,10 @@ export function CustomerProfileCard({
 
             {discountPercent ? (
               <Stack direction="row" justifyContent="space-between" spacing={1} sx={{ mt: 0.55 }}>
-                <Typography variant="body2" sx={{ color: "#2d8b58", fontWeight: 700 }}>
+                  <Typography variant="body2" sx={{ color: "#86efac", fontWeight: 700 }}>
                   Skidka
                 </Typography>
-                <Typography variant="subtitle2" sx={{ color: "#2d8b58" }}>
+                <Typography variant="subtitle2" sx={{ color: "#86efac" }}>
                   -{discountPercent}%
                 </Typography>
               </Stack>
@@ -163,8 +173,8 @@ export function CustomerProfileCard({
           sx={{
             p: { xs: 0, md: 1.35 },
             borderRadius: { xs: 0, md: "22px" },
-            backgroundColor: { xs: "transparent", md: "#fff" },
-            border: { xs: "none", md: `1px solid ${alpha("#111111", 0.05)}` },
+            backgroundColor: { xs: "transparent", md: alpha("#ffffff", 0.05) },
+            border: { xs: "none", md: `1px solid ${alpha("#c4b5fd", 0.12)}` },
           }}
         >
           <Stack spacing={1.2}>
@@ -180,7 +190,7 @@ export function CustomerProfileCard({
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutlineRoundedIcon sx={{ color: "#a3a9bb" }} />
+                      <PersonOutlineRoundedIcon sx={{ color: "#8d96ad" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -217,7 +227,7 @@ export function CustomerProfileCard({
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneIphoneRoundedIcon sx={{ color: "#a3a9bb" }} />
+                      <PhoneIphoneRoundedIcon sx={{ color: "#8d96ad" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -280,7 +290,9 @@ function IconButtonEdge({ onClick }: { onClick: () => void }) {
         height: 34,
         borderRadius: "50%",
         p: 0,
-        color: "#111111",
+        color: "#f8fafc",
+        backgroundColor: alpha("#ffffff", 0.06),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
         mt: -0.15,
       }}
     >
@@ -298,8 +310,8 @@ function SummaryRow({
 }) {
   return (
     <Stack direction="row" spacing={0.8} alignItems="center">
-      <Box sx={{ color: "#9aa2ba", display: "grid", placeItems: "center" }}>{icon}</Box>
-      <Typography variant="body2" sx={{ fontSize: "1rem", color: "#394253" }}>
+      <Box sx={{ color: "#8d96ad", display: "grid", placeItems: "center" }}>{icon}</Box>
+      <Typography variant="body2" sx={{ fontSize: "1rem", color: "#f8fafc" }}>
         {label}
       </Typography>
     </Stack>

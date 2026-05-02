@@ -63,7 +63,7 @@ export function BookingsFiltersCard({
             "& .MuiOutlinedInput-root": {
               minHeight: 52,
               borderRadius: "18px",
-              backgroundColor: alpha("#fffaf3", 0.76),
+              backgroundColor: alpha("#ffffff", 0.06),
             },
           }}
         />
@@ -76,7 +76,7 @@ export function BookingsFiltersCard({
             minWidth: { xs: "100%", sm: 220 },
             minHeight: 52,
             borderRadius: "18px",
-            backgroundColor: alpha("#fffaf3", 0.76),
+            backgroundColor: alpha("#ffffff", 0.06),
           }}
         >
           <MenuItem value="all">Barcha barberlar</MenuItem>
@@ -91,8 +91,8 @@ export function BookingsFiltersCard({
           sx={{
             p: 0.5,
             borderRadius: "18px",
-            backgroundColor: alpha("#fffaf3", 0.72),
-            border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+            backgroundColor: alpha("#ffffff", 0.05),
+            border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
             gap: 0.75,
@@ -115,17 +115,17 @@ export function BookingsFiltersCard({
                   borderRadius: "14px",
                   cursor: "pointer",
                   background: selected
-                    ? "linear-gradient(180deg, rgba(248,241,227,1) 0%, rgba(244,232,210,1) 100%)"
+                    ? "linear-gradient(135deg, rgba(139,92,246,0.94) 0%, rgba(34,211,238,0.78) 100%)"
                     : "transparent",
-                  boxShadow: selected ? "0 6px 18px rgba(17, 17, 17, 0.06)" : "none",
+                  boxShadow: selected ? `0 10px 24px ${alpha("#8b5cf6", 0.22)}` : "none",
                   border: selected
-                    ? `1px solid ${alpha("#7a5d31", 0.12)}`
+                    ? `1px solid ${alpha("#67e8f9", 0.24)}`
                     : "1px solid transparent",
                 }}
               >
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: selected ? "#111111" : "text.secondary" }}
+                  sx={{ color: selected ? "#fff" : "text.secondary" }}
                 >
                   {item.label}
                 </Typography>

@@ -3,12 +3,17 @@ import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import {
   alpha,
   Alert,
   Box,
   Button,
   Chip,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
   InputAdornment,
   Stack,
   TextField,
@@ -21,9 +26,9 @@ import { ApiRole } from "../types";
 interface UnifiedLoginPageProps {
   selectedRole: ApiRole;
   onRoleChange: (role: ApiRole) => void;
-  onCustomerLogin: (phone: string, password: string) => Promise<void>;
-  onBarberLogin: (username: string, password: string) => Promise<void>;
-  onAdminLogin: (username: string, password: string) => Promise<void>;
+  onCustomerLogin: (phone: string, password: string, remember?: boolean) => Promise<void>;
+  onBarberLogin: (username: string, password: string, remember?: boolean) => Promise<void>;
+  onAdminLogin: (username: string, password: string, remember?: boolean) => Promise<void>;
   onOpenRegister: () => void;
 }
 
@@ -59,6 +64,8 @@ export function UnifiedLoginPage({
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   useEffect(() => {
     setError("");
@@ -102,10 +109,10 @@ export function UnifiedLoginPage({
 
   const autofillSx = {
     "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-      WebkitTextFillColor: "#111111",
-      WebkitBoxShadow: "0 0 0 100px #fffdf9 inset",
+      WebkitTextFillColor: "#f8fafc",
+      WebkitBoxShadow: "0 0 0 100px #121326 inset",
       transition: "background-color 9999s ease-out 0s",
-      caretColor: "#111111",
+      caretColor: "#f8fafc",
       borderRadius: "14px",
     },
   };
@@ -117,16 +124,16 @@ export function UnifiedLoginPage({
       setSubmitting(true);
 
       if (selectedRole === "customer") {
-        await onCustomerLogin(customerValues.phone, customerValues.password);
+        await onCustomerLogin(customerValues.phone, customerValues.password, rememberMe);
         return;
       }
 
       if (selectedRole === "barber") {
-        await onBarberLogin(barberValues.username, barberValues.password);
+        await onBarberLogin(barberValues.username, barberValues.password, rememberMe);
         return;
       }
 
-      await onAdminLogin(adminValues.username, adminValues.password);
+      await onAdminLogin(adminValues.username, adminValues.password, rememberMe);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Kirishda xato yuz berdi.");
     } finally {
@@ -150,9 +157,10 @@ export function UnifiedLoginPage({
           p: { xs: 1.25, md: 1.5 },
           borderRadius: "22px",
           background:
-            "linear-gradient(180deg, rgba(255,252,247,0.94) 0%, rgba(255,255,255,1) 100%)",
-          border: `1px solid ${alpha("#111111", 0.06)}`,
-          boxShadow: "0 14px 34px rgba(17,17,17,0.05)",
+            "linear-gradient(180deg, rgba(18,18,31,0.86) 0%, rgba(10,11,22,0.78) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+          boxShadow: "0 18px 44px rgba(0,0,0,0.28)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <Stack spacing={1.1}>
@@ -170,11 +178,13 @@ export function UnifiedLoginPage({
                   sx={{
                     height: 36,
                     borderRadius: "999px",
-                    color: selected ? "#fff" : "#4c5568",
-                    backgroundColor: selected ? "#111111" : alpha("#111111", 0.04),
-                    border: `1px solid ${selected ? "#111111" : alpha("#111111", 0.06)}`,
+                    color: selected ? "#fff" : "#aab2c8",
+                    background: selected
+                      ? "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)"
+                      : alpha("#ffffff", 0.06),
+                    border: `1px solid ${selected ? alpha("#67e8f9", 0.34) : alpha("#c4b5fd", 0.12)}`,
                     "& .MuiChip-icon": {
-                      color: selected ? "#fff" : "#80889b",
+                      color: selected ? "#fff" : "#8d96ad",
                     },
                     "& .MuiChip-label": {
                       px: 1.05,
@@ -212,12 +222,12 @@ export function UnifiedLoginPage({
                 setAdminValues((current) => ({ ...current, username: value }));
               }}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {selectedRole === "customer" ? (
-                      <PhoneIphoneRoundedIcon sx={{ color: "#a4aaba" }} />
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {selectedRole === "customer" ? (
+                      <PhoneIphoneRoundedIcon sx={{ color: "#8d96ad" }} />
                     ) : (
-                      <PersonRoundedIcon sx={{ color: "#a4aaba" }} />
+                      <PersonRoundedIcon sx={{ color: "#8d96ad" }} />
                     )}
                   </InputAdornment>
                 ),
@@ -227,11 +237,11 @@ export function UnifiedLoginPage({
                 "& .MuiOutlinedInput-root": {
                   minHeight: 54,
                   borderRadius: "17px",
-                  backgroundColor: alpha("#fffdf9", 0.96),
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
+                  backgroundColor: alpha("#101224", 0.92),
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: alpha("#7a5d31", 0.12),
+                  borderColor: alpha("#c4b5fd", 0.14),
                 },
                 "& .MuiInputBase-input": {
                   py: 1.45,
@@ -246,7 +256,7 @@ export function UnifiedLoginPage({
             </Typography>
             <TextField
               fullWidth
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               placeholder="Parolni kiriting"
               value={currentMeta.passwordValue}
@@ -267,9 +277,25 @@ export function UnifiedLoginPage({
                 setAdminValues((current) => ({ ...current, password: value }));
               }}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockRoundedIcon sx={{ color: "#a4aaba" }} />
+                  startAdornment: (
+                    <InputAdornment position="start">
+                    <LockRoundedIcon sx={{ color: "#8d96ad" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                      edge="end"
+                      onClick={() => setShowPassword((current) => !current)}
+                      sx={{ width: 36, height: 36 }}
+                    >
+                      {showPassword ? (
+                        <VisibilityOffRoundedIcon sx={{ fontSize: "1.08rem" }} />
+                      ) : (
+                        <VisibilityRoundedIcon sx={{ fontSize: "1.08rem" }} />
+                      )}
+                    </IconButton>
                   </InputAdornment>
                 ),
               }}
@@ -278,11 +304,11 @@ export function UnifiedLoginPage({
                 "& .MuiOutlinedInput-root": {
                   minHeight: 54,
                   borderRadius: "17px",
-                  backgroundColor: alpha("#fffdf9", 0.96),
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
+                  backgroundColor: alpha("#101224", 0.92),
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: alpha("#7a5d31", 0.12),
+                  borderColor: alpha("#c4b5fd", 0.14),
                 },
                 "& .MuiInputBase-input": {
                   py: 1.45,
@@ -290,6 +316,26 @@ export function UnifiedLoginPage({
               }}
             />
           </Box>
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+                sx={{ color: alpha("#c4b5fd", 0.62) }}
+              />
+            }
+            label="Eslab qolish"
+            sx={{
+              mx: 0,
+              width: "fit-content",
+              color: "text.secondary",
+              "& .MuiFormControlLabel-label": {
+                fontSize: "0.86rem",
+                fontWeight: 700,
+              },
+            }}
+          />
 
           {error ? (
             <Alert severity="error" sx={{ borderRadius: "16px", alignItems: "center" }}>

@@ -188,7 +188,7 @@ export function BarberSettingsDialog({
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h5">Ish sozlamalari</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.primary">
               Ish vaqti, narxlar va lokatsiyani shu yerda boshqaring.
             </Typography>
           </Box>
@@ -201,9 +201,9 @@ export function BarberSettingsDialog({
       <DialogContent sx={{ px: { xs: 2.2, md: 2.6 }, py: { xs: 2, md: 2.3 } }}>
         <Stack spacing={1.6}>
           <Panel
-            icon={<ScheduleRoundedIcon sx={{ fontSize: "1rem" }} />}
-            title="Ish vaqti"
-          >
+          icon={<ScheduleRoundedIcon sx={{ fontSize: "1rem" }} />}
+          title="Ish vaqti"
+        >
             <GridFields>
               <Field label="Boshlanish" type="time" value={formValues.workStartTime} onChange={(value) => setFormValues((current) => ({ ...current, workStartTime: value }))} />
               <Field label="Tugash" type="time" value={formValues.workEndTime} onChange={(value) => setFormValues((current) => ({ ...current, workEndTime: value }))} />
@@ -229,7 +229,7 @@ export function BarberSettingsDialog({
           >
             <Stack spacing={1.2}>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="space-between">
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   Xarita ustidan nuqtani bosing yoki markerni suring.
                 </Typography>
                 <Button
@@ -309,7 +309,7 @@ function Panel({
       sx={{
         p: 1.35,
         borderRadius: "22px",
-        background: "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(247,239,226,0.94) 100%)",
+        backgroundColor: (theme) => alpha("#ffffff", 0.04),
         border: `1px solid ${alpha("#111111", 0.05)}`,
       }}
     >
@@ -369,7 +369,7 @@ function Field({
 }) {
   return (
     <Stack spacing={0.7}>
-      <Typography variant="subtitle2" sx={{ color: "#4a4338" }}>
+      <Typography variant="subtitle2" sx={{ color: (theme) => theme.palette.text.primary }}>
         {label}
       </Typography>
       <TextField
@@ -383,7 +383,16 @@ function Field({
           "& .MuiOutlinedInput-root": {
             minHeight: 48,
             borderRadius: "16px",
-            backgroundColor: alpha("#fffaf3", 0.85),
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? alpha("#ffffff", 0.06)
+                : alpha("#f7efe8", 0.95),
+          },
+          "& .MuiInputBase-input": {
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.92)"),
+          },
+          "& .MuiInputBase-input::placeholder": {
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.58)" : "rgba(0,0,0,0.5)"),
           },
         }}
       />

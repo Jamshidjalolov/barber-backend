@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from ipaddress import ip_address
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI
@@ -81,7 +82,18 @@ def is_allowed_browser_origin(origin: str) -> bool:
     except ValueError:
         return False
 
-    return hostname == "vercel.app" or hostname.endswith(".vercel.app")
+    if hostname == "vercel.app" or hostname.endswith(".vercel.app"):
+        return True
+
+    if hostname == "localhost":
+        return True
+
+    try:
+        address = ip_address(hostname)
+    except ValueError:
+        return False
+
+    return address.is_loopback or address.is_private
 
 
 @app.middleware("http")

@@ -60,7 +60,7 @@ export function DeleteBarberDialog({
                 <Typography variant="h6" sx={{ mb: 0.4 }}>
                   Barberni o'chirish
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   Bu amalni ortga qaytarib bo'lmaydi
                 </Typography>
               </Box>
@@ -87,9 +87,8 @@ export function DeleteBarberDialog({
               sx={{
                 p: 2,
                 borderRadius: "20px",
-                background:
-                  "linear-gradient(180deg, rgba(255,251,244,0.98) 0%, rgba(247,239,226,0.96) 100%)",
-                border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                backgroundColor: (theme) => theme.palette.background.paper,
+                border: `1px solid ${alpha("7a5d31", 0.08)}`,
               }}
             >
               <Avatar
@@ -107,14 +106,14 @@ export function DeleteBarberDialog({
               </Avatar>
               <Box>
                 <Typography variant="subtitle1">{barber.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   {barber.specialty}
                 </Typography>
               </Box>
             </Stack>
           ) : null}
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.primary">
             Haqiqatan ham bu barberni o'chirmoqchimisiz? Agar davom etsangiz,
             uning ro'yxatdagi ma'lumotlari olib tashlanadi.
           </Typography>

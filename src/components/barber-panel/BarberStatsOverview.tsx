@@ -4,6 +4,7 @@ import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import { alpha, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface BarberStatsOverviewProps {
@@ -65,8 +66,11 @@ export function BarberStatsOverview({
         sx={{
           p: { xs: 1.5, md: 1.7 },
           borderRadius: "24px",
-          backgroundColor: "#fff",
-          border: `1px solid ${alpha("#111111", 0.06)}`,
+          background:
+            "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+          boxShadow: "0 18px 42px rgba(0,0,0,0.22)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <Stack
@@ -102,7 +106,7 @@ export function BarberStatsOverview({
           sx={{
             height: 10,
             "& .MuiLinearProgress-bar": {
-              background: "linear-gradient(90deg, #111111 0%, #2f2f2f 100%)",
+              background: "linear-gradient(90deg, #8b5cf6 0%, #22d3ee 100%)",
             },
           }}
         />
@@ -125,37 +129,48 @@ function MetricCard({
   const styles =
     tone === "dark"
       ? {
-          background: "linear-gradient(180deg, #161616 0%, #0e0e0e 100%)",
+          background:
+            "linear-gradient(135deg, rgba(139,92,246,0.98) 0%, rgba(34,211,238,0.78) 100%)",
           color: "#fff",
-          borderColor: alpha("#111111", 0.08),
+          borderColor: alpha("#67e8f9", 0.28),
         }
       : tone === "accepted"
         ? {
-            background: "linear-gradient(180deg, rgba(238,246,255,1) 0%, rgba(248,251,255,1) 100%)",
-            color: "#102117",
-            borderColor: alpha("#5a7bd8", 0.14),
+            background:
+              "linear-gradient(180deg, rgba(18,25,45,0.9) 0%, rgba(12,18,31,0.78) 100%)",
+            color: "#dbeafe",
+            borderColor: alpha("#60a5fa", 0.18),
           }
       : tone === "success"
         ? {
-            background: "linear-gradient(180deg, rgba(229,252,238,1) 0%, rgba(241,255,247,1) 100%)",
-            color: "#102117",
-            borderColor: alpha("#39a96b", 0.12),
+            background:
+              "linear-gradient(180deg, rgba(16,35,32,0.9) 0%, rgba(11,24,25,0.78) 100%)",
+            color: "#dcfce7",
+            borderColor: alpha("#34d399", 0.2),
           }
         : {
-            background: "linear-gradient(180deg, rgba(255,245,245,1) 0%, rgba(255,250,250,1) 100%)",
-            color: "#111111",
-            borderColor: alpha("#d96868", 0.16),
+            background:
+              "linear-gradient(180deg, rgba(45,18,26,0.9) 0%, rgba(28,12,18,0.78) 100%)",
+            color: "#ffe4e6",
+            borderColor: alpha("#fb7185", 0.2),
           };
 
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      viewport={{ once: true, amount: 0.24 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       sx={{
         p: 1.5,
         borderRadius: "24px",
         border: `1px solid ${styles.borderColor}`,
         color: styles.color,
         background: styles.background,
-        boxShadow: "0 18px 34px rgba(17,17,17,0.04)",
+        boxShadow: "0 18px 42px rgba(0,0,0,0.24)",
+        backdropFilter: "blur(18px)",
       }}
     >
       <Box
@@ -169,10 +184,10 @@ function MetricCard({
             tone === "dark"
               ? alpha("#ffffff", 0.08)
               : tone === "accepted"
-                ? alpha("#5a7bd8", 0.1)
+                ? alpha("#60a5fa", 0.14)
                 : tone === "rejected"
-                  ? alpha("#d96868", 0.1)
-                  : alpha("#111111", 0.05),
+                  ? alpha("#fb7185", 0.14)
+                  : alpha("#34d399", 0.14),
           color: "inherit",
           mb: 1.2,
         }}
@@ -190,8 +205,8 @@ function MetricCard({
             tone === "dark"
               ? alpha("#ffffff", 0.75)
               : tone === "rejected"
-                ? "#9a5a5a"
-                : "#798196",
+                ? "#fecdd3"
+                : "#aab2c8",
         }}
       >
         {label}

@@ -31,24 +31,24 @@ const statusColorMap: Record<
 
 const statusLabelStyles: Record<BookingStatus, Record<string, string | number>> = {
   Tasdiqlandi: {
-    backgroundColor: alpha("#1976d2", 0.1),
-    color: "#1565c0",
+    backgroundColor: alpha("#22d3ee", 0.12),
+    color: "#67e8f9",
   },
   Kutilmoqda: {
-    backgroundColor: alpha("#d6a622", 0.14),
-    color: "#9a7410",
+    backgroundColor: alpha("#f6c85f", 0.14),
+    color: "#fde68a",
   },
   Jarayonda: {
-    backgroundColor: alpha("#121212", 0.08),
-    color: "#111111",
+    backgroundColor: alpha("#8b5cf6", 0.14),
+    color: "#ddd6fe",
   },
   Tugallandi: {
-    backgroundColor: alpha("#3aa66f", 0.12),
-    color: "#1f7d4c",
+    backgroundColor: alpha("#34d399", 0.12),
+    color: "#86efac",
   },
   "Rad etildi": {
-    backgroundColor: alpha("#d96868", 0.12),
-    color: "#a23c3c",
+    backgroundColor: alpha("#fb7185", 0.12),
+    color: "#fecdd3",
   },
 };
 
@@ -66,8 +66,9 @@ export function BookingsTable({ items }: BookingsTableProps) {
               p: 1.6,
               borderRadius: "18px",
               background:
-                "linear-gradient(180deg, rgba(255,251,244,0.96) 0%, rgba(247,239,226,0.92) 100%)",
-              border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.035) 100%)",
+              border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
+              backdropFilter: "blur(14px)",
             }}
           >
             <Stack spacing={1.1}>
@@ -113,7 +114,14 @@ export function BookingsTable({ items }: BookingsTableProps) {
   }
 
   return (
-    <TableContainer sx={{ overflowX: "auto" }}>
+    <TableContainer
+      sx={{
+        overflowX: "auto",
+        borderRadius: "16px",
+        border: `1px solid ${alpha("#c4b5fd", 0.1)}`,
+        backgroundColor: alpha("#ffffff", 0.03),
+      }}
+    >
       <Table sx={{ minWidth: 720 }}>
         <TableHead>
           <TableRow>

@@ -263,6 +263,8 @@ export function BarberPanelPage({
           minHeight: "100vh",
           px: { xs: 1.25, sm: 2.5, xl: 3.25 },
           py: { xs: 1.5, sm: 2.5, xl: 3 },
+          background:
+            "radial-gradient(circle at 12% -8%, rgba(139,92,246,0.2), transparent 28%), radial-gradient(circle at 90% 4%, rgba(34,211,238,0.12), transparent 26%)",
         }}
       >
         <Box sx={{ width: "min(1360px, 100%)", mx: "auto" }}>
@@ -294,8 +296,9 @@ export function BarberPanelPage({
                 sx={{
                   p: 1.35,
                   borderRadius: "24px",
-                  border: `1px solid ${alpha("#229ed9", 0.12)}`,
-                  backgroundColor: alpha("#229ed9", 0.05),
+                  border: `1px solid ${alpha("#22d3ee", 0.16)}`,
+                  backgroundColor: alpha("#22d3ee", 0.08),
+                  backdropFilter: "blur(16px)",
                 }}
               >
                 <TelegramQRCode

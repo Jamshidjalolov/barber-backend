@@ -59,7 +59,7 @@ export function DeleteBookingDialog({
                 <Typography variant="h6" sx={{ mb: 0.4 }}>
                   Bookingni o'chirish
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   Bu booking ro'yxatdan olib tashlanadi
                 </Typography>
               </Box>
@@ -83,19 +83,18 @@ export function DeleteBookingDialog({
               sx={{
                 p: 2,
                 borderRadius: "20px",
-                background:
-                  "linear-gradient(180deg, rgba(255,251,244,0.98) 0%, rgba(247,239,226,0.96) 100%)",
-                border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                backgroundColor: (theme) => theme.palette.background.paper,
+                border: `1px solid ${alpha("7a5d31", 0.08)}`,
               }}
             >
               <Typography variant="subtitle1">{booking.customer}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.primary">
                 {booking.barber} / {booking.time} / {booking.id}
               </Typography>
             </Box>
           ) : null}
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.primary">
             Haqiqatan ham bu bookingni o'chirmoqchimisiz? Tasdiqlasangiz, u
             jadvaldan olib tashlanadi.
           </Typography>

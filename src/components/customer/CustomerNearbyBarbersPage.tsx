@@ -43,7 +43,7 @@ export function CustomerNearbyBarbersPage({
             px: 0.8,
             borderRadius: "14px",
             textTransform: "none",
-            color: "#111111",
+            color: "#c4b5fd",
           }}
         >
           Orqaga
@@ -54,7 +54,7 @@ export function CustomerNearbyBarbersPage({
             Yaqin barberlar xaritada
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Joylashuvingiz va yaqin barberlar shu yerda ko‘rinadi.
+            Joylashuvingiz va yaqin barberlar shu yerda ko'rinadi.
           </Typography>
         </Box>
       </Stack>
@@ -63,10 +63,11 @@ export function CustomerNearbyBarbersPage({
         sx={{
           p: { xs: 1.35, md: 1.6 },
           borderRadius: "26px",
-          border: `1px solid ${alpha("#111111", 0.06)}`,
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
           background:
-            "linear-gradient(180deg, rgba(248,249,253,0.96) 0%, rgba(255,255,255,1) 100%)",
-          boxShadow: "0 16px 36px rgba(17,17,17,0.05)",
+            "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.26)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <Stack spacing={1.2}>
@@ -103,7 +104,7 @@ export function CustomerNearbyBarbersPage({
                 startIcon={<NearMeRoundedIcon />}
                 sx={{ minHeight: 42, borderRadius: "14px", textTransform: "none" }}
               >
-                Eng yaqin barberni ko‘rsat
+                Eng yaqin barberni ko'rsat
               </Button>
             </Stack>
           </Stack>
@@ -115,8 +116,9 @@ export function CustomerNearbyBarbersPage({
                 label={`Mening joyim: ${customerCoords.latitude.toFixed(4)}, ${customerCoords.longitude.toFixed(4)}`}
                 sx={{
                   alignSelf: "flex-start",
-                  backgroundColor: alpha("#d5a546", 0.12),
-                  color: "#8f6617",
+                  backgroundColor: alpha("#f6c85f", 0.12),
+                  color: "#fde68a",
+                  border: `1px solid ${alpha("#f6c85f", 0.16)}`,
                   "& .MuiChip-label": { fontWeight: 700 },
                 }}
               />
@@ -130,10 +132,11 @@ export function CustomerNearbyBarbersPage({
                 sx={{
                   alignSelf: "flex-start",
                   cursor: "pointer",
-                  backgroundColor: alpha("#3aa66f", 0.12),
-                  color: "#24764b",
+                  backgroundColor: alpha("#34d399", 0.12),
+                  color: "#86efac",
+                  border: `1px solid ${alpha("#34d399", 0.16)}`,
                   "& .MuiChip-label": { fontWeight: 700 },
-                  "& .MuiChip-icon": { color: "#24764b" },
+                  "& .MuiChip-icon": { color: "#86efac" },
                 }}
               />
             ) : null}
@@ -153,7 +156,7 @@ export function CustomerNearbyBarbersPage({
               sx={{
                 p: 1.6,
                 borderRadius: "18px",
-                border: `1px dashed ${alpha("#111111", 0.12)}`,
+                border: `1px dashed ${alpha("#c4b5fd", 0.22)}`,
                 textAlign: "center",
               }}
             >
@@ -168,8 +171,8 @@ export function CustomerNearbyBarbersPage({
               sx={{
                 p: 1.15,
                 borderRadius: "20px",
-                backgroundColor: "#fff",
-                border: `1px solid ${alpha("#111111", 0.06)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
+                border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
               }}
             >
               <Stack

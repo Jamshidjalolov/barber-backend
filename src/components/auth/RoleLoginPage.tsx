@@ -1,8 +1,10 @@
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import { alpha, Alert, Box, Button, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
-import { FormEvent, ReactNode } from "react";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import { alpha, Alert, Box, Button, Chip, IconButton, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { FormEvent, ReactNode, useState } from "react";
 import { AuthShell } from "./AuthShell";
 
 interface LoginField {
@@ -54,6 +56,8 @@ export function RoleLoginPage({
   onBack,
   children,
 }: RoleLoginPageProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit();
@@ -61,10 +65,10 @@ export function RoleLoginPage({
 
   const autofillSx = {
     "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-      WebkitTextFillColor: "#111111",
-      WebkitBoxShadow: "0 0 0 100px #fffdf9 inset",
+      WebkitTextFillColor: "#f8fafc",
+      WebkitBoxShadow: "0 0 0 100px #121326 inset",
       transition: "background-color 9999s ease-out 0s",
-      caretColor: "#111111",
+      caretColor: "#f8fafc",
       borderRadius: "14px",
     },
   };
@@ -86,9 +90,10 @@ export function RoleLoginPage({
           p: { xs: 1.25, md: 1.5 },
           borderRadius: "22px",
           background:
-            "linear-gradient(180deg, rgba(255,252,247,0.94) 0%, rgba(255,255,255,1) 100%)",
-          border: `1px solid ${alpha("#111111", 0.06)}`,
-          boxShadow: "0 14px 34px rgba(17,17,17,0.05)",
+            "linear-gradient(180deg, rgba(18,18,31,0.86) 0%, rgba(10,11,22,0.78) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+          boxShadow: "0 18px 44px rgba(0,0,0,0.28)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <Stack spacing={1}>
@@ -99,7 +104,7 @@ export function RoleLoginPage({
               </Typography>
               <TextField
                 fullWidth
-                type={field.type ?? "text"}
+                type={field.type === "password" && showPassword ? "text" : field.type ?? "text"}
                 autoComplete={field.autoComplete}
                 placeholder={field.placeholder}
                 value={values[field.key] ?? ""}
@@ -108,25 +113,42 @@ export function RoleLoginPage({
                   startAdornment: (
                     <InputAdornment position="start">
                       {field.key.toLowerCase().includes("phone") ? (
-                        <PhoneIphoneRoundedIcon sx={{ color: "#a4aaba" }} />
+                        <PhoneIphoneRoundedIcon sx={{ color: "#8d96ad" }} />
                       ) : field.type === "password" ? (
-                        <LockRoundedIcon sx={{ color: "#a4aaba" }} />
+                        <LockRoundedIcon sx={{ color: "#8d96ad" }} />
                       ) : (
-                        <PersonRoundedIcon sx={{ color: "#a4aaba" }} />
+                        <PersonRoundedIcon sx={{ color: "#8d96ad" }} />
                       )}
                     </InputAdornment>
                   ),
+                  endAdornment:
+                    field.type === "password" ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                          edge="end"
+                          onClick={() => setShowPassword((current) => !current)}
+                          sx={{ width: 36, height: 36 }}
+                        >
+                          {showPassword ? (
+                            <VisibilityOffRoundedIcon sx={{ fontSize: "1.08rem" }} />
+                          ) : (
+                            <VisibilityRoundedIcon sx={{ fontSize: "1.08rem" }} />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ) : undefined,
                 }}
                 sx={{
                   ...autofillSx,
                   "& .MuiOutlinedInput-root": {
                     minHeight: 54,
                     borderRadius: "17px",
-                    backgroundColor: alpha("#fffdf9", 0.96),
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
+                    backgroundColor: alpha("#101224", 0.92),
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
                   },
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha("#7a5d31", 0.12),
+                    borderColor: alpha("#c4b5fd", 0.14),
                   },
                   "& .MuiInputBase-input": {
                     py: 1.45,
@@ -160,7 +182,9 @@ export function RoleLoginPage({
                   size="small"
                   sx={{
                     borderRadius: "999px",
-                    backgroundColor: alpha("#111111", 0.04),
+                    backgroundColor: alpha("#ffffff", 0.06),
+                    color: "#cbd5e1",
+                    border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                     "& .MuiChip-label": {
                       px: 1,
                       fontWeight: 600,

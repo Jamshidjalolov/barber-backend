@@ -56,7 +56,7 @@ export function BookingSuccessDialog({
             <CheckCircleRoundedIcon sx={{ fontSize: "1.8rem" }} />
           </Box>
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.primary">
             Tanlangan barber va vaqt saqlandi. Bu hozircha frontend demo, lekin
             slot darrov band holatiga o&apos;tadi.
           </Typography>
@@ -65,18 +65,18 @@ export function BookingSuccessDialog({
             sx={{
               p: 1.3,
               borderRadius: "18px",
-              backgroundColor: alpha("#111111", 0.04),
+              backgroundColor: (theme) => theme.palette.background.paper,
             }}
           >
             <Stack spacing={0.45}>
               <Typography variant="subtitle2">Mijoz: {customer?.name ?? "-"}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.primary">
                 Telefon: {customer?.phone ?? "-"}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.primary">
                 Barber: {barber?.name ?? "-"}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.primary">
                 Vaqt: {time ?? "-"}
               </Typography>
             </Stack>

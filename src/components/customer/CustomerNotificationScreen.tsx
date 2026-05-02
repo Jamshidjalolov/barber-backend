@@ -10,6 +10,7 @@ import RadioButtonCheckedRoundedIcon from "@mui/icons-material/RadioButtonChecke
 import ReportProblemRoundedIcon from "@mui/icons-material/ReportProblemRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import { alpha, Avatar, Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { BarberProfile, BookingItem, BookingStatus } from "../../types";
 import { BrandLogo } from "../common/BrandLogo";
@@ -43,15 +44,22 @@ export function CustomerNotificationScreen({
   const finalPriceLabel = formatMoney(booking.finalPrice ?? booking.originalPrice ?? 0);
 
   return (
-    <Stack spacing={1.6}>
+    <Stack
+      component={motion.div}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+      spacing={1.6}
+    >
       <Box
         sx={{
           p: { xs: 1.2, sm: 1.45 },
           borderRadius: "26px",
           background:
-            "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(248,244,237,0.9) 100%)",
-          border: `1px solid ${alpha("#111111", 0.05)}`,
-          boxShadow: "0 16px 34px rgba(17,17,17,0.05)",
+            "linear-gradient(135deg, rgba(22,22,39,0.9) 0%, rgba(10,11,22,0.82) 56%, rgba(7,19,31,0.82) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.15)}`,
+          boxShadow: "0 24px 70px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.06)",
+          backdropFilter: "blur(22px)",
         }}
       >
         <Stack spacing={1.2}>
@@ -61,11 +69,11 @@ export function CustomerNotificationScreen({
                 px: 0.75,
                 py: 0.55,
                 borderRadius: "16px",
-                backgroundColor: "#fff",
-                border: `1px solid ${alpha("#111111", 0.05)}`,
+                backgroundColor: alpha("#ffffff", 0.07),
+                border: `1px solid ${alpha("#ffffff", 0.12)}`,
               }}
             >
-              <BrandLogo badgeSize={40} />
+              <BrandLogo badgeSize={40} tone="light" />
             </Box>
 
             <Stack direction="row" spacing={0.6}>
@@ -75,9 +83,9 @@ export function CustomerNotificationScreen({
                   sx={{
                     width: 36,
                     height: 36,
-                    backgroundColor: "#fff",
-                    border: `1px solid ${alpha("#111111", 0.06)}`,
-                    "&:hover": { backgroundColor: alpha("#111111", 0.04) },
+                    backgroundColor: alpha("#ffffff", 0.08),
+                    border: `1px solid ${alpha("#ffffff", 0.12)}`,
+                    "&:hover": { backgroundColor: alpha("#ffffff", 0.14) },
                   }}
                 >
                   <HomeRoundedIcon sx={{ fontSize: "1.05rem" }} />
@@ -89,9 +97,9 @@ export function CustomerNotificationScreen({
                 sx={{
                   width: 36,
                   height: 36,
-                  backgroundColor: "#fff",
-                  border: `1px solid ${alpha("#111111", 0.06)}`,
-                  "&:hover": { backgroundColor: alpha("#111111", 0.04) },
+                  backgroundColor: alpha("#ffffff", 0.08),
+                  border: `1px solid ${alpha("#ffffff", 0.12)}`,
+                  "&:hover": { backgroundColor: alpha("#ffffff", 0.14) },
                 }}
               >
                 <IosShareRoundedIcon sx={{ fontSize: "1rem" }} />
@@ -111,7 +119,7 @@ export function CustomerNotificationScreen({
                 sx={{
                   fontSize: { xs: "1.65rem", sm: "1.95rem" },
                   lineHeight: 1,
-                  letterSpacing: "-0.04em",
+                  letterSpacing: 0,
                 }}
               >
                 {view.title}
@@ -163,8 +171,10 @@ export function CustomerNotificationScreen({
             p: { xs: 1.25, sm: 1.45 },
             borderRadius: "24px",
             background:
-              "linear-gradient(180deg, rgba(248,249,253,0.98) 0%, rgba(255,255,255,1) 100%)",
-            border: `1px solid ${alpha("#111111", 0.05)}`,
+              "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+            border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+            boxShadow: "0 18px 42px rgba(0,0,0,0.22)",
+            backdropFilter: "blur(18px)",
           }}
         >
           <Stack spacing={1.15}>
@@ -173,9 +183,9 @@ export function CustomerNotificationScreen({
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "#9aa2ba",
+                    color: "#8d96ad",
                     textTransform: "uppercase",
-                    letterSpacing: "0.08em",
+                    letterSpacing: 0,
                     fontWeight: 700,
                   }}
                 >
@@ -200,8 +210,8 @@ export function CustomerNotificationScreen({
               sx={{
                 p: 1,
                 borderRadius: "18px",
-                backgroundColor: "#fff",
-                border: `1px solid ${alpha("#111111", 0.05)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
+                border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
               }}
             >
               <Avatar
@@ -238,8 +248,8 @@ export function CustomerNotificationScreen({
                 sx={{
                   p: 1,
                   borderRadius: "18px",
-                  backgroundColor: alpha("#d5a546", 0.08),
-                  border: `1px solid ${alpha("#d5a546", 0.12)}`,
+                  backgroundColor: alpha("#f6c85f", 0.1),
+                  border: `1px solid ${alpha("#f6c85f", 0.16)}`,
                 }}
               >
                 <Stack direction="row" justifyContent="space-between" spacing={1}>
@@ -251,10 +261,10 @@ export function CustomerNotificationScreen({
 
                 {booking.appliedDiscountPercent ? (
                   <Stack direction="row" justifyContent="space-between" spacing={1} sx={{ mt: 0.5 }}>
-                    <Typography variant="body2" sx={{ color: "#2d8b58", fontWeight: 700 }}>
+                    <Typography variant="body2" sx={{ color: "#86efac", fontWeight: 700 }}>
                       Skidka
                     </Typography>
-                    <Typography variant="subtitle2" sx={{ color: "#2d8b58" }}>
+                    <Typography variant="subtitle2" sx={{ color: "#86efac" }}>
                       -{booking.appliedDiscountPercent}%
                     </Typography>
                   </Stack>
@@ -287,7 +297,7 @@ export function CustomerNotificationScreen({
                     borderRadius: "12px",
                     display: "grid",
                     placeItems: "center",
-                    backgroundColor: "#fff",
+                    backgroundColor: alpha("#ffffff", 0.08),
                     color: view.badgeColor,
                     flexShrink: 0,
                   }}
@@ -324,8 +334,9 @@ export function CustomerNotificationScreen({
           sx={{
             p: 1.2,
             borderRadius: "24px",
-            backgroundColor: "#fff",
-            border: `1px solid ${alpha("#111111", 0.05)}`,
+            backgroundColor: alpha("#ffffff", 0.05),
+            border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
+            backdropFilter: "blur(18px)",
           }}
         >
           <Typography variant="subtitle2" sx={{ color: "#8d95a8", mb: 1 }}>
@@ -342,7 +353,7 @@ export function CustomerNotificationScreen({
                 sx={{
                   p: 0.85,
                   borderRadius: "16px",
-                  backgroundColor: item.active ? alpha(item.color, 0.1) : alpha("#111111", 0.03),
+                  backgroundColor: item.active ? alpha(item.color, 0.12) : alpha("#ffffff", 0.04),
                 }}
               >
                 <RadioButtonCheckedRoundedIcon
@@ -356,7 +367,7 @@ export function CustomerNotificationScreen({
                 <Box>
                   <Typography
                     variant="subtitle2"
-                    sx={{ color: item.active ? "#111111" : "#8890a4" }}
+                    sx={{ color: item.active ? "#f8fafc" : "#8890a4" }}
                   >
                     {item.title}
                   </Typography>
@@ -434,12 +445,12 @@ function InfoPill({
         px: 1,
         py: 0.9,
         borderRadius: "16px",
-        backgroundColor: "#fff",
-        border: `1px solid ${alpha("#111111", 0.05)}`,
+        backgroundColor: alpha("#ffffff", 0.06),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
-      <Box sx={{ color: "#9aa2ba", display: "grid", placeItems: "center" }}>{icon}</Box>
-      <Typography variant="body2" sx={{ fontSize: "0.94rem", color: "#1f2430" }}>
+      <Box sx={{ color: "#8d96ad", display: "grid", placeItems: "center" }}>{icon}</Box>
+      <Typography variant="body2" sx={{ fontSize: "0.94rem", color: "#f8fafc" }}>
         {label}
       </Typography>
     </Stack>
@@ -565,7 +576,7 @@ function getTimeline(status: BookingStatus) {
       title: "Yakunlandi",
       note: "Tugadi",
       active: activeMap.finished,
-      color: "#111111",
+      color: "#22d3ee",
     },
   ];
 }

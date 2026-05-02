@@ -17,6 +17,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { BarberAvailabilitySection, AvailabilitySlot } from "../components/customer/BarberAvailabilitySection";
 import { BookedSlotDetailsDialog } from "../components/customer/BookedSlotDetailsDialog";
@@ -717,8 +718,8 @@ export function CustomerBookingPage({
                 sx={{
                   p: 0.85,
                   borderRadius: "16px",
-                  backgroundColor: "#f8f9fd",
-                  border: `1px solid ${alpha("#111111", 0.04)}`,
+                  backgroundColor: alpha("#ffffff", 0.06),
+                  border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                 }}
               >
                 <Avatar
@@ -809,8 +810,8 @@ export function CustomerBookingPage({
             sx={{
               p: 1.1,
               borderRadius: "18px",
-              backgroundColor: "#f8f9fd",
-              border: `1px solid ${alpha("#111111", 0.05)}`,
+              backgroundColor: alpha("#ffffff", 0.06),
+              border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
             }}
           >
             <Avatar
@@ -860,14 +861,14 @@ export function CustomerBookingPage({
                 mt: 1.1,
                 p: 0.95,
                 borderRadius: "16px",
-                backgroundColor: alpha("#3aa66f", 0.08),
-                border: `1px solid ${alpha("#3aa66f", 0.14)}`,
+                backgroundColor: alpha("#34d399", 0.1),
+                border: `1px solid ${alpha("#34d399", 0.16)}`,
               }}
             >
-              <Typography variant="subtitle2" sx={{ color: "#23784a", mb: 0.3 }}>
+              <Typography variant="subtitle2" sx={{ color: "#86efac", mb: 0.3 }}>
                 Shu barberdagi skidka
               </Typography>
-              <Typography variant="body2" sx={{ color: "#24513a", fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: "#bbf7d0", fontWeight: 700 }}>
                 {selectedBarberDiscount.percent}% | {selectedBarberDiscount.startTime} - {selectedBarberDiscount.endTime}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
@@ -883,7 +884,8 @@ export function CustomerBookingPage({
                 mt: 1.2,
                 height: 32,
                 borderRadius: "999px",
-                backgroundColor: "#0f0f0f",
+                background:
+                  "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
                 color: "#fff",
                 "& .MuiChip-label": { px: 1.15, fontWeight: 700, fontSize: "0.78rem" },
               }}
@@ -955,11 +957,11 @@ export function CustomerBookingPage({
                   mt: 1.05,
                   p: 0.95,
                   borderRadius: "16px",
-                  backgroundColor: alpha("#d5a546", 0.1),
-                  border: `1px solid ${alpha("#d5a546", 0.18)}`,
+                  backgroundColor: alpha("#f6c85f", 0.1),
+                  border: `1px solid ${alpha("#f6c85f", 0.18)}`,
                 }}
               >
-                <Typography variant="subtitle2" sx={{ color: "#8f6617", mb: 0.3 }}>
+                <Typography variant="subtitle2" sx={{ color: "#fde68a", mb: 0.3 }}>
                   Shu barberdagi skidka
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -980,7 +982,7 @@ export function CustomerBookingPage({
           px: { xs: 0, sm: 2.5, lg: 3 },
           py: { xs: 0, sm: 2.5, lg: 3 },
           background:
-            "radial-gradient(circle at top, rgba(227,191,106,0.16), transparent 32%), #f4efe6",
+            "radial-gradient(circle at 16% 8%, rgba(139,92,246,0.28), transparent 30%), radial-gradient(circle at 88% 4%, rgba(34,211,238,0.14), transparent 28%), linear-gradient(135deg, #05050a 0%, #10071d 52%, #06111e 100%)",
         }}
       >
         <Box
@@ -991,51 +993,65 @@ export function CustomerBookingPage({
             px: { xs: 2, sm: 2.6, lg: 3.2 },
             py: { xs: 2.4, sm: 2.9, lg: 3.2 },
             borderRadius: { xs: 0, sm: "34px" },
-            backgroundColor: "#ffffff",
-            border: { xs: "none", sm: `1px solid ${alpha("#111111", 0.04)}` },
-            boxShadow: { xs: "none", sm: "0 28px 80px rgba(17,17,17,0.08)" },
+            background:
+              "linear-gradient(180deg, rgba(10,11,22,0.78) 0%, rgba(6,7,14,0.72) 100%)",
+            border: { xs: "none", sm: `1px solid ${alpha("#c4b5fd", 0.13)}` },
+            boxShadow: { xs: "none", sm: "0 34px 100px rgba(0,0,0,0.42)" },
+            backdropFilter: "blur(24px)",
             display: "flex",
             flexDirection: "column",
           }}
         >
-          {step === "barbers" ? barberStepContent : null}
-          {step === "nearby" ? (
-            <CustomerNearbyBarbersPage
-              customerCoords={customerCoords}
-              nearestBarber={nearestBarber ?? null}
-              selectedBarber={selectedBarber}
-              barbers={mappableBarbers}
-              onBack={() => setStep("barbers")}
-              onUseCurrentLocation={requestCurrentLocation}
-              onPreviewBarber={handleBarberPreview}
-              onChooseBarber={(barber) => handleBarberSelect(barber, "nearby")}
-              onChangeCustomerCoords={setCustomerCoords}
-            />
-          ) : null}
-          {step === "time" ? timeStepContent : null}
-          {step === "details" ? detailsStepContent : null}
+          <AnimatePresence mode="wait">
+            <Box
+              key={step}
+              component={motion.div}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
+            >
+              {step === "barbers" ? barberStepContent : null}
+              {step === "nearby" ? (
+                <CustomerNearbyBarbersPage
+                  customerCoords={customerCoords}
+                  nearestBarber={nearestBarber ?? null}
+                  selectedBarber={selectedBarber}
+                  barbers={mappableBarbers}
+                  onBack={() => setStep("barbers")}
+                  onUseCurrentLocation={requestCurrentLocation}
+                  onPreviewBarber={handleBarberPreview}
+                  onChooseBarber={(barber) => handleBarberSelect(barber, "nearby")}
+                  onChangeCustomerCoords={setCustomerCoords}
+                />
+              ) : null}
+              {step === "time" ? timeStepContent : null}
+              {step === "details" ? detailsStepContent : null}
 
-          {step === "notification" && trackedBooking && trackedBarber ? (
-            <Box sx={{ maxWidth: 760, width: "100%", mx: "auto" }}>
-              <CustomerNotificationScreen
-                barber={trackedBarber}
-                booking={trackedBooking}
-                dateLabel={formatUzbekReadableDate(new Date(`${trackedBooking.date}T00:00:00`))}
-                timeLabel={formatTimeLabel(trackedBooking.time)}
-                lastRefreshLabel={lastRefreshAt.toLocaleTimeString("uz-UZ")}
-                isAutoRefreshing={
-                  trackedBooking.status !== "Tugallandi" && trackedBooking.status !== "Rad etildi"
-                }
-                onShare={handleShare}
-                onBackHome={() => setStep("barbers")}
-                onReset={
-                  trackedBooking.status === "Tugallandi" || trackedBooking.status === "Rad etildi"
-                    ? resetFlow
-                    : undefined
-                }
-              />
+              {step === "notification" && trackedBooking && trackedBarber ? (
+                <Box sx={{ maxWidth: 760, width: "100%", mx: "auto" }}>
+                  <CustomerNotificationScreen
+                    barber={trackedBarber}
+                    booking={trackedBooking}
+                    dateLabel={formatUzbekReadableDate(new Date(`${trackedBooking.date}T00:00:00`))}
+                    timeLabel={formatTimeLabel(trackedBooking.time)}
+                    lastRefreshLabel={lastRefreshAt.toLocaleTimeString("uz-UZ")}
+                    isAutoRefreshing={
+                      trackedBooking.status !== "Tugallandi" && trackedBooking.status !== "Rad etildi"
+                    }
+                    onShare={handleShare}
+                    onBackHome={() => setStep("barbers")}
+                    onReset={
+                      trackedBooking.status === "Tugallandi" || trackedBooking.status === "Rad etildi"
+                        ? resetFlow
+                        : undefined
+                    }
+                  />
+                </Box>
+              ) : null}
             </Box>
-          ) : null}
+          </AnimatePresence>
         </Box>
       </Box>
 
@@ -1114,10 +1130,11 @@ function DesktopAsideCard({
       sx={{
         p: 1.3,
         borderRadius: "22px",
-        border: `1px solid ${alpha("#111111", 0.06)}`,
+        border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
         background:
-          "linear-gradient(180deg, rgba(248,249,253,0.96) 0%, rgba(255,255,255,1) 100%)",
-        boxShadow: "0 12px 24px rgba(17,17,17,0.05)",
+          "linear-gradient(180deg, rgba(19,20,34,0.84) 0%, rgba(10,11,22,0.72) 100%)",
+        boxShadow: "0 20px 48px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(18px)",
         position: "sticky",
         top: 24,
       }}
@@ -1152,8 +1169,8 @@ function InfoMetric({
       sx={{
         p: 0.85,
         borderRadius: "14px",
-        backgroundColor: "#fff",
-        border: `1px solid ${alpha("#111111", 0.05)}`,
+        backgroundColor: alpha("#ffffff", 0.06),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
       <Box
@@ -1163,8 +1180,8 @@ function InfoMetric({
           borderRadius: "10px",
           display: "grid",
           placeItems: "center",
-          color: "#b18424",
-          backgroundColor: alpha("#e9c76a", 0.16),
+          color: "#67e8f9",
+          backgroundColor: alpha("#22d3ee", 0.12),
           flexShrink: 0,
         }}
       >
@@ -1172,7 +1189,7 @@ function InfoMetric({
       </Box>
 
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" sx={{ color: "#8a91a3", fontSize: "0.67rem" }}>
+        <Typography variant="caption" sx={{ color: "#8d96ad", fontSize: "0.67rem" }}>
           {label}
         </Typography>
         <Typography variant="subtitle2" sx={{ fontSize: "0.86rem", mt: 0.05 }}>

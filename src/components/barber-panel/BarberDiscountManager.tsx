@@ -146,7 +146,8 @@ export function BarberDiscountManager({
           borderRadius: "30px",
           width: "min(1080px, calc(100% - 24px))",
           background:
-            "linear-gradient(180deg, rgba(255,252,247,0.99) 0%, rgba(249,244,236,0.99) 100%)",
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -169,7 +170,7 @@ export function BarberDiscountManager({
               </Box>
               <Box>
                 <Typography variant="h5">Skidka boshqaruvi</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+                <Typography variant="body2" color="text.primary" sx={{ mt: 0.3 }}>
                   Sana, vaqt va foizni belgilang. Qolganlari avtomatik yuboriladi.
                 </Typography>
               </Box>
@@ -212,12 +213,12 @@ export function BarberDiscountManager({
               component="form"
               onSubmit={handleSubmit}
               sx={{
-                p: 1.5,
-                borderRadius: "24px",
-                backgroundColor: alpha("#ffffff", 0.84),
-                border: `1px solid ${alpha("#111111", 0.06)}`,
-                boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
-              }}
+                  p: 1.5,
+                  borderRadius: "24px",
+                  backgroundColor: (theme) => theme.palette.background.paper,
+                  border: `1px solid ${alpha("#111111", 0.06)}`,
+                  boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
+                }}
             >
               <Stack spacing={1.25}>
                 <Box
@@ -321,7 +322,7 @@ export function BarberDiscountManager({
               sx={{
                 p: 1.3,
                 borderRadius: "24px",
-                backgroundColor: alpha("#fffdfa", 0.84),
+                backgroundColor: (theme) => theme.palette.background.paper,
                 border: `1px solid ${alpha("#111111", 0.06)}`,
               }}
             >
@@ -368,7 +369,7 @@ export function BarberDiscountManager({
                               }}
                             />
                           </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>
+                          <Typography variant="body2" color="text.primary" sx={{ mt: 0.35 }}>
                             {item.description || "Izoh kiritilmagan"}
                           </Typography>
                         </Box>
@@ -412,7 +413,7 @@ export function BarberDiscountManager({
                       p: 1.4,
                       borderRadius: "20px",
                       border: `1px dashed ${alpha("#111111", 0.12)}`,
-                      color: "text.secondary",
+                      color: "text.primary",
                       backgroundColor: alpha("#111111", 0.02),
                     }}
                   >
@@ -443,7 +444,7 @@ function Field({
 }) {
   return (
     <Stack spacing={0.7}>
-      <Typography variant="subtitle2" sx={{ color: "#4a4338" }}>
+      <Typography variant="subtitle2" sx={{ color: (theme) => theme.palette.text.primary }}>
         {label}
       </Typography>
       <TextField
@@ -459,13 +460,20 @@ function Field({
           "& .MuiOutlinedInput-root": {
             minHeight: 50,
             borderRadius: "16px",
-            backgroundColor: alpha("#fffaf3", 0.82),
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? alpha("#ffffff", 0.06)
+                : alpha("#f7efe8", 0.95),
           },
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: alpha("#7a5d31", 0.1),
           },
           "& .MuiInputBase-input": {
             py: 1.6,
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.92)"),
+          },
+          "& .MuiInputBase-input::placeholder": {
+            color: (theme) => (theme.palette.mode === "dark" ? "rgba(255,255,255,0.58)" : "rgba(0,0,0,0.5)"),
           },
         }}
       />

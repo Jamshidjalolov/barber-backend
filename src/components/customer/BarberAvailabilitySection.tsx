@@ -3,6 +3,7 @@ import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordRounded";
 import { alpha, Avatar, Box, Button, Card, IconButton, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { AvailabilityStatus, BarberProfile, BookingItem } from "../../types";
 
 export interface AvailabilitySlot {
@@ -39,7 +40,7 @@ function LegendItem({
   return (
     <Stack direction="row" spacing={0.45} alignItems="center">
       <FiberManualRecordRoundedIcon sx={{ fontSize: "0.8rem", color }} />
-      <Typography variant="caption" sx={{ color: "#949bb0", fontSize: "0.76rem" }}>
+      <Typography variant="caption" sx={{ color: "#aab2c8", fontSize: "0.76rem" }}>
         {label}
       </Typography>
     </Stack>
@@ -49,36 +50,37 @@ function LegendItem({
 function getSlotStyles(status: AvailabilityStatus, selected: boolean) {
   if (selected) {
     return {
-      backgroundColor: "#0f0f0f",
+      background:
+        "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
       color: "#fff",
-      border: "2px solid rgba(255,255,255,0.5)",
-      boxShadow: "0 10px 18px rgba(17,17,17,0.18)",
+      border: "2px solid rgba(255,255,255,0.36)",
+      boxShadow: "0 16px 28px rgba(139,92,246,0.28)",
       textDecoration: "none",
     };
   }
 
   if (status === "bo'sh") {
     return {
-      backgroundColor: "#f7f8fc",
-      color: "#0f0f0f",
-      border: `1px solid ${alpha("#111111", 0.04)}`,
+      backgroundColor: alpha("#ffffff", 0.07),
+      color: "#f8fafc",
+      border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       textDecoration: "none",
     };
   }
 
   if (status === "ishlayapti") {
     return {
-      backgroundColor: alpha("#5a7bd8", 0.1),
-      color: "#3354b8",
-      border: `1px solid ${alpha("#5a7bd8", 0.12)}`,
+      backgroundColor: alpha("#22d3ee", 0.12),
+      color: "#67e8f9",
+      border: `1px solid ${alpha("#22d3ee", 0.18)}`,
       textDecoration: "none",
     };
   }
 
   return {
-    backgroundColor: "#f7f8fc",
-    color: "#c6cbda",
-    border: `1px solid ${alpha("#111111", 0.03)}`,
+    backgroundColor: alpha("#ffffff", 0.035),
+    color: "#64748b",
+    border: `1px solid ${alpha("#c4b5fd", 0.08)}`,
     textDecoration: "line-through",
   };
 }
@@ -108,14 +110,22 @@ export function BarberAvailabilitySection({
   onContinue,
 }: BarberAvailabilitySectionProps) {
   return (
-    <Stack spacing={{ xs: 2.1, md: 2.35 }}>
+    <Stack
+      component={motion.div}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      spacing={{ xs: 2.1, md: 2.35 }}
+    >
       <Stack direction="row" spacing={0.7} alignItems="flex-start">
         <IconButton
           onClick={onBack}
           sx={{
             mt: -0.25,
             ml: -0.4,
-            color: "#111111",
+            color: "#f8fafc",
+            backgroundColor: alpha("#ffffff", 0.06),
+            border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
           }}
         >
           <ArrowBackRoundedIcon />
@@ -135,8 +145,11 @@ export function BarberAvailabilitySection({
         elevation={0}
         sx={{
           borderRadius: "22px",
-          border: `1px solid ${alpha("#111111", 0.06)}`,
-          backgroundColor: "#f8f9fd",
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+          background:
+            "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+          boxShadow: "0 18px 42px rgba(0,0,0,0.24)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <Stack
@@ -174,9 +187,9 @@ export function BarberAvailabilitySection({
             variant="caption"
             sx={{
               display: { xs: "none", md: "block" },
-              color: "#8c93a7",
+              color: "#8d96ad",
               fontWeight: 700,
-              letterSpacing: "0.04em",
+              letterSpacing: 0,
             }}
           >
             {workHoursLabel} | {priceLabel}
@@ -191,8 +204,8 @@ export function BarberAvailabilitySection({
           sx={{
             width: 42,
             height: 42,
-            border: `1px solid ${alpha("#111111", 0.08)}`,
-            backgroundColor: "#fff",
+            border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+            backgroundColor: alpha("#ffffff", 0.06),
           }}
         >
           <ChevronLeftRoundedIcon />
@@ -213,8 +226,8 @@ export function BarberAvailabilitySection({
           sx={{
             width: 42,
             height: 42,
-            border: `1px solid ${alpha("#111111", 0.08)}`,
-            backgroundColor: "#fff",
+            border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+            backgroundColor: alpha("#ffffff", 0.06),
           }}
         >
           <ChevronRightRoundedIcon />
@@ -224,9 +237,9 @@ export function BarberAvailabilitySection({
       <Typography
         variant="caption"
         sx={{
-          color: "#9aa2ba",
+          color: "#8d96ad",
           textTransform: "uppercase",
-          letterSpacing: "0.08em",
+          letterSpacing: 0,
           fontWeight: 700,
         }}
       >
@@ -277,10 +290,10 @@ export function BarberAvailabilitySection({
                   canSelect || canPreview
                     ? {
                         backgroundColor: selected
-                          ? "#0f0f0f"
+                          ? "rgba(139,92,246,0.92)"
                           : slot.status === "bo'sh"
-                            ? "#eff2f9"
-                            : alpha("#111111", 0.06),
+                            ? alpha("#ffffff", 0.12)
+                            : alpha("#ffffff", 0.08),
                       }
                     : undefined,
               }}
@@ -292,10 +305,10 @@ export function BarberAvailabilitySection({
       </Box>
 
       <Stack direction="row" spacing={1.2} flexWrap="wrap" useFlexGap>
-        <LegendItem label="Tanlangan" color="#0f0f0f" />
-        <LegendItem label="Bo'sh" color="#d9dfe9" />
-        <LegendItem label="Band" color="#eceff5" />
-        <LegendItem label="Ishlayapti" color="#5a7bd8" />
+        <LegendItem label="Tanlangan" color="#8b5cf6" />
+        <LegendItem label="Bo'sh" color="#c4b5fd" />
+        <LegendItem label="Band" color="#64748b" />
+        <LegendItem label="Ishlayapti" color="#22d3ee" />
       </Stack>
 
       <Box sx={{ pt: { xs: 1.5, sm: 2.2 }, display: "flex", justifyContent: { md: "flex-end" } }}>

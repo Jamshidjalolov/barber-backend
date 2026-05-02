@@ -112,7 +112,7 @@ export function BookedSlotDetailsDialog({
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           <Box>
             <Typography variant="h5">Bu vaqt band</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.primary">
               Kim bron qilgani va qaysi xizmatga yozilgani shu yerda ko'rinadi.
             </Typography>
           </Box>
@@ -128,15 +128,14 @@ export function BookedSlotDetailsDialog({
             sx={{
               p: 1.25,
               borderRadius: "20px",
-              background:
-                "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(247,239,226,0.94) 100%)",
+              backgroundColor: (theme) => theme.palette.background.paper,
               border: `1px solid ${alpha("#111111", 0.05)}`,
             }}
           >
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
               <Box>
                 <Typography variant="h6">{booking.customer || "Ma'lumot topilmadi"}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   {booking.date} | {formatTimeLabel(booking.time)}
                 </Typography>
               </Box>

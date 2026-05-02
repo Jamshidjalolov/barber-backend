@@ -1,6 +1,7 @@
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import RadioButtonCheckedRoundedIcon from "@mui/icons-material/RadioButtonCheckedRounded";
 import { alpha, Box, Chip, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface PageHeaderProps {
@@ -22,13 +23,32 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
       sx={{
         p: { xs: 1.3, md: 1.6 },
         borderRadius: "26px",
         background:
-          "linear-gradient(135deg, rgba(255,250,244,0.98) 0%, rgba(248,242,232,0.92) 100%)",
-        border: `1px solid ${alpha("#111111", 0.06)}`,
-        boxShadow: "0 24px 60px rgba(17,17,17,0.06)",
+          "linear-gradient(135deg, rgba(22,22,39,0.88) 0%, rgba(10,11,22,0.72) 58%, rgba(7,19,31,0.78) 100%)",
+        border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+        boxShadow: "0 24px 70px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.06)",
+        backdropFilter: "blur(22px)",
+        position: "relative",
+        overflow: "hidden",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(120deg, rgba(139,92,246,0.14), transparent 34%, rgba(34,211,238,0.1))",
+          pointerEvents: "none",
+        },
+        "& > *": {
+          position: "relative",
+          zIndex: 1,
+        },
       }}
     >
       <Box
@@ -58,9 +78,10 @@ export function PageHeader({
                   borderRadius: "16px",
                   display: "grid",
                   placeItems: "center",
-                  bgcolor: "#111111",
+                  background:
+                    "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
                   color: "#fff",
-                  boxShadow: "0 14px 26px rgba(17,17,17,0.12)",
+                  boxShadow: `0 16px 30px ${alpha("#8b5cf6", 0.28)}`,
                   flexShrink: 0,
                 }}
               >
@@ -88,9 +109,10 @@ export function PageHeader({
                 sx={{
                   height: 31,
                   borderRadius: "999px",
-                  color: "#1f7d4c",
-                  backgroundColor: alpha("#3aa66f", 0.12),
-                  "& .MuiChip-icon": { color: "#2f9d62" },
+                  color: "#86efac",
+                  backgroundColor: alpha("#34d399", 0.12),
+                  border: `1px solid ${alpha("#34d399", 0.18)}`,
+                  "& .MuiChip-icon": { color: "#34d399" },
                   "& .MuiChip-label": { px: 1, fontWeight: 700 },
                 }}
               />
@@ -103,9 +125,9 @@ export function PageHeader({
                   sx={{
                     height: 31,
                     borderRadius: "999px",
-                    backgroundColor: alpha("#d5a546", 0.14),
-                    color: "#8f6a0c",
-                    border: `1px solid ${alpha("#d5a546", 0.18)}`,
+                    backgroundColor: alpha("#f6c85f", 0.14),
+                    color: "#fde68a",
+                    border: `1px solid ${alpha("#f6c85f", 0.18)}`,
                     "& .MuiChip-label": { px: 1.05, fontWeight: 700 },
                   }}
                 />

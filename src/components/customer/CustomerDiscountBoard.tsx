@@ -1,6 +1,7 @@
 import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import { alpha, Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { DiscountItem } from "../../types";
 import { formatUzbekReadableIsoDate } from "../../utils/date";
 
@@ -19,13 +20,19 @@ export function CustomerDiscountBoard({
 
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
       sx={{
         p: { xs: 1.4, md: 1.65 },
         borderRadius: "26px",
         background:
-          "linear-gradient(135deg, rgba(255,250,243,1) 0%, rgba(249,243,230,0.94) 100%)",
-        border: `1px solid ${alpha("#d5a546", 0.18)}`,
-        boxShadow: "0 18px 40px rgba(17,17,17,0.05)",
+          "linear-gradient(135deg, rgba(46,32,16,0.88) 0%, rgba(23,18,29,0.78) 54%, rgba(10,11,22,0.72) 100%)",
+        border: `1px solid ${alpha("#f6c85f", 0.2)}`,
+        boxShadow: "0 22px 52px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+        backdropFilter: "blur(18px)",
       }}
     >
       <Stack spacing={1.3}>
@@ -49,7 +56,8 @@ export function CustomerDiscountBoard({
               height: 34,
               borderRadius: "999px",
               backgroundColor: alpha("#d5a546", 0.12),
-              color: "#8f6617",
+              color: "#fde68a",
+              border: `1px solid ${alpha("#f6c85f", 0.18)}`,
               "& .MuiChip-label": { px: 1.1, fontWeight: 700 },
             }}
           />
@@ -68,8 +76,8 @@ export function CustomerDiscountBoard({
               sx={{
                 p: 1.15,
                 borderRadius: "20px",
-                backgroundColor: "#fff",
-                border: `1px solid ${alpha("#111111", 0.05)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
+                border: `1px solid ${alpha("#ffffff", 0.1)}`,
               }}
             >
               <Stack spacing={1}>
@@ -88,7 +96,8 @@ export function CustomerDiscountBoard({
                       height: 28,
                       borderRadius: "999px",
                       backgroundColor: alpha("#3aa66f", 0.12),
-                      color: "#217d4a",
+                      color: "#86efac",
+                      border: `1px solid ${alpha("#34d399", 0.16)}`,
                       "& .MuiChip-label": { px: 1.05, fontWeight: 800 },
                     }}
                   />
@@ -99,7 +108,7 @@ export function CustomerDiscountBoard({
                 </Typography>
 
                 {item.description ? (
-                  <Typography variant="body2" sx={{ color: "#5b5448" }}>
+                  <Typography variant="body2" sx={{ color: "#cbd5e1" }}>
                     {item.description}
                   </Typography>
                 ) : null}

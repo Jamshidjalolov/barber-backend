@@ -41,6 +41,10 @@ export function LogoutConfirmDialog({
         sx: {
           borderRadius: "28px",
           width: "min(520px, calc(100% - 24px))",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.16)}`,
+          boxShadow: "0 34px 100px rgba(0,0,0,0.58)",
         },
       }}
     >
@@ -55,8 +59,9 @@ export function LogoutConfirmDialog({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "18px",
-                  backgroundColor: alpha("#d5a546", 0.16),
-                  color: "#9a7410",
+                  backgroundColor: alpha("#f6c85f", 0.14),
+                  color: "#fde68a",
+                  border: `1px solid ${alpha("#f6c85f", 0.18)}`,
                 }}
               >
                 <WarningAmberRoundedIcon />
@@ -65,7 +70,7 @@ export function LogoutConfirmDialog({
                 <Typography variant="h6" sx={{ mb: 0.4 }}>
                   {title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary" sx={{ opacity: 0.9 }}>
                   {subtitle}
                 </Typography>
               </Box>
@@ -77,7 +82,8 @@ export function LogoutConfirmDialog({
                 width: 42,
                 height: 42,
                 borderRadius: "14px",
-                border: `1px solid ${alpha("#121212", 0.08)}`,
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
               }}
             >
               <CloseRoundedIcon fontSize="small" />
@@ -89,11 +95,12 @@ export function LogoutConfirmDialog({
               p: 2,
               borderRadius: "20px",
               background:
-                "linear-gradient(180deg, rgba(255,251,244,0.98) 0%, rgba(247,239,226,0.96) 100%)",
-              border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%)",
+              border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
             }}
           >
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.primary" sx={{ color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.92)' : undefined }}>
               {message}
             </Typography>
           </Box>
@@ -107,7 +114,7 @@ export function LogoutConfirmDialog({
                 minHeight: 50,
                 borderRadius: "18px",
                 textTransform: "none",
-                borderColor: alpha("#121212", 0.12),
+                borderColor: alpha("#c4b5fd", 0.18),
                 color: "text.secondary",
               }}
             >

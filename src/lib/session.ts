@@ -8,7 +8,9 @@ export function readStoredSession(): AuthSession | null {
     return null;
   }
 
-  const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  const raw =
+    window.localStorage.getItem(SESSION_STORAGE_KEY) ??
+    window.sessionStorage.getItem(SESSION_STORAGE_KEY);
   if (!raw) {
     return null;
   }
@@ -20,17 +22,22 @@ export function readStoredSession(): AuthSession | null {
   }
 }
 
-export function writeStoredSession(session: AuthSession | null) {
+export function writeStoredSession(session: AuthSession | null, remember = true) {
   if (typeof window === "undefined") {
     return;
   }
 
   if (!session) {
     window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
     return;
   }
 
-  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+
+  const storage = remember ? window.localStorage : window.sessionStorage;
+  storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
 export function readStoredBarberPasswords(): Record<string, string> {

@@ -5,6 +5,7 @@ import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { alpha, Avatar, Box, Card, CardActionArea, Chip, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { BarberProfile, DiscountItem } from "../../types";
 
 interface CustomerBarberListProps {
@@ -31,17 +32,24 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
 
         return (
           <Card
+            component={motion.div}
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4, scale: 1.006 }}
+            viewport={{ once: true, amount: 0.18 }}
+            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
             key={barber.id}
             elevation={0}
             sx={{
-              borderRadius: "22px",
-              border: `1px solid ${alpha("#111111", 0.06)}`,
-              boxShadow: "0 8px 20px rgba(17,17,17,0.04)",
-              backgroundColor: "#fff",
-              transition: "transform 160ms ease, box-shadow 160ms ease",
+              borderRadius: "24px",
+              border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+              boxShadow: "0 18px 42px rgba(0,0,0,0.24)",
+              background:
+                "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+              backdropFilter: "blur(18px)",
+              transition: "box-shadow 160ms ease",
               "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 18px 34px rgba(17,17,17,0.08)",
+                boxShadow: `0 26px 54px ${alpha("#8b5cf6", 0.18)}`,
               },
             }}
           >
@@ -105,7 +113,9 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
                       sx={{
                         height: 26,
                         borderRadius: "999px",
-                        backgroundColor: alpha("#111111", 0.05),
+                        backgroundColor: alpha("#ffffff", 0.07),
+                        color: "#dbeafe",
+                        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                         "& .MuiChip-label": {
                           px: 1,
                           fontSize: "0.72rem",
@@ -117,7 +127,7 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
 
                   {barber.address ? (
                     <Stack direction="row" spacing={0.45} alignItems="center" sx={{ mt: 0.55 }}>
-                      <FmdGoodRoundedIcon sx={{ fontSize: "0.92rem", color: "#9ca3b5" }} />
+                      <FmdGoodRoundedIcon sx={{ fontSize: "0.92rem", color: "#8d96ad" }} />
                       <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem" }}>
                         {barber.address}
                         {typeof barber.distanceKm === "number" ? ` | ${barber.distanceKm.toFixed(1)} km` : ""}
@@ -132,10 +142,10 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
                   {nearestDiscount ? (
                     <Stack direction="row" spacing={0.55} alignItems="center" sx={{ mt: 0.65 }}>
                       <LocalOfferRoundedIcon sx={{ fontSize: "0.95rem", color: "#2d8b58" }} />
-                      <Typography variant="body2" sx={{ color: "#2d8b58", fontWeight: 700 }}>
+                      <Typography variant="body2" sx={{ color: "#86efac", fontWeight: 700 }}>
                         {nearestDiscount.percent}% skidka
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#8a91a3", fontSize: "0.82rem" }}>
+                      <Typography variant="body2" sx={{ color: "#8d96ad", fontSize: "0.82rem" }}>
                         {nearestDiscount.startTime} - {nearestDiscount.endTime}
                       </Typography>
                     </Stack>
@@ -143,22 +153,22 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
 
                   <Stack direction="row" spacing={1.4} alignItems="center" sx={{ mt: 0.9 }} flexWrap="wrap" useFlexGap>
                     <Stack direction="row" spacing={0.45} alignItems="center">
-                      <StarRoundedIcon sx={{ fontSize: "1rem", color: "#f2b400" }} />
+                      <StarRoundedIcon sx={{ fontSize: "1rem", color: "#f6c85f" }} />
                       <Typography variant="subtitle2" sx={{ fontSize: "0.9rem" }}>
                         {barber.rating}
                       </Typography>
                     </Stack>
 
                     <Stack direction="row" spacing={0.45} alignItems="center">
-                      <PersonOutlineRoundedIcon sx={{ fontSize: "0.95rem", color: "#a3a9bb" }} />
-                      <Typography variant="subtitle2" sx={{ fontSize: "0.9rem", color: "#788199" }}>
+                      <PersonOutlineRoundedIcon sx={{ fontSize: "0.95rem", color: "#8d96ad" }} />
+                      <Typography variant="subtitle2" sx={{ fontSize: "0.9rem", color: "#aab2c8" }}>
                         {barber.experience.replace("tajriba", "").trim()}
                       </Typography>
                     </Stack>
 
                     <Stack direction="row" spacing={0.45} alignItems="center">
-                      <AccessTimeRoundedIcon sx={{ fontSize: "0.95rem", color: "#a3a9bb" }} />
-                      <Typography variant="subtitle2" sx={{ fontSize: "0.86rem", color: "#788199" }}>
+                      <AccessTimeRoundedIcon sx={{ fontSize: "0.95rem", color: "#8d96ad" }} />
+                      <Typography variant="subtitle2" sx={{ fontSize: "0.86rem", color: "#aab2c8" }}>
                         {barber.workStartTime} - {barber.workEndTime}
                       </Typography>
                     </Stack>
@@ -172,9 +182,11 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
                     borderRadius: "50%",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: "#0f0f0f",
+                    background:
+                      "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
                     color: "#fff",
                     flexShrink: 0,
+                    boxShadow: `0 14px 24px ${alpha("#8b5cf6", 0.24)}`,
                   }}
                 >
                   <ChevronRightRoundedIcon />

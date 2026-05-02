@@ -6,6 +6,7 @@ import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUnch
 import ReportProblemRoundedIcon from "@mui/icons-material/ReportProblemRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import { alpha, Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 import { BookingItem, BookingStatus } from "../../types";
 
@@ -52,12 +53,19 @@ export function BarberAppointmentsBoard({
 }: BarberAppointmentsBoardProps) {
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
       sx={{
         p: { xs: 1.5, md: 1.8 },
         borderRadius: "28px",
-        backgroundColor: "#fff",
-        border: `1px solid ${alpha("#111111", 0.06)}`,
-        boxShadow: "0 24px 56px rgba(17,17,17,0.05)",
+        background:
+          "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+        border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+        boxShadow: "0 24px 64px rgba(0,0,0,0.28)",
+        backdropFilter: "blur(22px)",
       }}
     >
       <Stack spacing={1.6}>
@@ -83,7 +91,8 @@ export function BarberAppointmentsBoard({
               sx={{
                 width: 44,
                 height: 44,
-                border: `1px solid ${alpha("#111111", 0.08)}`,
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
               }}
             >
               <ChevronLeftRoundedIcon />
@@ -102,7 +111,8 @@ export function BarberAppointmentsBoard({
               sx={{
                 width: 44,
                 height: 44,
-                border: `1px solid ${alpha("#111111", 0.08)}`,
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
               }}
             >
               <ChevronRightRoundedIcon />
@@ -121,7 +131,8 @@ export function BarberAppointmentsBoard({
           sx={{
             p: 0.55,
             borderRadius: "20px",
-            backgroundColor: alpha("#111111", 0.04),
+            backgroundColor: alpha("#ffffff", 0.05),
+            border: `1px solid ${alpha("#c4b5fd", 0.1)}`,
             display: "inline-grid",
             gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
             gap: 0.6,
@@ -160,7 +171,7 @@ export function BarberAppointmentsBoard({
               sx={{
                 p: 2.2,
                 borderRadius: "22px",
-                border: `1px dashed ${alpha("#111111", 0.12)}`,
+                border: `1px dashed ${alpha("#c4b5fd", 0.22)}`,
                 textAlign: "center",
               }}
             >
@@ -177,25 +188,27 @@ export function BarberAppointmentsBoard({
 
               return (
                 <Box
+                  component={motion.div}
+                  layout
                   key={booking.id}
                   onClick={() => onOpenDetails(booking)}
                   sx={{
                     p: { xs: 1.35, md: 1.5 },
                     borderRadius: "24px",
-                    border: `1px solid ${alpha("#111111", isNew ? 0.12 : 0.06)}`,
+                    border: `1px solid ${alpha(isNew ? "#f6c85f" : "#c4b5fd", isNew ? 0.24 : 0.13)}`,
                     background: isNew
-                      ? "linear-gradient(180deg, rgba(255,251,241,1) 0%, rgba(255,255,255,1) 100%)"
-                      : "#fff",
+                      ? "linear-gradient(180deg, rgba(49,36,17,0.9) 0%, rgba(19,20,34,0.78) 100%)"
+                      : "linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.035) 100%)",
                     boxShadow: isNew
-                      ? "0 18px 40px rgba(213,165,70,0.12)"
-                      : "0 10px 24px rgba(17,17,17,0.03)",
+                      ? `0 20px 44px ${alpha("#f6c85f", 0.16)}`
+                      : "0 12px 28px rgba(0,0,0,0.16)",
                     cursor: "pointer",
                     transition: "transform 160ms ease, box-shadow 160ms ease",
                     "&:hover": {
                       transform: "translateY(-2px)",
                       boxShadow: isNew
-                        ? "0 22px 42px rgba(213,165,70,0.14)"
-                        : "0 16px 28px rgba(17,17,17,0.06)",
+                        ? `0 26px 52px ${alpha("#f6c85f", 0.2)}`
+                        : `0 20px 40px ${alpha("#8b5cf6", 0.14)}`,
                     },
                   }}
                 >
@@ -226,8 +239,9 @@ export function BarberAppointmentsBoard({
                             size="small"
                             label="Yangi bron"
                             sx={{
-                              backgroundColor: alpha("#d5a546", 0.16),
-                              color: "#946f16",
+                              backgroundColor: alpha("#f6c85f", 0.16),
+                              color: "#fde68a",
+                              border: `1px solid ${alpha("#f6c85f", 0.18)}`,
                             }}
                           />
                         ) : null}
@@ -253,13 +267,14 @@ export function BarberAppointmentsBoard({
                             px: 1,
                             py: 0.85,
                             borderRadius: "14px",
-                            backgroundColor: alpha("#d96868", 0.08),
+                            backgroundColor: alpha("#fb7185", 0.1),
+                            border: `1px solid ${alpha("#fb7185", 0.14)}`,
                           }}
                         >
-                          <Typography variant="caption" sx={{ color: "#a23c3c", fontWeight: 700 }}>
+                          <Typography variant="caption" sx={{ color: "#fecdd3", fontWeight: 700 }}>
                             Rad etish sababi
                           </Typography>
-                          <Typography variant="body2" sx={{ color: "#6d3f3f", mt: 0.2 }}>
+                          <Typography variant="body2" sx={{ color: "#ffe4e6", mt: 0.2 }}>
                             {booking.rejectionReason}
                           </Typography>
                         </Box>
@@ -280,9 +295,9 @@ export function BarberAppointmentsBoard({
                           icon={<CheckCircleRoundedIcon />}
                           label="Yakunlangan"
                           sx={{
-                            backgroundColor: alpha("#39a96b", 0.12),
-                            color: "#1f7d4c",
-                            "& .MuiChip-icon": { color: "#1f7d4c" },
+                            backgroundColor: alpha("#34d399", 0.12),
+                            color: "#86efac",
+                            "& .MuiChip-icon": { color: "#86efac" },
                           }}
                         />
                       ) : booking.status === "Rad etildi" ? (
@@ -290,9 +305,9 @@ export function BarberAppointmentsBoard({
                           icon={<ReportProblemRoundedIcon />}
                           label="Rad etilgan"
                           sx={{
-                            backgroundColor: alpha("#d96868", 0.12),
-                            color: "#a23c3c",
-                            "& .MuiChip-icon": { color: "#a23c3c" },
+                            backgroundColor: alpha("#fb7185", 0.12),
+                            color: "#fecdd3",
+                            "& .MuiChip-icon": { color: "#fecdd3" },
                           }}
                         />
                       ) : (
@@ -353,12 +368,12 @@ function LegendChip({
 }) {
   const styles =
     tone === "done"
-      ? { bg: alpha("#39a96b", 0.12), color: "#1f7d4c", icon: "#2daa62" }
+      ? { bg: alpha("#34d399", 0.12), color: "#86efac", icon: "#34d399" }
       : tone === "rejected"
-        ? { bg: alpha("#d96868", 0.12), color: "#a23c3c", icon: "#d96868" }
+        ? { bg: alpha("#fb7185", 0.12), color: "#fecdd3", icon: "#fb7185" }
       : tone === "pending"
-        ? { bg: alpha("#d5a546", 0.12), color: "#986c00", icon: "#d6a622" }
-        : { bg: alpha("#111111", 0.05), color: "#6b7488", icon: "#c0c5d1" };
+        ? { bg: alpha("#f6c85f", 0.12), color: "#fde68a", icon: "#f6c85f" }
+        : { bg: alpha("#ffffff", 0.06), color: "#cbd5e1", icon: "#8d96ad" };
 
   return (
     <Stack
@@ -389,7 +404,7 @@ function InfoLine({
 }) {
   return (
     <Stack direction="row" spacing={0.65} alignItems="center">
-      <Box sx={{ color: "#8d95a8", display: "grid", placeItems: "center" }}>{icon}</Box>
+      <Box sx={{ color: "#8d96ad", display: "grid", placeItems: "center" }}>{icon}</Box>
       <Typography variant="body1">{label}</Typography>
     </Stack>
   );
@@ -406,39 +421,39 @@ function getStatusView(status: BookingStatus) {
   if (status === "Rad etildi") {
     return {
       label: "Rad etildi",
-      bg: alpha("#d96868", 0.14),
-      color: "#a23c3c",
+      bg: alpha("#fb7185", 0.14),
+      color: "#fecdd3",
     };
   }
 
   if (status === "Tugallandi") {
     return {
       label: "Tayyor",
-      bg: alpha("#39a96b", 0.14),
-      color: "#1f7d4c",
+      bg: alpha("#34d399", 0.14),
+      color: "#86efac",
     };
   }
 
   if (status === "Jarayonda") {
     return {
       label: "Jarayonda",
-      bg: alpha("#5a7bd8", 0.12),
-      color: "#3354b8",
+      bg: alpha("#22d3ee", 0.12),
+      color: "#67e8f9",
     };
   }
 
   if (status === "Tasdiqlandi") {
     return {
       label: "Qabul qilindi",
-      bg: alpha("#3aa66f", 0.14),
-      color: "#1f7d4c",
+      bg: alpha("#34d399", 0.14),
+      color: "#86efac",
     };
   }
 
   return {
     label: "Kutilmoqda",
-    bg: alpha("#d5a546", 0.14),
-    color: "#946f16",
+    bg: alpha("#f6c85f", 0.14),
+    color: "#fde68a",
   };
 }
 

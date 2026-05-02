@@ -42,8 +42,9 @@ export function PerformanceCard({ items }: PerformanceCardProps) {
               px: 1,
               py: 0.58,
               borderRadius: "999px",
-              backgroundColor: alpha("#d5a546", 0.12),
-              color: "#8f6a0c",
+              backgroundColor: alpha("#f6c85f", 0.12),
+              color: "#fde68a",
+              border: `1px solid ${alpha("#f6c85f", 0.16)}`,
             }}
           >
             <WorkspacePremiumRoundedIcon sx={{ fontSize: "0.92rem" }} />
@@ -63,9 +64,10 @@ export function PerformanceCard({ items }: PerformanceCardProps) {
                 elevation={0}
                 sx={{
                   borderRadius: "16px",
-                  border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                  border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                   background:
-                    "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(248,242,233,0.94) 100%)",
+                    "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.035) 100%)",
+                  backdropFilter: "blur(14px)",
                 }}
               >
                 <CardContent sx={{ p: 1.15, "&:last-child": { pb: 1.15 } }}>
@@ -126,7 +128,8 @@ export function PerformanceCard({ items }: PerformanceCardProps) {
                           px: 0.75,
                           py: 0.35,
                           borderRadius: "999px",
-                          backgroundColor: alpha("#111111", 0.05),
+                          backgroundColor: alpha("#ffffff", 0.06),
+                          border: `1px solid ${alpha("#c4b5fd", 0.1)}`,
                           color: "text.secondary",
                           fontWeight: 700,
                         }}
@@ -139,7 +142,8 @@ export function PerformanceCard({ items }: PerformanceCardProps) {
                           px: 0.75,
                           py: 0.35,
                           borderRadius: "999px",
-                          backgroundColor: alpha("#111111", 0.04),
+                          backgroundColor: alpha("#ffffff", 0.05),
+                          border: `1px solid ${alpha("#c4b5fd", 0.1)}`,
                           color: "text.secondary",
                           fontWeight: 700,
                         }}

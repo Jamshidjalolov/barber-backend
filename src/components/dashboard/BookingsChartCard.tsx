@@ -15,7 +15,7 @@ import {
 import { BarberBookingSummary } from "../../types";
 import { SectionCard } from "../common/SectionCard";
 
-const barberColors = ["#191919", "#d5a546", "#3aa66f", "#6d7486"];
+const barberColors = ["#8b5cf6", "#22d3ee", "#34d399", "#f6c85f"];
 
 interface BookingsChartCardProps {
   items: BarberBookingSummary[];
@@ -56,7 +56,8 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
               sx={{
                 height: 30,
                 borderRadius: "999px",
-                backgroundColor: alpha("#111111", 0.05),
+                backgroundColor: alpha("#ffffff", 0.06),
+                border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                 "& .MuiChip-label": { px: 1.1, fontWeight: 700 },
               }}
             />
@@ -67,8 +68,9 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
               sx={{
                 height: 30,
                 borderRadius: "999px",
-                backgroundColor: alpha("#3aa66f", 0.12),
-                color: "#1f7d4c",
+                backgroundColor: alpha("#34d399", 0.12),
+                color: "#86efac",
+                border: `1px solid ${alpha("#34d399", 0.16)}`,
                 "& .MuiChip-label": { px: 1.1, fontWeight: 700 },
               }}
             />
@@ -85,11 +87,12 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
                 key={item.name}
                 elevation={0}
                 sx={{
-                  borderRadius: "16px",
-                  border: `1px solid ${alpha("#7a5d31", 0.08)}`,
+                borderRadius: "16px",
+                  border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                   background:
-                    "linear-gradient(180deg, rgba(255,252,247,0.98) 0%, rgba(248,242,233,0.94) 100%)",
-                  boxShadow: "0 10px 22px rgba(58, 44, 23, 0.04)",
+                    "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.035) 100%)",
+                  boxShadow: "0 14px 30px rgba(0,0,0,0.16)",
+                  backdropFilter: "blur(14px)",
                 }}
               >
                 <CardContent sx={{ p: 1.2, "&:last-child": { pb: 1.2 } }}>
@@ -136,7 +139,8 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
                             height: 26,
                             borderRadius: "999px",
                             backgroundColor: alpha("#3aa66f", 0.12),
-                            color: "#1f7d4c",
+                            color: "#86efac",
+                            border: `1px solid ${alpha("#34d399", 0.16)}`,
                             "& .MuiChip-label": { px: 0.95, fontWeight: 700, fontSize: "0.75rem" },
                           }}
                         />
@@ -146,8 +150,9 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
                           sx={{
                             height: 26,
                             borderRadius: "999px",
-                            backgroundColor: alpha("#d5a546", 0.13),
-                            color: "#916c12",
+                            backgroundColor: alpha("#f6c85f", 0.13),
+                            color: "#fde68a",
+                            border: `1px solid ${alpha("#f6c85f", 0.16)}`,
                             "& .MuiChip-label": { px: 0.95, fontWeight: 700, fontSize: "0.75rem" },
                           }}
                         />
@@ -213,7 +218,7 @@ export function BookingsChartCard({ items }: BookingsChartCardProps) {
         </Stack>
 
         <Stack direction="row" spacing={0.75} alignItems="center">
-          <ScheduleRoundedIcon sx={{ fontSize: "0.95rem", color: "#8f6a0c" }} />
+          <ScheduleRoundedIcon sx={{ fontSize: "0.95rem", color: "#f6c85f" }} />
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem" }}>
             Bugun eng ko&apos;p navbatni {bestBarber.name} tugatgan.
           </Typography>

@@ -34,7 +34,8 @@ export function RecentBookingsCard({ items }: RecentBookingsCardProps) {
               px: 0.9,
               py: 0.45,
               borderRadius: "999px",
-              backgroundColor: alpha("#111111", 0.04),
+              backgroundColor: alpha("#ffffff", 0.06),
+              border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>

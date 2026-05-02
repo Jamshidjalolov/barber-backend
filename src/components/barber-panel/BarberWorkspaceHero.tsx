@@ -6,6 +6,7 @@ import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import RadioButtonCheckedRoundedIcon from "@mui/icons-material/RadioButtonCheckedRounded";
 import { alpha, Avatar, Badge, Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 import { BarberProfile, BookingItem } from "../../types";
 
 interface BarberWorkspaceHeroProps {
@@ -31,13 +32,32 @@ export function BarberWorkspaceHero({
 }: BarberWorkspaceHeroProps) {
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       sx={{
         p: { xs: 1.45, md: 1.8, xl: 2.1 },
         borderRadius: "28px",
         background:
-          "linear-gradient(135deg, rgba(255,250,244,0.98) 0%, rgba(248,242,232,0.92) 100%)",
-        border: `1px solid ${alpha("#111111", 0.06)}`,
-        boxShadow: "0 24px 60px rgba(17,17,17,0.06)",
+          "linear-gradient(135deg, rgba(22,22,39,0.9) 0%, rgba(10,11,22,0.82) 54%, rgba(7,19,31,0.82) 100%)",
+        border: `1px solid ${alpha("#c4b5fd", 0.15)}`,
+        boxShadow: "0 24px 70px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.06)",
+        backdropFilter: "blur(22px)",
+        position: "relative",
+        overflow: "hidden",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(120deg, rgba(139,92,246,0.14), transparent 36%, rgba(34,211,238,0.1))",
+          pointerEvents: "none",
+        },
+        "& > *": {
+          position: "relative",
+          zIndex: 1,
+        },
       }}
     >
       <Box
@@ -98,9 +118,11 @@ export function BarberWorkspaceHero({
                   textTransform: "none",
                   fontWeight: 800,
                   boxShadow: "none",
-                  backgroundColor: "#111111",
+                  background:
+                    "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
                   "&:hover": {
-                    backgroundColor: "#232323",
+                    background:
+                      "linear-gradient(135deg, rgba(124,58,237,1) 0%, rgba(8,145,178,0.92) 100%)",
                     boxShadow: "none",
                   },
                 }}
@@ -115,11 +137,11 @@ export function BarberWorkspaceHero({
                   width: 40,
                   height: 40,
                   borderRadius: "14px",
-                  color: "#111111",
-                  backgroundColor: "#fff",
-                  border: `1px solid ${alpha("#111111", 0.06)}`,
+                  color: "#f8fafc",
+                  backgroundColor: alpha("#ffffff", 0.08),
+                  border: `1px solid ${alpha("#ffffff", 0.12)}`,
                   "&:hover": {
-                    backgroundColor: alpha("#111111", 0.04),
+                    backgroundColor: alpha("#ffffff", 0.14),
                   },
                 }}
               >
@@ -132,9 +154,10 @@ export function BarberWorkspaceHero({
                 sx={{
                   height: 31,
                   borderRadius: "999px",
-                  color: "#1f7d4c",
-                  backgroundColor: alpha("#3aa66f", 0.12),
-                  "& .MuiChip-icon": { color: "#2f9d62" },
+                  color: "#86efac",
+                  backgroundColor: alpha("#34d399", 0.12),
+                  border: `1px solid ${alpha("#34d399", 0.18)}`,
+                  "& .MuiChip-icon": { color: "#34d399" },
                   "& .MuiChip-label": { px: 1, fontWeight: 700 },
                 }}
               />
@@ -145,11 +168,11 @@ export function BarberWorkspaceHero({
                   width: 40,
                   height: 40,
                   borderRadius: "14px",
-                  color: "#111111",
-                  backgroundColor: "#fff",
-                  border: `1px solid ${alpha("#111111", 0.06)}`,
+                  color: "#f8fafc",
+                  backgroundColor: alpha("#ffffff", 0.08),
+                  border: `1px solid ${alpha("#ffffff", 0.12)}`,
                   "&:hover": {
-                    backgroundColor: alpha("#111111", 0.04),
+                    backgroundColor: alpha("#ffffff", 0.14),
                   },
                 }}
               >
@@ -188,8 +211,9 @@ export function BarberWorkspaceHero({
                     borderRadius: "14px",
                     display: "grid",
                     placeItems: "center",
-                    bgcolor: alpha("#111111", 0.04),
-                    color: "#111111",
+                    bgcolor: alpha("#ffffff", 0.08),
+                    color: "#f8fafc",
+                    border: `1px solid ${alpha("#ffffff", 0.1)}`,
                   }}
                 >
                   <NotificationsRoundedIcon sx={{ fontSize: "1.1rem" }} />
@@ -206,8 +230,9 @@ export function BarberWorkspaceHero({
           sx={{
             p: 1.5,
             borderRadius: "24px",
-            backgroundColor: alpha("#ffffff", 0.72),
-            border: `1px solid ${alpha("#111111", 0.05)}`,
+            backgroundColor: alpha("#ffffff", 0.06),
+            border: `1px solid ${alpha("#ffffff", 0.11)}`,
+            backdropFilter: "blur(18px)",
           }}
         >
             <Typography variant="subtitle2" sx={{ color: "#8d95a8", mb: 0.65 }}>
@@ -221,7 +246,8 @@ export function BarberWorkspaceHero({
                 sx={{
                   height: 28,
                   borderRadius: "999px",
-                  backgroundColor: alpha("#111111", 0.05),
+                  backgroundColor: alpha("#ffffff", 0.08),
+                  border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
                   "& .MuiChip-label": { px: 1, fontWeight: 700 },
                 }}
               />

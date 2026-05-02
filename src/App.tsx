@@ -148,7 +148,7 @@ function LoadingScreen({ label }: { label: string }) {
         display: "grid",
         placeItems: "center",
         background:
-          "radial-gradient(circle at top, rgba(227,191,106,0.16), transparent 32%), #f4efe6",
+          "radial-gradient(circle at 18% 10%, rgba(139,92,246,0.28), transparent 32%), radial-gradient(circle at 84% 12%, rgba(34,211,238,0.16), transparent 28%), #05050a",
         px: 2,
       }}
     >
@@ -158,8 +158,11 @@ function LoadingScreen({ label }: { label: string }) {
         sx={{
           p: 3,
           borderRadius: "28px",
-          backgroundColor: "#fff",
-          boxShadow: "0 24px 60px rgba(17,17,17,0.08)",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.88) 0%, rgba(10,11,22,0.78) 100%)",
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          boxShadow: "0 24px 70px rgba(0,0,0,0.38)",
+          backdropFilter: "blur(18px)",
         }}
       >
         <CircularProgress />
@@ -303,8 +306,8 @@ export default function App() {
   }, []);
 
   const applySession = useCallback(
-    (nextSession: AuthSession) => {
-      writeStoredSession(nextSession);
+    (nextSession: AuthSession, remember = true) => {
+      writeStoredSession(nextSession, remember);
       writeAuthHash("customer-login");
       setSession(nextSession);
       setAppMode(nextSession.user.role === "customer" ? "customer" : nextSession.user.role);
@@ -461,12 +464,12 @@ export default function App() {
     };
   }, [session, syncSessionData]);
 
-  const handleCustomerLogin = async (phone: string, password: string) => {
+  const handleCustomerLogin = async (phone: string, password: string, remember = true) => {
     const response = await loginCustomer(phone, password);
     await applySession({
       accessToken: response.access_token,
       user: mapApiUserToAuthUser(response.user),
-    });
+    }, remember);
   };
 
   const handleCustomerRegister = async (fullName: string, phone: string, password: string) => {
@@ -477,12 +480,12 @@ export default function App() {
     });
   };
 
-  const handleBarberLogin = async (username: string, password: string) => {
+  const handleBarberLogin = async (username: string, password: string, remember = true) => {
     const response = await loginBarber(username, password);
     await applySession({
       accessToken: response.access_token,
       user: mapApiUserToAuthUser(response.user),
-    });
+    }, remember);
   };
 
   const handleBarberRegister = async (payload: BarberFormPayload) => {
@@ -493,12 +496,12 @@ export default function App() {
     });
   };
 
-  const handleAdminLogin = async (username: string, password: string) => {
+  const handleAdminLogin = async (username: string, password: string, remember = true) => {
     const response = await loginAdmin(username, password);
     await applySession({
       accessToken: response.access_token,
       user: mapApiUserToAuthUser(response.user),
-    });
+    }, remember);
   };
 
   const handleCreateBooking = async (payload: {
