@@ -3,9 +3,12 @@ from __future__ import annotations
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 from app.api.routes.auth import router as auth_router
 from app.api.routes.barbers import router as barbers_router
@@ -67,6 +70,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def is_allowed_browser_origin(origin: str) -> bool:
+    if origin in settings.allowed_cors_origins:
+        return True
+
+    try:
+        hostname = urlsplit(origin).hostname or ""
+    except ValueError:
+        return False
+
+    return hostname == "vercel.app" or hostname.endswith(".vercel.app")
+
+
+@app.middleware("http")
+async def add_browser_cors_headers(request: Request, call_next):
+    origin = request.headers.get("origin")
+    allow_origin = origin if origin and is_allowed_browser_origin(origin) else None
+
+    if request.method == "OPTIONS" and allow_origin:
+        response = Response(status_code=204)
+    else:
+        response = await call_next(request)
+
+    if allow_origin:
+        response.headers["Access-Control-Allow-Origin"] = allow_origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = (
+            request.headers.get("access-control-request-headers") or "*"
+        )
+        response.headers["Vary"] = "Origin"
+
+    return response
 
 
 @app.get("/health")
