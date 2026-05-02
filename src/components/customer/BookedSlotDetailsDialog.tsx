@@ -58,7 +58,7 @@ function InfoRow({
       sx={{
         p: 1,
         borderRadius: "16px",
-        backgroundColor: "#fff",
+        backgroundColor: (theme) => theme.palette.background.paper,
         border: `1px solid ${alpha("#111111", 0.05)}`,
       }}
     >
@@ -77,10 +77,12 @@ function InfoRow({
         {icon}
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" sx={{ color: "#8a91a3" }}>
+        <Typography variant="caption" sx={{ color: (theme) => theme.palette.text.secondary }}>
           {label}
         </Typography>
-        <Typography variant="subtitle2">{value}</Typography>
+        <Typography variant="subtitle2" sx={{ color: (theme) => theme.palette.text.primary }}>
+          {value}
+        </Typography>
       </Box>
     </Stack>
   );
@@ -194,13 +196,13 @@ export function BookedSlotDetailsDialog({
               px: 1.2,
               py: 0.95,
               borderRadius: "16px",
-              backgroundColor: alpha("#111111", 0.03),
+              backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.04),
               border: `1px solid ${alpha("#111111", 0.05)}`,
             }}
           >
             <Stack direction="row" spacing={0.8} alignItems="center">
-              <StickyNote2RoundedIcon sx={{ fontSize: "1rem", color: "#8a91a3" }} />
-              <Typography variant="body2" sx={{ color: "#5f6473" }}>
+              <StickyNote2RoundedIcon sx={{ fontSize: "1rem", color: (theme) => theme.palette.text.secondary }} />
+              <Typography variant="body2" sx={{ color: (theme) => theme.palette.text.primary }}>
                 {booking.note?.trim() || "Qo'shimcha izoh qoldirilmagan"}
               </Typography>
             </Stack>
