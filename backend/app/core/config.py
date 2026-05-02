@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     telegram_poll_retry_seconds: int = 5
     booking_reminder_minutes_before: int = 10
     booking_reminder_check_interval_seconds: int = 30
+    database_connect_timeout_seconds: int = 8
+    database_command_timeout_seconds: int = 15
 
     @field_validator("database_url", mode="before")
     @classmethod

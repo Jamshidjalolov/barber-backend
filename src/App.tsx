@@ -303,7 +303,7 @@ export default function App() {
   }, []);
 
   const applySession = useCallback(
-    async (nextSession: AuthSession) => {
+    (nextSession: AuthSession) => {
       writeStoredSession(nextSession);
       writeAuthHash("customer-login");
       setSession(nextSession);
@@ -311,14 +311,15 @@ export default function App() {
       setAuthScreen("customer-login");
       setGlobalError("");
 
-      try {
-        await syncSessionData(nextSession);
-      } catch (error) {
-        switchToAuth("customer-login");
-        throw error;
-      }
+      void syncSessionData(nextSession).catch((error) => {
+        setGlobalError(
+          error instanceof Error
+            ? error.message
+            : "Backend ma'lumotlarini yuklab bo'lmadi.",
+        );
+      });
     },
-    [switchToAuth, syncSessionData],
+    [syncSessionData],
   );
 
   useEffect(() => {
