@@ -1,1 +1,2 @@
 backend/backend/.venv/bin/python text eol=lf
+backend/render-build.sh text eol=lf
