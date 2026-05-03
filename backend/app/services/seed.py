@@ -7,21 +7,32 @@ from app.core.enums import RoleEnum
 from app.core.security import hash_password
 from app.models.user import User
 
+DEFAULT_ADMIN_FULL_NAME = "Jamshid Jalolov"
+DEFAULT_ADMIN_USERNAME = "jamshidjalolov6767@gmail.com"
+DEFAULT_ADMIN_PASSWORD = "jamshid4884"
+
 
 async def seed_demo_data(session: AsyncSession) -> None:
-    """Seed faqat admin qoldiradi - barber va customer o'zi qo'shadi"""
-    existing_admin = (
-        await session.execute(select(User).where(User.role == RoleEnum.admin))
+    """Ensure the production admin account exists with the expected credentials."""
+    admin = (
+        await session.execute(
+            select(User).where(
+                User.role == RoleEnum.admin,
+                User.username == DEFAULT_ADMIN_USERNAME,
+            )
+        )
     ).scalar_one_or_none()
-    if existing_admin:
-        return
 
-    # Faqat admin - foydalanuvchilar o'zi ro'yxatdan o'tadi
-    admin = User(
-        role=RoleEnum.admin,
-        full_name="Jamshid Jalolov",
-        username="jamshidjalolov6767@gmail.com",
-        password_hash=hash_password("jamshid4884"),
-    )
-    session.add(admin)
+    if admin is None:
+        admin = User(
+            role=RoleEnum.admin,
+            full_name=DEFAULT_ADMIN_FULL_NAME,
+            username=DEFAULT_ADMIN_USERNAME,
+            password_hash=hash_password(DEFAULT_ADMIN_PASSWORD),
+        )
+        session.add(admin)
+    else:
+        admin.full_name = DEFAULT_ADMIN_FULL_NAME
+        admin.password_hash = hash_password(DEFAULT_ADMIN_PASSWORD)
+
     await session.commit()

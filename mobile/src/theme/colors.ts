@@ -22,10 +22,7 @@ export const colors = {
 
 export const shadows = {
   soft: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 18 },
-    shadowOpacity: 0.28,
-    shadowRadius: 28,
+    boxShadow: "0px 18px 28px rgba(0, 0, 0, 0.28)",
     elevation: 8,
   },
 };

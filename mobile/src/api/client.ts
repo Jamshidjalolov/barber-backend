@@ -1,8 +1,4 @@
 import {
-  NativeModules,
-  Platform,
-} from "react-native";
-import {
   ApiAuthUser,
   ApiBarber,
   ApiBooking,
@@ -22,37 +18,14 @@ declare const process:
   | undefined;
 
 const envBaseUrl = typeof process !== "undefined" ? process.env?.EXPO_PUBLIC_API_BASE_URL : undefined;
-const LOCAL_API_PORT = "8001";
-const LOCAL_API_PATH = "/api/v1";
-
-function getExpoDevServerHost() {
-  const scriptURL = (NativeModules.SourceCode as { scriptURL?: string } | undefined)?.scriptURL;
-  if (!scriptURL) {
-    return null;
-  }
-
-  try {
-    return new URL(scriptURL).hostname;
-  } catch {
-    return scriptURL.match(/^[a-z]+:\/\/([^/:]+)/i)?.[1] ?? null;
-  }
-}
+const PRODUCTION_API_BASE_URL = "https://barber-backend.onrender.com/api/v1";
 
 function resolveApiBaseUrl() {
   if (envBaseUrl) {
     return envBaseUrl.replace(/\/$/, "");
   }
 
-  const devServerHost = getExpoDevServerHost();
-  if (devServerHost && devServerHost !== "localhost" && devServerHost !== "127.0.0.1") {
-    return `http://${devServerHost}:${LOCAL_API_PORT}${LOCAL_API_PATH}`;
-  }
-
-  if (Platform.OS === "android") {
-    return `http://10.0.2.2:${LOCAL_API_PORT}${LOCAL_API_PATH}`;
-  }
-
-  return `http://localhost:${LOCAL_API_PORT}${LOCAL_API_PATH}`;
+  return PRODUCTION_API_BASE_URL;
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();

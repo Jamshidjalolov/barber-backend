@@ -223,10 +223,7 @@ const styles = StyleSheet.create({
     minHeight: 54,
     justifyContent: "center",
     paddingHorizontal: 18,
-    shadowColor: colors.purple,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.28,
-    shadowRadius: 20,
+    boxShadow: "0px 12px 20px rgba(139, 92, 246, 0.28)",
     elevation: 6,
   },
   buttonGold: {
@@ -237,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: colors.line,
     borderWidth: 1,
-    shadowOpacity: 0,
+    boxShadow: "none",
     elevation: 0,
   },
   buttonText: {

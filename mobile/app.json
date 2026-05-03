@@ -17,7 +17,7 @@
       }
     },
     "extra": {
-      "apiBaseUrl": "http://localhost:8001/api/v1"
+      "apiBaseUrl": "https://barber-backend.onrender.com/api/v1"
     }
   }
 }
