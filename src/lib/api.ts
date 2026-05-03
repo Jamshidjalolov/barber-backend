@@ -25,7 +25,7 @@ function resolveApiBaseUrl() {
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
-const API_REQUEST_TIMEOUT_MS = 8_000;
+const API_REQUEST_TIMEOUT_MS = 60_000;
 
 interface RequestOptions extends RequestInit {
   token?: string;

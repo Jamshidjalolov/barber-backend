@@ -44,14 +44,14 @@ def track_background_task(task: asyncio.Task[None]) -> None:
 
 
 def start_background_jobs() -> None:
+    track_background_task(asyncio.create_task(run_database_startup_jobs()))
     track_background_task(asyncio.create_task(booking_reminder_worker.run()))
     track_background_task(asyncio.create_task(telegram_notifier.run_polling()))
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await run_database_startup_jobs(max_attempts=settings.database_startup_max_attempts)
-    start_background_jobs()
+    asyncio.get_running_loop().call_soon(start_background_jobs)
     try:
         yield
     finally:
