@@ -112,6 +112,7 @@ async def register_barber(
         rating=payload.rating,
         bio=payload.bio.strip() if payload.bio else None,
         photo_url=payload.photo_url.strip() if payload.photo_url else None,
+        media_url=payload.media_url.strip() if payload.media_url else None,
     )
     session.add(barber)
     await session.commit()

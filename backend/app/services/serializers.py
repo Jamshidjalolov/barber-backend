@@ -13,6 +13,7 @@ def serialize_auth_user(user: User) -> AuthUserRead:
         full_name=user.full_name,
         username=user.username,
         phone=user.phone,
+        photo_url=user.photo_url,
         telegram_chat_id=user.telegram_chat_id,
         telegram_connected=bool(user.telegram_chat_id),
         barber_profile_id=getattr(barber_profile, "id", None),

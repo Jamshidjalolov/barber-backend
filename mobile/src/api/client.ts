@@ -13,6 +13,7 @@ import {
   BarberFormPayload,
   BarberSettingsPayload,
   DiscountFormPayload,
+  ProfileFormPayload,
 } from "../types";
 
 declare const process:
@@ -66,6 +67,7 @@ function mapUser(user: ApiAuthUser): AuthUser {
     fullName: user.full_name,
     username: user.username,
     phone: user.phone,
+    photoUrl: user.photo_url,
     barberProfileId: user.barber_profile_id,
   };
 }
@@ -168,9 +170,28 @@ export function registerBarber(payload: {
       rating: 4.8,
       experience_years: 1,
       photo_url: null,
+      media_url: null,
       bio: null,
     }),
   }).then(mapSession);
+}
+
+export function getMe(token: string) {
+  return request<ApiAuthUser>("/auth/me", { token }).then(mapUser);
+}
+
+export function updateMe(token: string, payload: ProfileFormPayload) {
+  return request<ApiAuthUser>("/auth/me", {
+    method: "PATCH",
+    token,
+    body: JSON.stringify({
+      full_name: payload.fullName,
+      username: payload.username || null,
+      phone: payload.phone || null,
+      password: payload.password || undefined,
+      photo_url: payload.photoUrl || null,
+    }),
+  }).then(mapUser);
 }
 
 export function getBarbers() {
@@ -188,12 +209,15 @@ function toBarberPayload(payload: BarberFormPayload | BarberSettingsPayload) {
     password: "password" in payload ? payload.password || undefined : undefined,
     specialty: payload.specialty,
     photo_url: payload.photoUrl || null,
+    media_url: payload.mediaUrl || null,
     rating: payload.rating,
     experience_years: payload.yearsExp,
     bio: payload.bio || null,
     work_start_time: payload.workStartTime,
     work_end_time: payload.workEndTime,
     address: payload.address || null,
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
     price_haircut: payload.priceHaircut,
     price_fade: payload.priceFade,
     price_hair_beard: payload.priceHairBeard,

@@ -13,6 +13,7 @@ class BarberBasePayload(BaseModel):
     rating: float = Field(default=4.8, ge=0, le=5)
     bio: str | None = None
     photo_url: str | None = Field(default=None, max_length=2048)
+    media_url: str | None = Field(default=None, max_length=2048)
     work_start_time: str = Field(default="09:00", min_length=5, max_length=5)
     work_end_time: str = Field(default="18:30", min_length=5, max_length=5)
     address: str | None = Field(default=None, max_length=255)
@@ -41,6 +42,7 @@ class BarberUpdateRequest(BaseModel):
     rating: float | None = Field(default=None, ge=0, le=5)
     bio: str | None = None
     photo_url: str | None = None
+    media_url: str | None = None
     password: str | None = Field(default=None, min_length=4, max_length=64)
     telegram_chat_id: str | None = None
     work_start_time: str | None = Field(default=None, min_length=5, max_length=5)
@@ -65,6 +67,7 @@ class BarberRead(BaseModel):
     rating: float
     bio: str | None
     photo_url: str | None
+    media_url: str | None
     telegram_chat_id: str | None
     work_start_time: str
     work_end_time: str

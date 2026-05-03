@@ -18,6 +18,7 @@ class Barber(Base, IdMixin, TimestampMixin):
     rating: Mapped[float] = mapped_column(Float, default=0)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     photo_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    media_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     telegram_chat_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     work_start_time: Mapped[str] = mapped_column(String(5), default="09:00")
     work_end_time: Mapped[str] = mapped_column(String(5), default="18:30")

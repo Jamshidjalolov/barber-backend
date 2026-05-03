@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -82,24 +82,40 @@ export function PrimaryButton({
   tone = "dark",
 }: {
   label: string;
-  onPress: () => void;
+  onPress: () => void | Promise<void>;
   loading?: boolean;
   disabled?: boolean;
   tone?: "dark" | "gold" | "ghost";
 }) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const activeLoading = Boolean(loading || internalLoading);
+
+  async function handlePress() {
+    if (disabled || activeLoading) return;
+    const result = onPress();
+    if (result && typeof (result as Promise<void>).then === "function") {
+      setInternalLoading(true);
+      try {
+        await result;
+      } finally {
+        setInternalLoading(false);
+      }
+    }
+  }
+
   return (
     <Pressable
-      onPress={onPress}
-      disabled={disabled || loading}
+      onPress={handlePress}
+      disabled={disabled || activeLoading}
       style={({ pressed }) => [
         styles.button,
         tone === "gold" && styles.buttonGold,
         tone === "ghost" && styles.buttonGhost,
-        (disabled || loading) && styles.disabled,
+        (disabled || activeLoading) && styles.disabled,
         pressed && styles.pressed,
       ]}
     >
-      {loading ? (
+      {activeLoading ? (
         <ActivityIndicator color={tone === "ghost" ? colors.cyan : "#fff"} />
       ) : (
         <Text style={[styles.buttonText, tone === "ghost" && styles.buttonGhostText]}>{label}</Text>

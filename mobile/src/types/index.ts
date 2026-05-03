@@ -7,6 +7,7 @@ export type AuthUser = {
   fullName: string;
   username?: string | null;
   phone?: string | null;
+  photoUrl?: string | null;
   barberProfileId?: string | null;
 };
 
@@ -21,6 +22,7 @@ export type ApiAuthUser = {
   full_name: string;
   username?: string | null;
   phone?: string | null;
+  photo_url?: string | null;
   barber_profile_id?: string | null;
 };
 
@@ -39,6 +41,7 @@ export type ApiBarber = {
   rating: number;
   bio?: string | null;
   photo_url?: string | null;
+  media_url?: string | null;
   telegram_chat_id?: string | null;
   work_start_time: string;
   work_end_time: string;
@@ -103,6 +106,9 @@ export type BarberFormPayload = {
   password?: string;
   specialty: string;
   photoUrl?: string;
+  mediaUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   rating: number;
   yearsExp: number;
   bio?: string;
@@ -121,6 +127,9 @@ export type BarberSettingsPayload = {
   username?: string;
   specialty?: string;
   photoUrl?: string;
+  mediaUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   rating?: number;
   yearsExp?: number;
   bio?: string;
@@ -141,4 +150,12 @@ export type DiscountFormPayload = {
   percent: number;
   startsAt: string;
   endsAt: string;
+};
+
+export type ProfileFormPayload = {
+  fullName: string;
+  username?: string;
+  phone?: string;
+  password?: string;
+  photoUrl?: string;
 };

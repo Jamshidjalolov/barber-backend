@@ -14,6 +14,7 @@ class User(Base, IdMixin, TimestampMixin):
     full_name: Mapped[str] = mapped_column(String(120))
     username: Mapped[str | None] = mapped_column(String(80), unique=True, nullable=True)
     phone: Mapped[str | None] = mapped_column(String(24), unique=True, nullable=True)
+    photo_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     telegram_chat_id: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

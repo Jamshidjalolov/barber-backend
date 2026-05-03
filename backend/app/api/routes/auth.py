@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import DatabaseSession, get_current_user
 from app.core.enums import RoleEnum
-from app.core.security import create_access_token
+from app.core.security import create_access_token, hash_password
 from app.models.user import User
 from app.schemas.auth import (
     AuthUserRead,
+    AuthUserUpdateRequest,
     CustomerLoginRequest,
     CustomerRegisterRequest,
     TokenResponse,
@@ -90,4 +91,58 @@ async def auth_me(
             select(User).options(selectinload(User.barber_profile)).where(User.id == current_user.id),
         )
     ).scalar_one()
+    return serialize_auth_user(hydrated)
+
+
+@router.patch("/me", response_model=AuthUserRead)
+async def update_auth_me(
+    payload: AuthUserUpdateRequest,
+    session: DatabaseSession,
+    current_user: User = Depends(get_current_user),
+) -> AuthUserRead:
+    hydrated = (
+        await session.execute(
+            select(User).options(selectinload(User.barber_profile)).where(User.id == current_user.id),
+        )
+    ).scalar_one()
+
+    if payload.phone is not None:
+        phone = payload.phone.strip() or None
+        if phone and phone != hydrated.phone:
+            existing = (await session.execute(select(User).where(User.phone == phone))).scalar_one_or_none()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Bu telefon raqam allaqachon band.",
+                )
+        hydrated.phone = phone
+
+    if payload.username is not None:
+        username = payload.username.strip().lower() or None
+        if username and username != hydrated.username:
+            existing = (await session.execute(select(User).where(User.username == username))).scalar_one_or_none()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Bu username allaqachon band.",
+                )
+        hydrated.username = username
+
+    if payload.full_name is not None:
+        hydrated.full_name = payload.full_name.strip()
+
+    photo_updated = payload.photo_url is not None
+    if photo_updated:
+        hydrated.photo_url = payload.photo_url.strip() or None
+
+    if payload.password:
+        hydrated.password_hash = hash_password(payload.password)
+
+    if hydrated.role == RoleEnum.barber and hydrated.barber_profile:
+        hydrated.barber_profile.display_name = hydrated.full_name
+        if photo_updated:
+            hydrated.barber_profile.photo_url = hydrated.photo_url
+
+    await session.commit()
+    await session.refresh(hydrated, attribute_names=["barber_profile"])
     return serialize_auth_user(hydrated)

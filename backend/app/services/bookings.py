@@ -47,6 +47,15 @@ async def create_booking(
     if not barber:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Barber topilmadi.")
 
+    scheduled_for = payload.scheduled_for
+    if scheduled_for.tzinfo is None:
+        scheduled_for = scheduled_for.replace(tzinfo=timezone.utc)
+    if scheduled_for <= datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="O'tib ketgan vaqtga bron qilib bo'lmaydi.",
+        )
+
     if customer.role == RoleEnum.customer:
         active_booking = (
             await session.execute(

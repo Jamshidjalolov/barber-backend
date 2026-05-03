@@ -5,6 +5,7 @@ import {
   Image,
   ImageBackground,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   RefreshControl,
@@ -33,6 +34,7 @@ import {
   login,
   registerBarber,
   registerCustomer,
+  updateMe,
   updateBarber,
   updateBookingStatus,
   updateMyBarberSettings,
@@ -47,8 +49,10 @@ import {
   ApiDiscount,
   ApiRole,
   AuthSession,
+  AuthUser,
   BarberFormPayload,
   DiscountFormPayload,
+  ProfileFormPayload,
 } from "./src/types";
 import { buildIsoFromLocal, buildTimeSlots, formatDateLabel, formatTime, getLocalDateInput } from "./src/utils/date";
 
@@ -60,6 +64,15 @@ type BookingSuccess = {
   scheduledFor: string;
   salon: string;
   price: number;
+};
+type NotificationItem = {
+  id: string;
+  title: string;
+  body: string;
+  tone: string;
+  tab: TabKey;
+  smsPhone?: string;
+  smsBody?: string;
 };
 
 const roleLabels: Record<ApiRole, string> = {
@@ -179,12 +192,15 @@ function defaultBarberForm(): BarberFormPayload {
     password: "",
     specialty: "Fade master",
     photoUrl: "",
+    mediaUrl: "",
     rating: 4.8,
     yearsExp: 1,
     bio: "",
     workStartTime: "09:00",
     workEndTime: "18:30",
     address: "",
+    latitude: null,
+    longitude: null,
     priceHaircut: 70000,
     priceFade: 90000,
     priceHairBeard: 120000,
@@ -200,12 +216,15 @@ function formFromBarber(barber: ApiBarber): BarberFormPayload {
     password: "",
     specialty: barber.specialty,
     photoUrl: barber.photo_url ?? "",
+    mediaUrl: barber.media_url ?? "",
     rating: barber.rating,
     yearsExp: barber.experience_years,
     bio: barber.bio ?? "",
     workStartTime: barber.work_start_time,
     workEndTime: barber.work_end_time,
     address: barber.address ?? "",
+    latitude: barber.latitude ?? null,
+    longitude: barber.longitude ?? null,
     priceHaircut: barber.price_haircut,
     priceFade: barber.price_fade,
     priceHairBeard: barber.price_hair_beard,
@@ -226,6 +245,16 @@ function defaultDiscountForm(): DiscountFormPayload {
   };
 }
 
+function profileFormFromUser(user: AuthUser): ProfileFormPayload {
+  return {
+    fullName: user.fullName,
+    username: user.username ?? "",
+    phone: user.phone ?? "",
+    password: "",
+    photoUrl: user.photoUrl ?? "",
+  };
+}
+
 function toNumber(value: string, fallback = 0) {
   const parsed = Number(value.replace(/[^\d.]/g, ""));
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -233,6 +262,34 @@ function toNumber(value: string, fallback = 0) {
 
 function sameLocalDay(iso: string, dateInput: string) {
   return getLocalDateInput(new Date(iso)) === dateInput;
+}
+
+function isPastLocalSlot(dateInput: string, time: string) {
+  const value = new Date(`${dateInput}T${time}:00`);
+  return Number.isNaN(value.getTime()) || value.getTime() <= Date.now();
+}
+
+function isVideoUrl(url?: string | null) {
+  if (!url) return false;
+  return /\.(mp4|mov|webm|m3u8)(\?.*)?$/i.test(url) || /youtube\.com|youtu\.be|vimeo\.com/i.test(url);
+}
+
+async function openSms(phone: string, body: string) {
+  const separator = Platform.OS === "ios" ? "&" : "?";
+  const url = `sms:${phone}${separator}body=${encodeURIComponent(body)}`;
+  const supported = await Linking.canOpenURL(url);
+  if (!supported) {
+    Alert.alert("SMS ochilmadi", "Bu qurilmada SMS ilovasi topilmadi.");
+    return;
+  }
+  await Linking.openURL(url);
+}
+
+async function sendBookingSms(booking: ApiBooking) {
+  await openSms(
+    booking.customer_phone,
+    `Salom, ${booking.customer_name}. ${booking.service_name} broningiz ${formatDateLabel(booking.scheduled_for)} ${formatTime(booking.scheduled_for)} ga belgilangan.`,
+  );
 }
 
 function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSession) => void }) {
@@ -442,16 +499,47 @@ function BarberAvatar({ barber, size = 56 }: { barber: ApiBarber; size?: number 
   );
 }
 
+function BarberMediaPreview({ barber }: { barber: ApiBarber }) {
+  const mediaUrl = barber.media_url || barber.photo_url;
+  if (!mediaUrl) return null;
+
+  if (isVideoUrl(mediaUrl)) {
+    return (
+      <Pressable
+        onPress={() => Linking.openURL(mediaUrl)}
+        style={({ pressed }) => [styles.mediaPreview, styles.videoPreview, pressed && styles.pressed]}
+      >
+        <View style={styles.videoPlay}>
+          <Ionicons name="play" size={24} color="#090b0d" />
+        </View>
+        <View style={styles.grow}>
+          <Text style={styles.mediaTitle}>Barber videosi</Text>
+          <Text style={styles.mediaSubtitle} numberOfLines={1}>{mediaUrl}</Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  return <Image source={{ uri: mediaUrl }} style={styles.mediaImage} />;
+}
+
 function HeaderIcon({
   name,
   onPress,
+  badgeCount = 0,
 }: {
   name: keyof typeof Ionicons.glyphMap;
   onPress?: () => void;
+  badgeCount?: number;
 }) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.headerIcon, pressed && styles.pressed]}>
       <Ionicons name={name} size={22} color={colors.text} />
+      {badgeCount > 0 ? (
+        <View style={styles.headerBadge}>
+          <Text style={styles.headerBadgeText}>{badgeCount > 9 ? "9+" : badgeCount}</Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -563,6 +651,7 @@ function BarberCard({
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [pressed && styles.pressed]}>
       <Card style={[styles.barberCard, selected && styles.selectedCard]}>
+        <BarberMediaPreview barber={barber} />
         <View style={styles.row}>
           <BarberAvatar barber={barber} />
           <View style={styles.grow}>
@@ -624,6 +713,7 @@ function BookingCard({
       {role !== "customer" && action ? (
         <View style={styles.actionRow}>
           <PrimaryButton label={action.label} onPress={() => onAdvance?.(booking)} tone="gold" />
+          <PrimaryButton label="SMS" onPress={() => sendBookingSms(booking)} tone="ghost" />
           {booking.status === "pending" || booking.status === "accepted" ? (
             <PrimaryButton label="Rad etish" onPress={() => onReject?.(booking)} tone="ghost" />
           ) : null}
@@ -631,6 +721,7 @@ function BookingCard({
         </View>
       ) : role === "admin" ? (
         <View style={styles.actionRow}>
+          <PrimaryButton label="SMS" onPress={() => sendBookingSms(booking)} tone="ghost" />
           <PrimaryButton label="Ochirish" onPress={() => onDelete?.(booking)} tone="ghost" />
         </View>
       ) : null}
@@ -660,9 +751,17 @@ export default function App() {
   const [barberForm, setBarberForm] = useState<BarberFormPayload>(defaultBarberForm);
   const [editingBarberId, setEditingBarberId] = useState("");
   const [discountForm, setDiscountForm] = useState<DiscountFormPayload>(defaultDiscountForm);
+  const [profileForm, setProfileForm] = useState<ProfileFormPayload>({
+    fullName: "",
+    username: "",
+    phone: "",
+    password: "",
+    photoUrl: "",
+  });
   const [bookingFilter, setBookingFilter] = useState<ApiBookingStatus | "all">("all");
   const [searchText, setSearchText] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState<BookingSuccess | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const role = session?.user.role ?? "customer";
   const visibleTabs = getTabs(role);
@@ -705,6 +804,39 @@ export default function App() {
     () => new Set(bookings.map((item) => item.customer_user_id ?? item.customer_phone)).size,
     [bookings],
   );
+  const notificationItems = useMemo<NotificationItem[]>(() => {
+    const bookingNotifications = [...bookings]
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .slice(0, 12)
+      .map((booking) => {
+        const isCustomer = role === "customer";
+        const person = isCustomer ? booking.barber_name : booking.customer_name;
+        const title = booking.status === "pending"
+          ? "Yangi bron"
+          : `Bron ${statusLabel(booking.status).toLowerCase()}`;
+        return {
+          id: `booking-${booking.id}`,
+          title,
+          body: `${person} • ${booking.service_name} • ${formatDateLabel(booking.scheduled_for)} ${formatTime(booking.scheduled_for)}`,
+          tone: statusTone(booking.status),
+          tab: "bookings" as TabKey,
+          smsPhone: isCustomer ? undefined : booking.customer_phone,
+          smsBody: `Salom, ${booking.customer_name}. ${booking.service_name} broningiz ${formatDateLabel(booking.scheduled_for)} ${formatTime(booking.scheduled_for)} ga belgilangan.`,
+        };
+      });
+
+    const discountNotifications = role === "customer"
+      ? discounts.slice(0, 5).map((discount) => ({
+        id: `discount-${discount.id}`,
+        title: "Yangi skidka",
+        body: `${discount.barber_name} • ${discount.percent}% chegirma • ${formatTime(discount.starts_at)}-${formatTime(discount.ends_at)}`,
+        tone: colors.gold,
+        tab: "discounts" as TabKey,
+      }))
+      : [];
+
+    return [...bookingNotifications, ...discountNotifications];
+  }, [bookings, discounts, role]);
   const dateChoices = useMemo(() => Array.from({ length: 4 }, (_, index) => {
     const value = new Date();
     value.setDate(value.getDate() + index);
@@ -759,10 +891,21 @@ export default function App() {
     void loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    const slots = buildTimeSlots(9, 16);
+    const selectedUnavailable = bookedSlots.has(bookingTime) || isPastLocalSlot(bookingDate, bookingTime);
+    if (!selectedUnavailable) return;
+    const nextOpenSlot = slots.find((slot) => !bookedSlots.has(slot) && !isPastLocalSlot(bookingDate, slot));
+    if (nextOpenSlot) {
+      setBookingTime(nextOpenSlot);
+    }
+  }, [bookedSlots, bookingDate, bookingTime]);
+
   async function submitBooking() {
+    if (busy) return;
     if (!session || !selectedBarber) return;
-    if (bookedSlots.has(bookingTime)) {
-      Alert.alert("Vaqt band", "Bu vaqtda barber band. Boshqa vaqt tanlang.");
+    if (bookedSlots.has(bookingTime) || isPastLocalSlot(bookingDate, bookingTime)) {
+      Alert.alert("Vaqt band", "Bu vaqt band yoki o'tib ketgan. Boshqa vaqt tanlang.");
       return;
     }
     const scheduledFor = buildIsoFromLocal(bookingDate, bookingTime);
@@ -805,6 +948,7 @@ export default function App() {
   }
 
   async function handleAdvance(booking: ApiBooking) {
+    if (busy) return;
     if (!session) return;
     const action = nextStatus(booking.status);
     if (!action) return;
@@ -820,6 +964,7 @@ export default function App() {
   }
 
   async function handleReject(booking: ApiBooking) {
+    if (busy) return;
     if (!session) return;
     setBusy(true);
     try {
@@ -833,6 +978,7 @@ export default function App() {
   }
 
   async function handleDeleteBooking(booking: ApiBooking) {
+    if (busy) return;
     if (!session || role !== "admin") return;
     Alert.alert("Navbat ochirilsinmi?", `${booking.customer_name} - ${booking.service_name}`, [
       { text: "Bekor qilish", style: "cancel" },
@@ -855,6 +1001,7 @@ export default function App() {
   }
 
   async function saveBarberForm() {
+    if (busy) return;
     if (!session || role !== "admin") return;
     if (!barberForm.fullName.trim() || !barberForm.username.trim() || !barberForm.specialty.trim()) {
       Alert.alert("Malumot yetarli emas", "Ism, username va mutaxassislikni kiriting.");
@@ -883,6 +1030,7 @@ export default function App() {
   }
 
   async function removeBarber(barber: ApiBarber) {
+    if (busy) return;
     if (!session || role !== "admin") return;
     Alert.alert("Barber ochirilsinmi?", barber.full_name, [
       { text: "Bekor qilish", style: "cancel" },
@@ -905,6 +1053,7 @@ export default function App() {
   }
 
   async function saveProfileSettings() {
+    if (busy) return;
     if (!session || role !== "barber") return;
     setBusy(true);
     try {
@@ -919,6 +1068,7 @@ export default function App() {
   }
 
   async function saveDiscountForm() {
+    if (busy) return;
     if (!session || (role !== "admin" && role !== "barber")) return;
     if (!discountForm.title.trim()) {
       Alert.alert("Sarlavha kerak", "Skidka nomini kiriting.");
@@ -941,6 +1091,7 @@ export default function App() {
   }
 
   async function removeDiscount(discount: ApiDiscount) {
+    if (busy) return;
     if (!session || (role !== "admin" && role !== "barber")) return;
     setBusy(true);
     try {
@@ -953,11 +1104,117 @@ export default function App() {
     }
   }
 
+  async function fillBarberLocation() {
+    if (busy) return;
+    const geo = (globalThis as unknown as {
+      navigator?: {
+        geolocation?: {
+          getCurrentPosition: (
+            success: (position: { coords: { latitude: number; longitude: number } }) => void,
+            error?: (error: { message?: string }) => void,
+            options?: { enableHighAccuracy?: boolean; timeout?: number; maximumAge?: number },
+          ) => void;
+        };
+      };
+    }).navigator?.geolocation;
+
+    if (!geo) {
+      Alert.alert("Lokatsiya yo'q", "Brauzer yoki qurilma geolokatsiyani qo'llamayapti.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const coords = await new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
+        geo.getCurrentPosition(
+          (position) => resolve({
+            latitude: Number(position.coords.latitude.toFixed(6)),
+            longitude: Number(position.coords.longitude.toFixed(6)),
+          }),
+          (error) => reject(new Error(error.message || "Lokatsiya olinmadi.")),
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 },
+        );
+      });
+      setBarberForm((current) => ({
+        ...current,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      }));
+      Alert.alert("Lokatsiya olindi", `${coords.latitude}, ${coords.longitude}`);
+    } catch (error) {
+      Alert.alert("Lokatsiya olinmadi", error instanceof Error ? error.message : "Qayta urinib koring.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveAccountSettings() {
+    if (busy) return;
+    if (!session) return;
+    if (!profileForm.fullName.trim()) {
+      Alert.alert("Ism kerak", "Ism familyani kiriting.");
+      return;
+    }
+    if (role === "customer" && !profileForm.phone?.trim()) {
+      Alert.alert("Telefon kerak", "Telefon raqamingizni kiriting.");
+      return;
+    }
+    if (role !== "customer" && !profileForm.username?.trim()) {
+      Alert.alert("Username kerak", "Kirish username'ini kiriting.");
+      return;
+    }
+    if (profileForm.password && profileForm.password.length < 4) {
+      Alert.alert("Parol qisqa", "Parol kamida 4 ta belgidan iborat bo'lsin.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const updatedUser = await updateMe(session.accessToken, {
+        ...profileForm,
+        fullName: profileForm.fullName.trim(),
+        username: profileForm.username?.trim(),
+        phone: profileForm.phone?.trim(),
+        photoUrl: profileForm.photoUrl?.trim(),
+      });
+      setSession({ ...session, user: updatedUser });
+      setProfileForm({ ...profileFormFromUser(updatedUser), password: "" });
+      if (updatedUser.role === "barber") {
+        await loadData();
+      }
+      Alert.alert("Saqlandi", "Profil ma'lumotlari yangilandi.");
+    } catch (error) {
+      Alert.alert("Saqlanmadi", error instanceof Error ? error.message : "Qayta urinib koring.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function logoutNow() {
+    setSession(null);
+    setBookings([]);
+    setDiscounts([]);
+    setBarberProfile(null);
+    setBookingFilter("all");
+    setSearchText("");
+    setProfileForm({ fullName: "", username: "", phone: "", password: "", photoUrl: "" });
+    loadedOnceRef.current = false;
+    setTab("home");
+  }
+
+  function confirmLogout() {
+    Alert.alert("Chiqmoqchimisiz?", "Tasdiqlasangiz, akkauntingizdan chiqasiz.", [
+      { text: "Bekor qilish", style: "cancel" },
+      { text: "Chiqish", style: "destructive", onPress: logoutNow },
+    ]);
+  }
+
   if (!session) {
     return (
       <AuthScreen
         onAuthenticated={(nextSession) => {
           loadedOnceRef.current = false;
+          setProfileForm(profileFormFromUser(nextSession.user));
           setSession(nextSession);
         }}
       />
@@ -1052,17 +1309,19 @@ export default function App() {
         <View style={styles.timeGrid}>
           {buildTimeSlots(9, 16).map((slot) => {
             const booked = bookedSlots.has(slot);
+            const expired = isPastLocalSlot(bookingDate, slot);
+            const disabled = booked || expired;
             const selected = bookingTime === slot;
             return (
               <Pressable
                 key={slot}
                 onPress={() => {
-                  if (!booked) setBookingTime(slot);
+                  if (!disabled) setBookingTime(slot);
                 }}
-                style={({ pressed }) => [styles.timeChip, booked && styles.timeChipBooked, selected && styles.timeChipActive, pressed && !booked && styles.pressed]}
+                style={({ pressed }) => [styles.timeChip, disabled && styles.timeChipBooked, selected && styles.timeChipActive, pressed && !disabled && styles.pressed]}
               >
-                <Text style={[styles.timeChipText, selected && styles.timeChipTextActive, booked && styles.timeChipTextBooked]}>
-                  {booked ? `${slot} band` : slot}
+                <Text style={[styles.timeChipText, selected && styles.timeChipTextActive, disabled && styles.timeChipTextBooked]}>
+                  {booked ? `${slot} band` : expired ? `${slot} o'tdi` : slot}
                 </Text>
               </Pressable>
             );
@@ -1108,7 +1367,7 @@ export default function App() {
           label={role === "admin" ? "Bron yaratish" : "Bronni tasdiqlash"}
           onPress={submitBooking}
           loading={busy}
-          disabled={!selectedBarber || bookedSlots.has(bookingTime)}
+          disabled={!selectedBarber || bookedSlots.has(bookingTime) || isPastLocalSlot(bookingDate, bookingTime)}
         />
       </View>
     </View>
@@ -1159,6 +1418,42 @@ export default function App() {
       </View>
     );
   };
+
+  const renderNotifications = () => (
+    <View style={styles.stack}>
+      <SectionTitle eyebrow="Bildirishnomalar" title="Bron va yangiliklar" />
+      {notificationItems.length === 0 ? <Text style={styles.emptyText}>Hozircha bildirishnoma yo'q.</Text> : null}
+      {notificationItems.map((item) => (
+        <Pressable
+          key={item.id}
+          onPress={() => {
+            setShowNotifications(false);
+            setTab(item.tab);
+          }}
+          style={({ pressed }) => [styles.notificationCard, pressed && styles.pressed]}
+        >
+          <View style={[styles.notificationDot, { backgroundColor: item.tone }]} />
+          <View style={styles.grow}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <Text style={styles.notificationBody}>{item.body}</Text>
+          </View>
+          {item.smsPhone && item.smsBody ? (
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                void openSms(item.smsPhone!, item.smsBody!);
+              }}
+              style={({ pressed }) => [styles.notificationSms, pressed && styles.pressed]}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.goldDark} />
+            </Pressable>
+          ) : (
+            <Ionicons name="chevron-forward" size={19} color={colors.muted} />
+          )}
+        </Pressable>
+      ))}
+    </View>
+  );
 
   const renderCustomerHome = () => (
     <View style={styles.stack}>
@@ -1351,6 +1646,26 @@ export default function App() {
             onChangeText={(value) => setBarberForm((current) => ({ ...current, specialty: value }))}
             placeholder="Fade master"
           />
+          <Field
+            label="Rasm URL"
+            value={barberForm.photoUrl}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, photoUrl: value }))}
+            placeholder="https://..."
+            autoCapitalize="none"
+          />
+          <Field
+            label="Video yoki media URL"
+            value={barberForm.mediaUrl}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, mediaUrl: value }))}
+            placeholder="https://..."
+            autoCapitalize="none"
+          />
+          <Field
+            label="Bio"
+            value={barberForm.bio}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, bio: value }))}
+            placeholder="Barber haqida qisqa ma'lumot"
+          />
           <View style={styles.twoColumn}>
             <Field
               label="Tajriba"
@@ -1371,6 +1686,21 @@ export default function App() {
             onChangeText={(value) => setBarberForm((current) => ({ ...current, address: value }))}
             placeholder="Salon manzili"
           />
+          <PrimaryButton label="Lokatsiyani olish" tone="ghost" onPress={fillBarberLocation} loading={busy} />
+          <View style={styles.twoColumn}>
+            <Field
+              label="Latitude"
+              value={barberForm.latitude == null ? "" : String(barberForm.latitude)}
+              onChangeText={(value) => setBarberForm((current) => ({ ...current, latitude: value ? Number(value) : null }))}
+              keyboardType="decimal-pad"
+            />
+            <Field
+              label="Longitude"
+              value={barberForm.longitude == null ? "" : String(barberForm.longitude)}
+              onChangeText={(value) => setBarberForm((current) => ({ ...current, longitude: value ? Number(value) : null }))}
+              keyboardType="decimal-pad"
+            />
+          </View>
           <View style={styles.twoColumn}>
             <Field
               label="Ish boshlanishi"
@@ -1568,9 +1898,13 @@ export default function App() {
       <SectionTitle eyebrow={roleLabels[role]} title="Profil va sozlamalar" />
       <Card style={styles.profileCard}>
         <View style={styles.row}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.avatarText}>{initials(session.user.fullName)}</Text>
-          </View>
+          {session.user.photoUrl ? (
+            <Image source={{ uri: session.user.photoUrl }} style={styles.profilePhotoPreview} />
+          ) : (
+            <View style={styles.profileAvatar}>
+              <Text style={styles.avatarText}>{initials(session.user.fullName)}</Text>
+            </View>
+          )}
           <View style={styles.grow}>
             <Text style={styles.cardTitle}>{session.user.fullName}</Text>
             <Text style={styles.muted}>{session.user.username ?? session.user.phone ?? roleLabels[role]}</Text>
@@ -1579,6 +1913,50 @@ export default function App() {
             <Text style={styles.statusText}>{roleLabels[role]}</Text>
           </View>
         </View>
+      </Card>
+
+      <Card style={styles.formCard}>
+        <Text style={styles.cardTitle}>Sozlamalar</Text>
+        <Field
+          label="Ism familya"
+          value={profileForm.fullName}
+          onChangeText={(value) => setProfileForm((current) => ({ ...current, fullName: value }))}
+          placeholder="Ism familya"
+        />
+        {role !== "customer" ? (
+          <Field
+            label="Username"
+            value={profileForm.username}
+            onChangeText={(value) => setProfileForm((current) => ({ ...current, username: value }))}
+            placeholder="username"
+            autoCapitalize="none"
+          />
+        ) : null}
+        <Field
+          label="Telefon"
+          value={profileForm.phone}
+          onChangeText={(value) => setProfileForm((current) => ({ ...current, phone: value }))}
+          placeholder="998901234567"
+          keyboardType="phone-pad"
+        />
+        <Field
+          label="Rasm URL"
+          value={profileForm.photoUrl}
+          onChangeText={(value) => setProfileForm((current) => ({ ...current, photoUrl: value }))}
+          placeholder="https://..."
+          autoCapitalize="none"
+        />
+        {profileForm.photoUrl ? (
+          <Image source={{ uri: profileForm.photoUrl }} style={styles.settingsPhotoPreview} />
+        ) : null}
+        <Field
+          label="Yangi parol"
+          value={profileForm.password}
+          onChangeText={(value) => setProfileForm((current) => ({ ...current, password: value }))}
+          placeholder="O'zgartirmasangiz bo'sh qoldiring"
+          secureTextEntry
+        />
+        <PrimaryButton label="Sozlamalarni saqlash" onPress={saveAccountSettings} loading={busy} />
       </Card>
 
       {role === "barber" ? (
@@ -1593,6 +1971,26 @@ export default function App() {
           ) : (
             <Text style={styles.emptyText}>Profil yuklanmadi.</Text>
           )}
+          <Field
+            label="Rasm URL"
+            value={barberForm.photoUrl}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, photoUrl: value }))}
+            placeholder="https://..."
+            autoCapitalize="none"
+          />
+          <Field
+            label="Video yoki media URL"
+            value={barberForm.mediaUrl}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, mediaUrl: value }))}
+            placeholder="https://..."
+            autoCapitalize="none"
+          />
+          <Field
+            label="Bio"
+            value={barberForm.bio}
+            onChangeText={(value) => setBarberForm((current) => ({ ...current, bio: value }))}
+            placeholder="Mijozlar ko'radigan tavsif"
+          />
           <View style={styles.twoColumn}>
             <Field
               label="Ish boshlanishi"
@@ -1611,6 +2009,21 @@ export default function App() {
             onChangeText={(value) => setBarberForm((current) => ({ ...current, address: value }))}
             placeholder="Salon manzili"
           />
+          <PrimaryButton label="Lokatsiyani olish" tone="ghost" onPress={fillBarberLocation} loading={busy} />
+          <View style={styles.twoColumn}>
+            <Field
+              label="Latitude"
+              value={barberForm.latitude == null ? "" : String(barberForm.latitude)}
+              onChangeText={(value) => setBarberForm((current) => ({ ...current, latitude: value ? Number(value) : null }))}
+              keyboardType="decimal-pad"
+            />
+            <Field
+              label="Longitude"
+              value={barberForm.longitude == null ? "" : String(barberForm.longitude)}
+              onChangeText={(value) => setBarberForm((current) => ({ ...current, longitude: value ? Number(value) : null }))}
+              keyboardType="decimal-pad"
+            />
+          </View>
           <View style={styles.priceGrid}>
             {([
               ["priceHaircut", "Soch"],
@@ -1669,22 +2082,15 @@ export default function App() {
         <PrimaryButton
           label="Chiqish"
           tone="ghost"
-          onPress={() => {
-            setSession(null);
-            setBookings([]);
-            setDiscounts([]);
-            setBarberProfile(null);
-            setBookingFilter("all");
-            setSearchText("");
-            loadedOnceRef.current = false;
-            setTab("home");
-          }}
+          onPress={confirmLogout}
         />
       </Card>
     </View>
   );
 
-  const content = bookingSuccess
+  const content = showNotifications
+    ? renderNotifications()
+    : bookingSuccess
     ? renderBookingSuccess()
     : tab === "home"
       ? renderHome()
@@ -1702,22 +2108,30 @@ export default function App() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
       <View style={styles.topBar}>
-        <HeaderIcon
-          name={tab === "book" || bookingSuccess ? "chevron-back" : "menu"}
-          onPress={() => {
-            if (bookingSuccess) {
-              setBookingSuccess(null);
-              setTab("book");
-            } else {
-              setTab(tab === "book" ? "home" : "profile");
-            }
-          }}
-        />
+        {tab === "book" || bookingSuccess || showNotifications ? (
+          <HeaderIcon
+            name="chevron-back"
+            onPress={() => {
+              if (showNotifications) {
+                setShowNotifications(false);
+              } else if (bookingSuccess) {
+                setBookingSuccess(null);
+                setTab("book");
+              } else {
+                setTab("home");
+              }
+            }}
+          />
+        ) : <View style={styles.headerIcon} />}
         <View style={styles.topCenter}>
-          <Text style={[styles.topTitle, { color: roleAccent(role) }]}>{bookingSuccess ? "Bron tasdiqlandi" : topTitleForRole(role)}</Text>
+          <Text style={[styles.topTitle, { color: roleAccent(role) }]}>{showNotifications ? "Bildirishnomalar" : bookingSuccess ? "Bron tasdiqlandi" : topTitleForRole(role)}</Text>
           {role === "customer" ? <Text style={styles.topLabel}>CLASSIC CUTS</Text> : null}
         </View>
-        <HeaderIcon name="notifications-outline" onPress={loadData} />
+        <HeaderIcon
+          name={showNotifications ? "notifications" : "notifications-outline"}
+          onPress={() => setShowNotifications((value) => !value)}
+          badgeCount={showNotifications ? 0 : notificationItems.length}
+        />
       </View>
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -1732,6 +2146,7 @@ export default function App() {
             key={item.key}
             onPress={() => {
               setBookingSuccess(null);
+              setShowNotifications(false);
               setTab(item.key);
             }}
             style={[styles.navItem, tab === item.key && styles.navItemActive]}
@@ -2014,6 +2429,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 42,
   },
+  headerBadge: {
+    alignItems: "center",
+    backgroundColor: colors.red,
+    borderColor: colors.paper,
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 19,
+    justifyContent: "center",
+    position: "absolute",
+    right: 3,
+    top: 4,
+    minWidth: 19,
+  },
+  headerBadgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "900",
+  },
   topLabel: {
     color: colors.gold,
     fontSize: 9,
@@ -2144,6 +2577,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 70,
     width: 86,
+  },
+  mediaImage: {
+    backgroundColor: colors.haze,
+    borderColor: colors.line,
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 142,
+    width: "100%",
+  },
+  mediaPreview: {
+    alignItems: "center",
+    backgroundColor: "rgba(215,170,85,0.1)",
+    borderColor: "rgba(215,170,85,0.2)",
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 82,
+    padding: 12,
+  },
+  videoPreview: {
+    backgroundColor: "rgba(215,170,85,0.12)",
+  },
+  videoPlay: {
+    alignItems: "center",
+    backgroundColor: colors.gold,
+    borderRadius: 999,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  mediaTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  mediaSubtitle: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 3,
   },
   distanceText: {
     color: colors.muted,
@@ -2498,6 +2972,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "900",
   },
+  notificationCard: {
+    alignItems: "center",
+    backgroundColor: "rgba(20,24,29,0.96)",
+    borderColor: colors.line,
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 76,
+    padding: 13,
+    ...shadows.soft,
+  },
+  notificationDot: {
+    borderRadius: 999,
+    height: 10,
+    width: 10,
+  },
+  notificationTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  notificationBody: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+    marginTop: 3,
+  },
+  notificationSms: {
+    alignItems: "center",
+    backgroundColor: "rgba(215,170,85,0.1)",
+    borderColor: "rgba(215,170,85,0.2)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: "center",
+    width: 38,
+  },
   formCard: {
     gap: 13,
     borderColor: colors.lineStrong,
@@ -2709,6 +3222,23 @@ const styles = StyleSheet.create({
     height: 58,
     justifyContent: "center",
     width: 58,
+  },
+  profilePhotoPreview: {
+    backgroundColor: colors.haze,
+    borderColor: colors.lineStrong,
+    borderRadius: 20,
+    borderWidth: 1,
+    height: 58,
+    width: 58,
+  },
+  settingsPhotoPreview: {
+    alignSelf: "center",
+    backgroundColor: colors.haze,
+    borderColor: colors.lineStrong,
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 96,
+    width: 96,
   },
   progressList: {
     gap: 12,

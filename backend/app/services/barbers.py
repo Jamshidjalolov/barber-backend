@@ -56,6 +56,7 @@ async def list_barbers(session: AsyncSession) -> list[BarberRead]:
                 rating=barber.rating,
                 bio=barber.bio,
                 photo_url=barber.photo_url,
+                media_url=barber.media_url,
                 telegram_chat_id=barber.user.telegram_chat_id or barber.telegram_chat_id,
                 work_start_time=barber.work_start_time,
                 work_end_time=barber.work_end_time,
@@ -108,6 +109,7 @@ async def create_barber(session: AsyncSession, payload: BarberCreateRequest) -> 
         rating=payload.rating,
         bio=payload.bio.strip() if payload.bio else None,
         photo_url=payload.photo_url.strip() if payload.photo_url else None,
+        media_url=payload.media_url.strip() if payload.media_url else None,
         telegram_chat_id=payload.telegram_chat_id.strip() if payload.telegram_chat_id else None,
         work_start_time=payload.work_start_time,
         work_end_time=payload.work_end_time,
@@ -160,6 +162,8 @@ async def update_barber(
         barber.bio = payload.bio.strip() if payload.bio else None
     if payload.photo_url is not None:
         barber.photo_url = payload.photo_url.strip() if payload.photo_url else None
+    if payload.media_url is not None:
+        barber.media_url = payload.media_url.strip() if payload.media_url else None
     if payload.telegram_chat_id is not None:
         chat_id = payload.telegram_chat_id.strip() if payload.telegram_chat_id else None
         barber.telegram_chat_id = chat_id
