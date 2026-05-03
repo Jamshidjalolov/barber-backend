@@ -1,5 +1,6 @@
 import {
   ApiAuthUser,
+  ApiAvailabilityBooking,
   ApiBarber,
   ApiBooking,
   ApiBookingStatus,
@@ -9,6 +10,9 @@ import {
   ApiTokenResponse,
   AuthSession,
   AuthUser,
+  BarberFormPayload,
+  BarberSettingsPayload,
+  DiscountFormPayload,
 } from "../types";
 
 declare const process:
@@ -35,6 +39,25 @@ export const API_BASE_URL = resolveApiBaseUrl();
 type RequestOptions = RequestInit & {
   token?: string;
 };
+
+type BookingQuery = {
+  status?: ApiBookingStatus;
+  barberId?: string;
+  customerUserId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+function withQuery(path: string, query: Record<string, string | undefined>) {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) {
+      params.set(key, value);
+    }
+  });
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
+}
 
 function mapUser(user: ApiAuthUser): AuthUser {
   return {
@@ -154,12 +177,108 @@ export function getBarbers() {
   return request<ApiBarber[]>("/barbers");
 }
 
-export function getBookings(token: string) {
-  return request<ApiBooking[]>("/bookings", { token });
+export function getMyBarberProfile(token: string) {
+  return request<ApiBarber>("/barbers/me", { token });
+}
+
+function toBarberPayload(payload: BarberFormPayload | BarberSettingsPayload) {
+  return {
+    full_name: payload.fullName,
+    username: payload.username,
+    password: "password" in payload ? payload.password || undefined : undefined,
+    specialty: payload.specialty,
+    photo_url: payload.photoUrl || null,
+    rating: payload.rating,
+    experience_years: payload.yearsExp,
+    bio: payload.bio || null,
+    work_start_time: payload.workStartTime,
+    work_end_time: payload.workEndTime,
+    address: payload.address || null,
+    price_haircut: payload.priceHaircut,
+    price_fade: payload.priceFade,
+    price_hair_beard: payload.priceHairBeard,
+    price_premium: payload.pricePremium,
+    price_beard: payload.priceBeard,
+  };
+}
+
+export function createBarber(token: string, payload: BarberFormPayload) {
+  return request<ApiBarber>("/barbers", {
+    method: "POST",
+    token,
+    body: JSON.stringify(toBarberPayload(payload)),
+  });
+}
+
+export function updateBarber(token: string, barberId: string, payload: BarberFormPayload) {
+  return request<ApiBarber>(`/barbers/${barberId}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(toBarberPayload(payload)),
+  });
+}
+
+export function updateMyBarberSettings(token: string, payload: BarberSettingsPayload) {
+  return request<ApiBarber>("/barbers/me", {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(toBarberPayload(payload)),
+  });
+}
+
+export function deleteBarber(token: string, barberId: string) {
+  return request<void>(`/barbers/${barberId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export function getBookings(token: string, query: BookingQuery = {}) {
+  return request<ApiBooking[]>(
+    withQuery("/bookings", {
+      status: query.status,
+      barber_id: query.barberId,
+      customer_user_id: query.customerUserId,
+      date_from: query.dateFrom,
+      date_to: query.dateTo,
+    }),
+    { token },
+  );
+}
+
+export function getAvailabilityBookings(dateFrom?: string, dateTo?: string) {
+  return request<ApiAvailabilityBooking[]>(
+    withQuery("/bookings/availability", {
+      date_from: dateFrom,
+      date_to: dateTo,
+    }),
+  );
 }
 
 export function getDiscounts(token: string) {
   return request<ApiDiscount[]>("/discounts", { token });
+}
+
+export function createDiscount(token: string, payload: DiscountFormPayload) {
+  return request<ApiDiscount>("/discounts", {
+    method: "POST",
+    token,
+    body: JSON.stringify({
+      barber_id: payload.barberId ?? null,
+      title: payload.title,
+      description: payload.description || null,
+      percent: payload.percent,
+      starts_at: payload.startsAt,
+      ends_at: payload.endsAt,
+    }),
+  });
+}
+
+export function deleteDiscount(token: string, discountId: string) {
+  return request<void>(`/discounts/${discountId}`, {
+    method: "DELETE",
+    token,
+  });
 }
 
 export function getServices() {
@@ -204,5 +323,12 @@ export function updateBookingStatus(
       status,
       rejection_reason: rejectionReason || null,
     }),
+  });
+}
+
+export function deleteBooking(token: string, bookingId: string) {
+  return request<void>(`/bookings/${bookingId}`, {
+    method: "DELETE",
+    token,
   });
 }

@@ -39,9 +39,12 @@ export type ApiBarber = {
   rating: number;
   bio?: string | null;
   photo_url?: string | null;
+  telegram_chat_id?: string | null;
   work_start_time: string;
   work_end_time: string;
   address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   price_haircut: number;
   price_fade: number;
   price_hair_beard: number;
@@ -85,4 +88,57 @@ export type ApiDiscount = {
 
 export type ApiServiceOptions = {
   items: string[];
+};
+
+export type ApiAvailabilityBooking = {
+  id: string;
+  barber_id: string;
+  status: ApiBookingStatus;
+  scheduled_for: string;
+};
+
+export type BarberFormPayload = {
+  fullName: string;
+  username: string;
+  password?: string;
+  specialty: string;
+  photoUrl?: string;
+  rating: number;
+  yearsExp: number;
+  bio?: string;
+  workStartTime: string;
+  workEndTime: string;
+  address?: string;
+  priceHaircut: number;
+  priceFade: number;
+  priceHairBeard: number;
+  pricePremium: number;
+  priceBeard: number;
+};
+
+export type BarberSettingsPayload = {
+  fullName?: string;
+  username?: string;
+  specialty?: string;
+  photoUrl?: string;
+  rating?: number;
+  yearsExp?: number;
+  bio?: string;
+  workStartTime: string;
+  workEndTime: string;
+  address?: string;
+  priceHaircut: number;
+  priceFade: number;
+  priceHairBeard: number;
+  pricePremium: number;
+  priceBeard: number;
+};
+
+export type DiscountFormPayload = {
+  barberId?: string | null;
+  title: string;
+  description?: string;
+  percent: number;
+  startsAt: string;
+  endsAt: string;
 };
