@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -14,9 +15,12 @@ from app.api.routes.bookings import router as bookings_router
 from app.api.routes.discounts import router as discounts_router
 from app.api.routes.meta import router as meta_router
 from app.api.routes.realtime import router as realtime_router
+from app.api.routes.uploads import UPLOADS_DIR, router as uploads_router
 from app.core.config import settings
 
 app = FastAPI(title=settings.app_name)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -84,3 +88,4 @@ app.include_router(bookings_router, prefix=settings.api_v1_prefix)
 app.include_router(discounts_router, prefix=settings.api_v1_prefix)
 app.include_router(meta_router, prefix=settings.api_v1_prefix)
 app.include_router(realtime_router, prefix=settings.api_v1_prefix)
+app.include_router(uploads_router, prefix=settings.api_v1_prefix)

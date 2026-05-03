@@ -6,6 +6,7 @@ import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { alpha, Avatar, Box, Card, CardActionArea, Chip, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
+import { isVideoUrl } from "../../lib/media";
 import { BarberProfile, DiscountItem } from "../../types";
 
 interface CustomerBarberListProps {
@@ -173,6 +174,46 @@ export function CustomerBarberList({ items, discounts, onSelect }: CustomerBarbe
                       </Typography>
                     </Stack>
                   </Stack>
+
+                  {barber.mediaUrl ? (
+                    <Box
+                      sx={{
+                        mt: 1.15,
+                        borderRadius: "16px",
+                        overflow: "hidden",
+                        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
+                        backgroundColor: alpha("#ffffff", 0.05),
+                      }}
+                    >
+                      {isVideoUrl(barber.mediaUrl) ? (
+                        <Box
+                          component="video"
+                          src={barber.mediaUrl}
+                          muted
+                          playsInline
+                          controls
+                          sx={{
+                            display: "block",
+                            width: "100%",
+                            maxHeight: 170,
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          component="img"
+                          src={barber.mediaUrl}
+                          alt={`${barber.name} ish namunasi`}
+                          sx={{
+                            display: "block",
+                            width: "100%",
+                            maxHeight: 170,
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
+                    </Box>
+                  ) : null}
                 </Box>
 
                 <Box

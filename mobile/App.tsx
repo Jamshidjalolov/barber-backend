@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import {
   Alert,
   Image,
@@ -34,6 +35,7 @@ import {
   login,
   registerBarber,
   registerCustomer,
+  uploadMedia,
   updateMe,
   updateBarber,
   updateBookingStatus,
@@ -1148,6 +1150,47 @@ export default function App() {
     }
   }
 
+  async function pickAndUploadMedia(
+    kind: "image" | "media",
+    applyUrl: (url: string) => void,
+  ) {
+    if (busy) return;
+    if (!session) return;
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Ruxsat kerak", "Rasm yoki videoni tanlash uchun galereyaga ruxsat bering.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: kind === "image" ? ["images"] : ["images", "videos"],
+      allowsEditing: kind === "image",
+      quality: 0.85,
+    });
+
+    if (result.canceled || !result.assets.length) return;
+    const asset = result.assets[0];
+    const fallbackType = asset.type === "video" ? "video/mp4" : "image/jpeg";
+    const fallbackName = asset.fileName || `${kind}-${Date.now()}.${asset.type === "video" ? "mp4" : "jpg"}`;
+    const file = asset.file ?? {
+      uri: asset.uri,
+      name: fallbackName,
+      type: asset.mimeType || fallbackType,
+    };
+
+    setBusy(true);
+    try {
+      const uploaded = await uploadMedia(session.accessToken, file);
+      applyUrl(uploaded.url);
+      Alert.alert("Yuklandi", "Fayl muvaffaqiyatli yuklandi.");
+    } catch (error) {
+      Alert.alert("Yuklanmadi", error instanceof Error ? error.message : "Qayta urinib koring.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function saveAccountSettings() {
     if (busy) return;
     if (!session) return;
@@ -1646,20 +1689,24 @@ export default function App() {
             onChangeText={(value) => setBarberForm((current) => ({ ...current, specialty: value }))}
             placeholder="Fade master"
           />
-          <Field
-            label="Rasm URL"
-            value={barberForm.photoUrl}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, photoUrl: value }))}
-            placeholder="https://..."
-            autoCapitalize="none"
-          />
-          <Field
-            label="Video yoki media URL"
-            value={barberForm.mediaUrl}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, mediaUrl: value }))}
-            placeholder="https://..."
-            autoCapitalize="none"
-          />
+          <View style={styles.uploadRow}>
+            <PrimaryButton
+              label={barberForm.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"}
+              tone="ghost"
+              onPress={() => pickAndUploadMedia("image", (url) => setBarberForm((current) => ({ ...current, photoUrl: url })))}
+              loading={busy}
+            />
+            <PrimaryButton
+              label={barberForm.mediaUrl ? "Mediani almashtirish" : "Video/Rasm tanlash"}
+              tone="ghost"
+              onPress={() => pickAndUploadMedia("media", (url) => setBarberForm((current) => ({ ...current, mediaUrl: url })))}
+              loading={busy}
+            />
+          </View>
+          {barberForm.photoUrl ? <Image source={{ uri: barberForm.photoUrl }} style={styles.settingsPhotoPreview} /> : null}
+          {barberForm.mediaUrl ? (
+            <Text style={styles.uploadedFileText} numberOfLines={1}>Media yuklandi: {barberForm.mediaUrl}</Text>
+          ) : null}
           <Field
             label="Bio"
             value={barberForm.bio}
@@ -1939,13 +1986,22 @@ export default function App() {
           placeholder="998901234567"
           keyboardType="phone-pad"
         />
-        <Field
-          label="Rasm URL"
-          value={profileForm.photoUrl}
-          onChangeText={(value) => setProfileForm((current) => ({ ...current, photoUrl: value }))}
-          placeholder="https://..."
-          autoCapitalize="none"
-        />
+        <View style={styles.uploadRow}>
+          <PrimaryButton
+            label={profileForm.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"}
+            tone="ghost"
+            onPress={() => pickAndUploadMedia("image", (url) => setProfileForm((current) => ({ ...current, photoUrl: url })))}
+            loading={busy}
+          />
+          {profileForm.photoUrl ? (
+            <PrimaryButton
+              label="Rasmni olib tashlash"
+              tone="ghost"
+              onPress={() => setProfileForm((current) => ({ ...current, photoUrl: "" }))}
+              disabled={busy}
+            />
+          ) : null}
+        </View>
         {profileForm.photoUrl ? (
           <Image source={{ uri: profileForm.photoUrl }} style={styles.settingsPhotoPreview} />
         ) : null}
@@ -1971,20 +2027,24 @@ export default function App() {
           ) : (
             <Text style={styles.emptyText}>Profil yuklanmadi.</Text>
           )}
-          <Field
-            label="Rasm URL"
-            value={barberForm.photoUrl}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, photoUrl: value }))}
-            placeholder="https://..."
-            autoCapitalize="none"
-          />
-          <Field
-            label="Video yoki media URL"
-            value={barberForm.mediaUrl}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, mediaUrl: value }))}
-            placeholder="https://..."
-            autoCapitalize="none"
-          />
+          <View style={styles.uploadRow}>
+            <PrimaryButton
+              label={barberForm.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"}
+              tone="ghost"
+              onPress={() => pickAndUploadMedia("image", (url) => setBarberForm((current) => ({ ...current, photoUrl: url })))}
+              loading={busy}
+            />
+            <PrimaryButton
+              label={barberForm.mediaUrl ? "Mediani almashtirish" : "Video/Rasm tanlash"}
+              tone="ghost"
+              onPress={() => pickAndUploadMedia("media", (url) => setBarberForm((current) => ({ ...current, mediaUrl: url })))}
+              loading={busy}
+            />
+          </View>
+          {barberForm.photoUrl ? <Image source={{ uri: barberForm.photoUrl }} style={styles.settingsPhotoPreview} /> : null}
+          {barberForm.mediaUrl ? (
+            <Text style={styles.uploadedFileText} numberOfLines={1}>Media yuklandi: {barberForm.mediaUrl}</Text>
+          ) : null}
           <Field
             label="Bio"
             value={barberForm.bio}
@@ -3239,6 +3299,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 96,
     width: 96,
+  },
+  uploadRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  uploadedFileText: {
+    backgroundColor: "rgba(103,232,249,0.08)",
+    borderColor: "rgba(103,232,249,0.18)",
+    borderRadius: 10,
+    borderWidth: 1,
+    color: colors.cyan,
+    fontSize: 12,
+    fontWeight: "800",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   progressList: {
     gap: 12,

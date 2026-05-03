@@ -19,6 +19,7 @@ import {
   loginCustomer,
   registerBarber,
   registerCustomer,
+  uploadMedia,
   updateBarber,
   updateMyBarberSettings,
   updateBookingStatus,
@@ -615,6 +616,15 @@ export default function App() {
     setBarbers((current) => current.filter((item) => item.id !== barberId));
   };
 
+  const handleUploadMedia = async (file: File) => {
+    if (!session) {
+      throw new Error("Fayl yuklash uchun avval tizimga kiring.");
+    }
+
+    const uploaded = await uploadMedia(session.accessToken, file);
+    return uploaded.url;
+  };
+
   const handleCreateDiscount = async (payload: DiscountFormPayload) => {
     if (!session || (session.user.role !== "barber" && session.user.role !== "admin")) {
       throw new Error("Skidka qo'yish uchun barber yoki admin sifatida kirish kerak.");
@@ -663,6 +673,7 @@ export default function App() {
           onCreateBarber={handleCreateBarber}
           onUpdateBarber={handleUpdateBarber}
           onDeleteBarber={handleDeleteBarber}
+          onUploadMedia={handleUploadMedia}
         />
       );
     }
@@ -691,7 +702,7 @@ export default function App() {
     );
   }, [
     activePage,
-    barbers,
+        barbers,
     bookings,
     chartItems,
     discounts,
@@ -699,6 +710,7 @@ export default function App() {
     performanceItems,
     recentItems,
     telegramBotUsername,
+    session,
   ]);
 
   const noticeNode = (
@@ -838,6 +850,7 @@ export default function App() {
         onCreateDiscount={handleCreateDiscount}
         onDeleteDiscount={handleDeleteDiscount}
         onUpdateSettings={handleUpdateMyBarberSettings}
+        onUploadMedia={handleUploadMedia}
       />
     );
   }

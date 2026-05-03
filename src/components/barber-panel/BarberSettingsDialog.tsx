@@ -1,11 +1,15 @@
+import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import FmdGoodRoundedIcon from "@mui/icons-material/FmdGoodRounded";
 import MyLocationRoundedIcon from "@mui/icons-material/MyLocationRounded";
+import OndemandVideoRoundedIcon from "@mui/icons-material/OndemandVideoRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import SellRoundedIcon from "@mui/icons-material/SellRounded";
 import {
   alpha,
   Alert,
+  Avatar,
   Box,
   Button,
   Dialog,
@@ -18,7 +22,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
 import { BarberProfile, BarberSettingsPayload } from "../../types";
 import { BarberLocationPickerMap } from "../maps/BarberLocationPickerMap";
 
@@ -27,9 +31,18 @@ interface BarberSettingsDialogProps {
   barber: BarberProfile;
   onClose: () => void;
   onSubmit: (payload: BarberSettingsPayload) => Promise<unknown>;
+  onUploadMedia: (file: File) => Promise<string>;
 }
 
 interface FormValues {
+  fullName: string;
+  username: string;
+  specialty: string;
+  photoUrl: string;
+  mediaUrl: string;
+  rating: string;
+  yearsExp: string;
+  bio: string;
   workStartTime: string;
   workEndTime: string;
   address: string;
@@ -44,6 +57,14 @@ interface FormValues {
 
 function toFormValues(barber: BarberProfile): FormValues {
   return {
+    fullName: barber.name,
+    username: barber.username,
+    specialty: barber.specialty,
+    photoUrl: barber.photoUrl ?? "",
+    mediaUrl: barber.mediaUrl ?? "",
+    rating: barber.rating.toString(),
+    yearsExp: barber.experience.match(/\d+/)?.[0] ?? "0",
+    bio: barber.bio ?? "",
     workStartTime: barber.workStartTime,
     workEndTime: barber.workEndTime,
     address: barber.address ?? "",
@@ -62,6 +83,7 @@ export function BarberSettingsDialog({
   barber,
   onClose,
   onSubmit,
+  onUploadMedia,
 }: BarberSettingsDialogProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -69,6 +91,7 @@ export function BarberSettingsDialog({
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [uploadingField, setUploadingField] = useState<"photoUrl" | "mediaUrl" | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -83,6 +106,31 @@ export function BarberSettingsDialog({
       latitude: coords.latitude.toFixed(6),
       longitude: coords.longitude.toFixed(6),
     }));
+  };
+
+  const handleUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+    field: "photoUrl" | "mediaUrl",
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    try {
+      setError("");
+      setUploadingField(field);
+      const url = await onUploadMedia(file);
+      setFormValues((current) => ({
+        ...current,
+        [field]: url,
+      }));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Faylni yuklab bo'lmadi.");
+    } finally {
+      setUploadingField(null);
+    }
   };
 
   const handleUseCurrentLocation = () => {
@@ -123,8 +171,15 @@ export function BarberSettingsDialog({
     const priceHairBeard = Number(formValues.priceHairBeard);
     const pricePremium = Number(formValues.pricePremium);
     const priceBeard = Number(formValues.priceBeard);
+    const rating = Number(formValues.rating);
+    const yearsExp = Number(formValues.yearsExp);
     const latitude = formValues.latitude ? Number(formValues.latitude) : undefined;
     const longitude = formValues.longitude ? Number(formValues.longitude) : undefined;
+
+    if (formValues.fullName.trim().length < 2 || formValues.specialty.trim().length < 2 || formValues.username.trim().length < 3) {
+      setError("Ism, mutaxassislik va username to'liq kiritilishi kerak.");
+      return;
+    }
 
     if (!formValues.workStartTime || !formValues.workEndTime) {
       setError("Ish vaqtini to'liq kiriting.");
@@ -141,6 +196,11 @@ export function BarberSettingsDialog({
       return;
     }
 
+    if (!Number.isFinite(rating) || rating < 0 || rating > 5 || !Number.isFinite(yearsExp) || yearsExp < 0) {
+      setError("Reyting va tajriba to'g'ri kiritilishi kerak.");
+      return;
+    }
+
     if ((latitude !== undefined && !Number.isFinite(latitude)) || (longitude !== undefined && !Number.isFinite(longitude))) {
       setError("Lokatsiya koordinatalari noto'g'ri.");
       return;
@@ -149,6 +209,14 @@ export function BarberSettingsDialog({
     try {
       setSaving(true);
       await onSubmit({
+        fullName: formValues.fullName.trim(),
+        username: formValues.username.trim(),
+        specialty: formValues.specialty.trim(),
+        photoUrl: formValues.photoUrl.trim(),
+        mediaUrl: formValues.mediaUrl.trim(),
+        rating,
+        yearsExp,
+        bio: formValues.bio.trim() || undefined,
         workStartTime: formValues.workStartTime,
         workEndTime: formValues.workEndTime,
         address: formValues.address.trim() || undefined,
@@ -203,6 +271,76 @@ export function BarberSettingsDialog({
 
       <DialogContent sx={{ px: { xs: 2.2, md: 2.6 }, py: { xs: 2, md: 2.3 } }}>
         <Stack spacing={1.6}>
+          <Panel
+            icon={<PersonRoundedIcon sx={{ fontSize: "1rem" }} />}
+            title="Profil ko'rinishi"
+          >
+            <Stack spacing={1.2}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} alignItems={{ xs: "stretch", sm: "center" }}>
+                <Avatar
+                  variant="rounded"
+                  src={formValues.photoUrl}
+                  sx={{
+                    width: 74,
+                    height: 74,
+                    borderRadius: "20px",
+                    bgcolor: barber.avatarColor,
+                    fontWeight: 800,
+                  }}
+                >
+                  {barber.initials}
+                </Avatar>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1} flex={1}>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    disabled={Boolean(uploadingField)}
+                    startIcon={<AddPhotoAlternateRoundedIcon />}
+                    sx={{ minHeight: 46, borderRadius: "14px", textTransform: "none" }}
+                  >
+                    {uploadingField === "photoUrl" ? "Rasm yuklanmoqda..." : formValues.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"}
+                    <Box
+                      component="input"
+                      type="file"
+                      accept="image/*"
+                      sx={{ display: "none" }}
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => void handleUpload(event, "photoUrl")}
+                    />
+                  </Button>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    disabled={Boolean(uploadingField)}
+                    startIcon={<OndemandVideoRoundedIcon />}
+                    sx={{ minHeight: 46, borderRadius: "14px", textTransform: "none" }}
+                  >
+                    {uploadingField === "mediaUrl" ? "Media yuklanmoqda..." : formValues.mediaUrl ? "Mediani almashtirish" : "Video/Rasm tanlash"}
+                    <Box
+                      component="input"
+                      type="file"
+                      accept="image/*,video/*"
+                      sx={{ display: "none" }}
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => void handleUpload(event, "mediaUrl")}
+                    />
+                  </Button>
+                </Stack>
+              </Stack>
+              <GridFields>
+                <Field label="Ism familya" value={formValues.fullName} onChange={(value) => setFormValues((current) => ({ ...current, fullName: value }))} placeholder="Ism familya" />
+                <Field label="Username" value={formValues.username} onChange={(value) => setFormValues((current) => ({ ...current, username: value }))} placeholder="username" />
+                <Field label="Mutaxassislik" value={formValues.specialty} onChange={(value) => setFormValues((current) => ({ ...current, specialty: value }))} placeholder="Fade master" />
+                <Field label="Reyting" type="number" value={formValues.rating} onChange={(value) => setFormValues((current) => ({ ...current, rating: value }))} placeholder="4.8" />
+                <Field label="Tajriba yili" type="number" value={formValues.yearsExp} onChange={(value) => setFormValues((current) => ({ ...current, yearsExp: value }))} placeholder="3" />
+              </GridFields>
+              <Field label="Bio" value={formValues.bio} onChange={(value) => setFormValues((current) => ({ ...current, bio: value }))} placeholder="Mijozlar ko'radigan tavsif" />
+              {formValues.mediaUrl ? (
+                <Typography variant="caption" color="text.secondary">
+                  Media yuklandi va mijozlar barber kartasida ko'radi.
+                </Typography>
+              ) : null}
+            </Stack>
+          </Panel>
+
           <Panel
           icon={<ScheduleRoundedIcon sx={{ fontSize: "1rem" }} />}
           title="Ish vaqti"

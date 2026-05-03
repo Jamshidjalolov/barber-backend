@@ -95,6 +95,7 @@ async def create_barber(session: AsyncSession, payload: BarberCreateRequest) -> 
         role=RoleEnum.barber,
         full_name=payload.full_name.strip(),
         username=username,
+        photo_url=payload.photo_url.strip() if payload.photo_url else None,
         telegram_chat_id=payload.telegram_chat_id.strip() if payload.telegram_chat_id else None,
         password_hash=hash_password(payload.password),
     )
@@ -162,6 +163,7 @@ async def update_barber(
         barber.bio = payload.bio.strip() if payload.bio else None
     if payload.photo_url is not None:
         barber.photo_url = payload.photo_url.strip() if payload.photo_url else None
+        barber.user.photo_url = barber.photo_url
     if payload.media_url is not None:
         barber.media_url = payload.media_url.strip() if payload.media_url else None
     if payload.telegram_chat_id is not None:

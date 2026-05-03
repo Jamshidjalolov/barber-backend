@@ -14,6 +14,7 @@ interface BarbersPageProps {
   onCreateBarber: (payload: BarberFormPayload) => Promise<void>;
   onUpdateBarber: (barberId: string, payload: BarberFormPayload) => Promise<void>;
   onDeleteBarber: (barberId: string) => Promise<void>;
+  onUploadMedia: (file: File) => Promise<string>;
 }
 
 export function BarbersPage({
@@ -22,6 +23,7 @@ export function BarbersPage({
   onCreateBarber,
   onUpdateBarber,
   onDeleteBarber,
+  onUploadMedia,
 }: BarbersPageProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
@@ -106,6 +108,7 @@ export function BarbersPage({
         mode={formMode}
         onClose={closeFormDialog}
         onSubmit={handleFormSubmit}
+        onUploadMedia={onUploadMedia}
         initialBarber={selectedBarber}
       />
 

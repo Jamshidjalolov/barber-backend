@@ -21,6 +21,7 @@ export interface AuthUser {
   fullName: string;
   username?: string | null;
   phone?: string | null;
+  photoUrl?: string | null;
   telegramChatId?: string | null;
   telegramConnected?: boolean;
   barberProfileId?: string | null;
@@ -46,6 +47,7 @@ export interface CustomerAccount {
   id: string;
   name: string;
   phone: string;
+  photoUrl?: string | null;
   telegramChatId?: string | null;
   telegramConnected?: boolean;
   password?: string;
@@ -138,6 +140,7 @@ export interface BarberProfile {
   initials: string;
   avatarColor: string;
   photoUrl?: string;
+  mediaUrl?: string;
   specialty: string;
   experience: string;
   username: string;
@@ -168,6 +171,7 @@ export interface ApiAuthUser {
   full_name: string;
   username?: string | null;
   phone?: string | null;
+  photo_url?: string | null;
   telegram_chat_id?: string | null;
   telegram_connected?: boolean;
   barber_profile_id?: string | null;
@@ -189,6 +193,7 @@ export interface ApiBarber {
   rating: number;
   bio?: string | null;
   photo_url?: string | null;
+  media_url?: string | null;
   telegram_chat_id?: string | null;
   work_start_time: string;
   work_end_time: string;
@@ -262,12 +267,23 @@ export interface ApiTelegramMeta {
 export interface BarberFormPayload {
   fullName: string;
   specialty: string;
-  photoUrl: string;
+  photoUrl?: string;
+  mediaUrl?: string;
   rating: number;
   yearsExp: number;
   username: string;
   password?: string;
   bio?: string;
+  workStartTime?: string;
+  workEndTime?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  priceHaircut?: number;
+  priceFade?: number;
+  priceHairBeard?: number;
+  pricePremium?: number;
+  priceBeard?: number;
 }
 
 export interface DiscountFormPayload {
@@ -280,6 +296,14 @@ export interface DiscountFormPayload {
 }
 
 export interface BarberSettingsPayload {
+  fullName?: string;
+  username?: string;
+  specialty?: string;
+  photoUrl?: string;
+  mediaUrl?: string;
+  rating?: number;
+  yearsExp?: number;
+  bio?: string;
   workStartTime: string;
   workEndTime: string;
   address?: string;

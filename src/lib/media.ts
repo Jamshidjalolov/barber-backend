@@ -50,3 +50,8 @@ export function getSafeImageUrl(value?: string | null) {
 
   return undefined;
 }
+
+export function isVideoUrl(value?: string | null) {
+  const normalized = normalizeImageUrlInput(value);
+  return /\.(mp4|mov|webm|m3u8)(\?.*)?$/i.test(normalized) || /youtube\.com|youtu\.be|vimeo\.com/i.test(normalized);
+}

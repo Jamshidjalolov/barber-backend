@@ -99,6 +99,7 @@ async def register_barber(
         role=RoleEnum.barber,
         full_name=payload.full_name.strip(),
         username=username,
+        photo_url=payload.photo_url.strip() if payload.photo_url else None,
         password_hash=hash_password(payload.password),
     )
     session.add(user)
@@ -113,6 +114,16 @@ async def register_barber(
         bio=payload.bio.strip() if payload.bio else None,
         photo_url=payload.photo_url.strip() if payload.photo_url else None,
         media_url=payload.media_url.strip() if payload.media_url else None,
+        work_start_time=payload.work_start_time,
+        work_end_time=payload.work_end_time,
+        address=payload.address.strip() if payload.address else None,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        price_haircut=payload.price_haircut,
+        price_fade=payload.price_fade,
+        price_hair_beard=payload.price_hair_beard,
+        price_premium=payload.price_premium,
+        price_beard=payload.price_beard,
     )
     session.add(barber)
     await session.commit()

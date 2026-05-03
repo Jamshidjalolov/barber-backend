@@ -19,7 +19,6 @@ export function BarberRegisterPage({
     yearsExp: "1",
     username: "",
     password: "",
-    photoUrl: "",
     bio: "",
   });
   const [error, setError] = useState("");
@@ -80,11 +79,6 @@ export function BarberRegisterPage({
           autoComplete: "new-password",
         },
         {
-          key: "photoUrl",
-          label: "Rasm manzili",
-          placeholder: "https://...",
-        },
-        {
           key: "bio",
           label: "Qisqa bio",
           placeholder: "Barber haqida qisqacha",
@@ -105,7 +99,7 @@ export function BarberRegisterPage({
           await onRegister({
             fullName: values.fullName,
             specialty: values.specialty,
-            photoUrl: values.photoUrl,
+            photoUrl: "",
             rating: 4.8,
             yearsExp: Number(values.yearsExp) || 0,
             username: values.username,

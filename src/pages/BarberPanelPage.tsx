@@ -26,6 +26,7 @@ interface BarberPanelPageProps {
   onCreateDiscount: (payload: DiscountFormPayload) => Promise<DiscountItem>;
   onDeleteDiscount: (discountId: string) => Promise<void>;
   onUpdateSettings: (payload: BarberSettingsPayload) => Promise<BarberProfile>;
+  onUploadMedia: (file: File) => Promise<string>;
 }
 
 function matchesBarber(booking: BookingItem, barber: BarberProfile) {
@@ -91,6 +92,7 @@ export function BarberPanelPage({
   onCreateDiscount,
   onDeleteDiscount,
   onUpdateSettings,
+  onUploadMedia,
 }: BarberPanelPageProps) {
   const [selectedDate, setSelectedDate] = useState(getLocalIsoDate());
   const [filter, setFilter] = useState<BarberScheduleFilter>("all");
@@ -372,6 +374,7 @@ export function BarberPanelPage({
         barber={barber}
         onClose={() => setSettingsOpen(false)}
         onSubmit={onUpdateSettings}
+        onUploadMedia={onUploadMedia}
       />
 
       <BarberDiscountManager

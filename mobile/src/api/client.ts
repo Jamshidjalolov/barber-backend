@@ -107,11 +107,12 @@ function formatApiError(payload: unknown) {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { token, headers, body, ...rest } = options;
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...rest,
     body,
     headers: {
-      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
@@ -192,6 +193,16 @@ export function updateMe(token: string, payload: ProfileFormPayload) {
       photo_url: payload.photoUrl || null,
     }),
   }).then(mapUser);
+}
+
+export function uploadMedia(token: string, file: Blob | { uri: string; name: string; type: string }) {
+  const form = new FormData();
+  form.append("file", file as Blob);
+  return request<{ url: string; content_type: string; filename: string }>("/uploads/media", {
+    method: "POST",
+    token,
+    body: form,
+  });
 }
 
 export function getBarbers() {

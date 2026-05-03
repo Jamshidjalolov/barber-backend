@@ -66,7 +66,8 @@ function formatApiDetail(detail: unknown) {
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { token, headers, signal, ...rest } = options;
+  const { token, headers, signal, body, ...rest } = options;
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
   const abortRequest = () => controller.abort();
@@ -76,9 +77,10 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...rest,
+      body,
       signal: controller.signal,
       headers: {
-        "Content-Type": "application/json",
+        ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
@@ -114,6 +116,30 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
   return (await response.json()) as T;
 }
 
+function toBarberApiPayload(payload: BarberFormPayload | BarberSettingsPayload) {
+  return {
+    full_name: payload.fullName,
+    specialty: payload.specialty,
+    photo_url: getSafeImageUrl(payload.photoUrl) ?? null,
+    media_url: getSafeImageUrl(payload.mediaUrl) ?? null,
+    rating: payload.rating,
+    experience_years: payload.yearsExp,
+    username: payload.username,
+    password: "password" in payload ? payload.password || undefined : undefined,
+    bio: payload.bio || null,
+    work_start_time: payload.workStartTime,
+    work_end_time: payload.workEndTime,
+    address: payload.address || null,
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
+    price_haircut: payload.priceHaircut,
+    price_fade: payload.priceFade,
+    price_hair_beard: payload.priceHairBeard,
+    price_premium: payload.pricePremium,
+    price_beard: payload.priceBeard,
+  };
+}
+
 export function loginCustomer(phone: string, password: string) {
   return apiRequest<ApiTokenResponse>("/auth/customer/login", {
     method: "POST",
@@ -142,16 +168,7 @@ export function loginBarber(username: string, password: string) {
 export function registerBarber(payload: BarberFormPayload) {
   return apiRequest<ApiTokenResponse>("/auth/barber/register", {
     method: "POST",
-    body: JSON.stringify({
-      full_name: payload.fullName,
-      specialty: payload.specialty,
-      photo_url: getSafeImageUrl(payload.photoUrl) ?? null,
-      rating: payload.rating,
-      experience_years: payload.yearsExp,
-      username: payload.username,
-      password: payload.password,
-      bio: payload.bio || null,
-    }),
+    body: JSON.stringify(toBarberApiPayload(payload)),
   });
 }
 
@@ -166,6 +183,16 @@ export function getMe(token: string) {
   return apiRequest<ApiAuthUser>("/auth/me", { token });
 }
 
+export function uploadMedia(token: string, file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest<{ url: string; content_type: string; filename: string }>("/uploads/media", {
+    method: "POST",
+    token,
+    body: form,
+  });
+}
+
 export function getBarbers(token?: string) {
   return apiRequest<ApiBarber[]>("/barbers", { token });
 }
@@ -178,16 +205,7 @@ export function createBarber(token: string, payload: BarberFormPayload) {
   return apiRequest<ApiBarber>("/barbers", {
     method: "POST",
     token,
-    body: JSON.stringify({
-      full_name: payload.fullName,
-      specialty: payload.specialty,
-      photo_url: getSafeImageUrl(payload.photoUrl) ?? null,
-      rating: payload.rating,
-      experience_years: payload.yearsExp,
-      username: payload.username,
-      password: payload.password,
-      bio: payload.bio || null,
-    }),
+    body: JSON.stringify(toBarberApiPayload(payload)),
   });
 }
 
@@ -195,16 +213,7 @@ export function updateBarber(token: string, barberId: string, payload: BarberFor
   return apiRequest<ApiBarber>(`/barbers/${barberId}`, {
     method: "PATCH",
     token,
-    body: JSON.stringify({
-      full_name: payload.fullName,
-      specialty: payload.specialty,
-      photo_url: getSafeImageUrl(payload.photoUrl) ?? null,
-      rating: payload.rating,
-      experience_years: payload.yearsExp,
-      username: payload.username,
-      password: payload.password || undefined,
-      bio: payload.bio || null,
-    }),
+    body: JSON.stringify(toBarberApiPayload(payload)),
   });
 }
 
@@ -212,18 +221,7 @@ export function updateMyBarberSettings(token: string, payload: BarberSettingsPay
   return apiRequest<ApiBarber>("/barbers/me", {
     method: "PATCH",
     token,
-    body: JSON.stringify({
-      work_start_time: payload.workStartTime,
-      work_end_time: payload.workEndTime,
-      address: payload.address || null,
-      latitude: payload.latitude ?? null,
-      longitude: payload.longitude ?? null,
-      price_haircut: payload.priceHaircut,
-      price_fade: payload.priceFade,
-      price_hair_beard: payload.priceHairBeard,
-      price_premium: payload.pricePremium,
-      price_beard: payload.priceBeard,
-    }),
+    body: JSON.stringify(toBarberApiPayload(payload)),
   });
 }
 
