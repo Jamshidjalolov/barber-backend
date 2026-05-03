@@ -25,7 +25,7 @@ Telefoningizda Expo Go ilovasini to'liq yopib qayta oching va yangi QR kodni sca
 Default API:
 
 ```text
-https://barber-backend.onrender.com/api/v1
+https://barber-backend-i5kz.onrender.com/api/v1
 ```
 
 Boshqa backend ishlatsangiz `mobile/.env` yarating:

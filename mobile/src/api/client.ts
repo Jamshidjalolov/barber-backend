@@ -18,11 +18,13 @@ declare const process:
   | undefined;
 
 const envBaseUrl = typeof process !== "undefined" ? process.env?.EXPO_PUBLIC_API_BASE_URL : undefined;
-const PRODUCTION_API_BASE_URL = "https://barber-backend.onrender.com/api/v1";
+const PRODUCTION_API_BASE_URL = "https://barber-backend-i5kz.onrender.com/api/v1";
+const LEGACY_API_HOST = "barber-backend.onrender.com";
 
 function resolveApiBaseUrl() {
-  if (envBaseUrl) {
-    return envBaseUrl.replace(/\/$/, "");
+  const configuredUrl = envBaseUrl?.replace(/\/$/, "");
+  if (configuredUrl && !configuredUrl.includes(LEGACY_API_HOST)) {
+    return configuredUrl;
   }
 
   return PRODUCTION_API_BASE_URL;

@@ -17,7 +17,7 @@
       }
     },
     "extra": {
-      "apiBaseUrl": "https://barber-backend.onrender.com/api/v1"
+      "apiBaseUrl": "https://barber-backend-i5kz.onrender.com/api/v1"
     }
   }
 }

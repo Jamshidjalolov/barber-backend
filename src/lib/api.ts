@@ -14,11 +14,15 @@ import {
 } from "../types";
 import { getSafeImageUrl } from "./media";
 
-const PRODUCTION_API_BASE_URL = "https://barber-backend.onrender.com/api/v1";
+const PRODUCTION_API_BASE_URL = "https://barber-backend-i5kz.onrender.com/api/v1";
+const LEGACY_API_HOST = "barber-backend.onrender.com";
 
 function resolveApiBaseUrl() {
   const configuredUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "");
   if (!configuredUrl) {
+    return PRODUCTION_API_BASE_URL;
+  }
+  if (configuredUrl.includes(LEGACY_API_HOST)) {
     return PRODUCTION_API_BASE_URL;
   }
   return configuredUrl;
