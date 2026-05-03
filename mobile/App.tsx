@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Alert,
   Image,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +13,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -51,6 +54,13 @@ import { buildIsoFromLocal, buildTimeSlots, formatDateLabel, formatTime, getLoca
 
 type AuthMode = "login" | "register";
 type TabKey = "home" | "book" | "barbers" | "bookings" | "discounts" | "profile";
+type BookingSuccess = {
+  barberName: string;
+  serviceName: string;
+  scheduledFor: string;
+  salon: string;
+  price: number;
+};
 
 const roleLabels: Record<ApiRole, string> = {
   customer: "Mijoz",
@@ -59,6 +69,19 @@ const roleLabels: Record<ApiRole, string> = {
 };
 
 const defaultServices = ["Soch olish", "Fade", "Soch + soqol", "Premium"];
+const HERO_IMAGE_URL = "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?auto=format&fit=crop&w=900&q=80";
+const SALON_IMAGE_URL = "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80";
+
+const serviceIcons: Record<string, keyof typeof MaterialCommunityIcons.glyphMap> = {
+  "Soch olish": "content-cut",
+  "Fade qirqim": "razor-double-edge",
+  Fade: "razor-double-edge",
+  "Soch + soqol": "face-man-shimmer",
+  "Premium paket": "crown-outline",
+  Premium: "crown-outline",
+  "Soqol dizayni": "face-man",
+  Styling: "hair-dryer-outline",
+};
 
 function getTabs(role: ApiRole): Array<{ key: TabKey; label: string }> {
   if (role === "customer") {
@@ -103,6 +126,27 @@ function statusTone(status: ApiBookingStatus) {
   return colors.muted;
 }
 
+function roleAccent(role: ApiRole) {
+  if (role === "barber") return colors.green;
+  if (role === "admin") return colors.purple;
+  return colors.gold;
+}
+
+function topTitleForRole(role: ApiRole) {
+  if (role === "barber") return "Mening ish joyim";
+  if (role === "admin") return "Boshqaruv paneli";
+  return "BARBERSHOP";
+}
+
+function iconForTab(tab: TabKey): keyof typeof Ionicons.glyphMap {
+  if (tab === "home") return "home";
+  if (tab === "book") return "calendar";
+  if (tab === "barbers") return "people";
+  if (tab === "bookings") return "reader";
+  if (tab === "discounts") return "pricetag";
+  return "person";
+}
+
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "BB";
@@ -121,8 +165,10 @@ function priceForService(barber: ApiBarber, service: string) {
   const lowered = service.toLowerCase();
   if (lowered.includes("fade")) return barber.price_fade;
   if (lowered.includes("premium")) return barber.price_premium;
+  if ((lowered.includes("soch") && lowered.includes("soqol")) || lowered.includes("combo") || lowered.includes("hair beard")) {
+    return barber.price_hair_beard;
+  }
   if (lowered.includes("soqol") || lowered.includes("beard")) return barber.price_beard;
-  if (lowered.includes("combo") || lowered.includes("hair beard")) return barber.price_hair_beard;
   return barber.price_haircut;
 }
 
@@ -198,9 +244,12 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const canRegister = role !== "admin";
   const identityLabel = role === "customer" ? "Telefon raqam" : "Username";
+  const accent = roleAccent(role);
+  const roleName = role === "customer" ? "BARBERSHOP" : role.toUpperCase();
 
   async function submit() {
     setError("");
@@ -225,43 +274,65 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
       <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.authScroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.authBrand}>
-            <View style={styles.logoMark}>
-              <Text style={styles.logoText}>B</Text>
-            </View>
-            <Text style={styles.appName}>Barber Mobile</Text>
-            <Text style={styles.appSub}>Navbat, barber va mijozlar bir joyda.</Text>
+          <View style={styles.authRoleTabs}>
+            {(["customer", "barber", "admin"] as ApiRole[]).map((item) => (
+              <Pressable
+                key={item}
+                onPress={() => {
+                  setRole(item);
+                  setMode("login");
+                  setError("");
+                }}
+                style={({ pressed }) => [
+                  styles.authRolePill,
+                  role === item && { borderColor: roleAccent(item), backgroundColor: `${roleAccent(item)}18` },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={[styles.authRoleText, role === item && { color: roleAccent(item) }]}>{roleLabels[item]}</Text>
+              </Pressable>
+            ))}
           </View>
 
-          <Card style={styles.authCard}>
-            <Text style={styles.authTitle}>Hisobga kirish</Text>
-            <Text style={styles.authCopy}>Rolingizni tanlang va panelga kiring.</Text>
-
-            <View style={styles.rowWrap}>
-              {(["customer", "barber", "admin"] as ApiRole[]).map((item) => (
-                <Pill
-                  key={item}
-                  label={roleLabels[item]}
-                  selected={role === item}
-                  onPress={() => {
-                    setRole(item);
-                    setMode("login");
-                    setError("");
-                  }}
-                />
-              ))}
+          {role === "customer" && mode === "login" ? (
+            <ImageBackground source={{ uri: HERO_IMAGE_URL }} imageStyle={styles.authHeroImage} style={styles.authHero}>
+              <View style={styles.heroScrim} />
+              <View style={styles.authHeroLogo}>
+                <MaterialCommunityIcons name="content-cut" size={24} color={colors.goldDark} />
+                <Text style={styles.authHeroBrand}>BARBERSHOP</Text>
+                <Text style={styles.authHeroSub}>CLASSIC & MODERN</Text>
+              </View>
+              <View style={styles.authHeroCopyWrap}>
+                <Text style={styles.authHeroTitle}>Stay Sharp,{`\n`}Look Sharp.</Text>
+                <Text style={styles.authHeroCopy}>Professional soch turmaklash xizmatlari bir joyda</Text>
+              </View>
+              <View style={styles.authHeroActions}>
+                <PrimaryButton label="Kirish" onPress={() => setMode("login")} tone="gold" />
+                <PrimaryButton label="Ro'yxatdan o'tish" onPress={() => setMode("register")} tone="ghost" />
+              </View>
+            </ImageBackground>
+          ) : (
+            <View style={styles.authBrand}>
+              <View style={[styles.logoMark, { borderColor: accent }]}>
+                <MaterialCommunityIcons name={role === "customer" ? "content-cut" : role === "barber" ? "razor-double-edge" : "shield-crown-outline"} size={34} color={accent} />
+              </View>
+              <Text style={[styles.appName, { color: accent }]}>{roleName}</Text>
+              <Text style={styles.appSub}>{mode === "register" ? "Ro'yxatdan o'tish" : "Kirish"}</Text>
             </View>
+          )}
 
+          <View style={[styles.authCard, { borderColor: `${accent}33` }]}>
+            <Text style={styles.authTitle}>{mode === "register" ? "Ro'yxatdan o'tish" : "Kirish"}</Text>
             {canRegister ? (
               <View style={styles.segment}>
                 {(["login", "register"] as AuthMode[]).map((item) => (
                   <Pressable
                     key={item}
                     onPress={() => setMode(item)}
-                    style={[styles.segmentItem, mode === item && styles.segmentItemActive]}
+                    style={[styles.segmentItem, mode === item && [styles.segmentItemActive, { backgroundColor: accent }]]}
                   >
                     <Text style={[styles.segmentText, mode === item && styles.segmentTextActive]}>
-                      {item === "login" ? "Kirish" : "Royxatdan otish"}
+                      {item === "login" ? "Kirish" : "Ro'yxatdan o'tish"}
                     </Text>
                   </Pressable>
                 ))}
@@ -269,19 +340,56 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
             ) : null}
 
             {mode === "register" ? (
-              <Field label="Toliq ism" value={fullName} onChangeText={setFullName} placeholder="Jamshid Jalolov" />
+              <View style={styles.authField}>
+                <Ionicons name="person-outline" size={18} color={colors.muted} />
+                <TextInput
+                  value={fullName}
+                  onChangeText={setFullName}
+                  placeholder="Ism"
+                  placeholderTextColor="rgba(203,213,225,0.52)"
+                  style={styles.authInput}
+                  autoCapitalize="words"
+                />
+              </View>
             ) : null}
             {mode === "register" && role === "barber" ? (
-              <Field label="Mutaxassislik" value={specialty} onChangeText={setSpecialty} placeholder="Fade master" />
+              <View style={styles.authField}>
+                <MaterialCommunityIcons name="content-cut" size={18} color={colors.muted} />
+                <TextInput
+                  value={specialty}
+                  onChangeText={setSpecialty}
+                  placeholder="Mutaxassislik"
+                  placeholderTextColor="rgba(203,213,225,0.52)"
+                  style={styles.authInput}
+                />
+              </View>
             ) : null}
-            <Field
-              label={identityLabel}
-              value={identity}
-              onChangeText={setIdentity}
-              placeholder={role === "customer" ? "998901234567" : "username"}
-              keyboardType={role === "customer" ? "phone-pad" : "default"}
-            />
-            <Field label="Parol" value={password} onChangeText={setPassword} secureTextEntry placeholder="Parol" />
+            <View style={styles.authField}>
+              <Ionicons name={role === "customer" ? "call-outline" : "person-circle-outline"} size={18} color={colors.muted} />
+              <TextInput
+                value={identity}
+                onChangeText={setIdentity}
+                placeholder={identityLabel}
+                placeholderTextColor="rgba(203,213,225,0.52)"
+                style={styles.authInput}
+                keyboardType={role === "customer" ? "phone-pad" : "default"}
+                autoCapitalize="none"
+              />
+            </View>
+            <View style={styles.authField}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.muted} />
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Parol"
+                placeholderTextColor="rgba(203,213,225,0.52)"
+                style={styles.authInput}
+                secureTextEntry={!passwordVisible}
+              />
+              <Pressable onPress={() => setPasswordVisible((value) => !value)} hitSlop={10}>
+                <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={18} color={colors.muted} />
+              </Pressable>
+            </View>
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -291,7 +399,32 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
               loading={loading}
               disabled={!identity || !password || (mode === "register" && !fullName)}
             />
-          </Card>
+
+            <View style={styles.authDivider}>
+              <View style={styles.authDividerLine} />
+              <Text style={styles.authDividerText}>yoki</Text>
+              <View style={styles.authDividerLine} />
+            </View>
+
+            <View style={styles.socialRow}>
+              {(["logo-google", "logo-apple", "call"] as Array<keyof typeof Ionicons.glyphMap>).map((icon) => (
+                <Pressable key={icon} style={({ pressed }) => [styles.socialButton, pressed && styles.pressed]}>
+                  <Ionicons name={icon} size={22} color={colors.text} />
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              onPress={() => canRegister && setMode(mode === "login" ? "register" : "login")}
+              disabled={!canRegister}
+              style={styles.authSwitch}
+            >
+              <Text style={styles.authSwitchText}>
+                {mode === "login" ? "Hisobingiz yo'qmi? " : "Hisobingiz bormi? "}
+                <Text style={{ color: accent }}>{mode === "login" ? "Ro'yxatdan o'tish" : "Kirish"}</Text>
+              </Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -306,6 +439,111 @@ function BarberAvatar({ barber, size = 56 }: { barber: ApiBarber; size?: number 
     <View style={[styles.avatar, { width: size, height: size, borderRadius: Math.round(size * 0.32) }]}>
       <Text style={styles.avatarText}>{initials(barber.full_name)}</Text>
     </View>
+  );
+}
+
+function HeaderIcon({
+  name,
+  onPress,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  onPress?: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.headerIcon, pressed && styles.pressed]}>
+      <Ionicons name={name} size={22} color={colors.text} />
+    </Pressable>
+  );
+}
+
+function SectionHeaderRow({ title, action }: { title: string; action?: string }) {
+  return (
+    <View style={styles.sectionRow}>
+      <Text style={styles.panelSectionTitle}>{title}</Text>
+      {action ? <Text style={styles.sectionAction}>{action}</Text> : null}
+    </View>
+  );
+}
+
+function ServiceTile({
+  service,
+  barber,
+  selected,
+  onPress,
+}: {
+  service: string;
+  barber?: ApiBarber;
+  selected?: boolean;
+  onPress?: () => void;
+}) {
+  const icon = serviceIcons[service] ?? "content-cut";
+  const price = barber ? priceForService(barber, service) : 0;
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.serviceTile, selected && styles.serviceTileActive, pressed && styles.pressed]}>
+      <MaterialCommunityIcons name={icon} size={24} color={selected ? colors.goldDark : colors.gold} />
+      <Text style={styles.serviceTitle} numberOfLines={1}>{service.replace(" qirqim", "")}</Text>
+      <Text style={styles.servicePrice}>{price ? `${price.toLocaleString()} so'm` : "Narx bor"}</Text>
+    </Pressable>
+  );
+}
+
+function MiniBookingRow({
+  booking,
+  role,
+}: {
+  booking: ApiBooking;
+  role: ApiRole;
+}) {
+  return (
+    <View style={styles.miniBookingRow}>
+      <Text style={styles.miniBookingTime}>{formatTime(booking.scheduled_for)}</Text>
+      <View style={styles.grow}>
+        <Text style={styles.miniBookingTitle}>{booking.service_name}</Text>
+        <Text style={styles.miniBookingSub}>{role === "customer" ? booking.barber_name : booking.customer_name}</Text>
+      </View>
+      <View style={[styles.smallStatus, { backgroundColor: `${statusTone(booking.status)}22` }]}>
+        <Text style={[styles.smallStatusText, { color: statusTone(booking.status) }]}>{statusLabel(booking.status)}</Text>
+      </View>
+    </View>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  icon,
+  accent = colors.gold,
+}: {
+  label: string;
+  value: string | number;
+  icon?: keyof typeof Ionicons.glyphMap;
+  accent?: string;
+}) {
+  return (
+    <View style={styles.metricCard}>
+      <View style={styles.rowBetween}>
+        <Text style={styles.metricLabel}>{label}</Text>
+        {icon ? <Ionicons name={icon} size={18} color={accent} /> : null}
+      </View>
+      <Text style={styles.metricValue}>{value}</Text>
+    </View>
+  );
+}
+
+function QuickAction({
+  label,
+  icon,
+  onPress,
+}: {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.quickAction, pressed && styles.pressed]}>
+      <Ionicons name={icon} size={24} color={colors.gold} />
+      <Text style={styles.quickActionText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -424,6 +662,7 @@ export default function App() {
   const [discountForm, setDiscountForm] = useState<DiscountFormPayload>(defaultDiscountForm);
   const [bookingFilter, setBookingFilter] = useState<ApiBookingStatus | "all">("all");
   const [searchText, setSearchText] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState<BookingSuccess | null>(null);
 
   const role = session?.user.role ?? "customer";
   const visibleTabs = getTabs(role);
@@ -466,6 +705,15 @@ export default function App() {
     () => new Set(bookings.map((item) => item.customer_user_id ?? item.customer_phone)).size,
     [bookings],
   );
+  const dateChoices = useMemo(() => Array.from({ length: 4 }, (_, index) => {
+    const value = new Date();
+    value.setDate(value.getDate() + index);
+    return {
+      value: getLocalDateInput(value),
+      kicker: index === 0 ? "Bugun" : value.toLocaleDateString("uz-UZ", { weekday: "short" }),
+      label: value.toLocaleDateString("uz-UZ", { day: "2-digit", month: "short" }),
+    };
+  }), []);
 
   const loadData = useCallback(async () => {
     const isInitial = !loadedOnceRef.current;
@@ -538,12 +786,17 @@ export default function App() {
         scheduledFor,
         note,
       });
+      setBookingSuccess({
+        barberName: selectedBarber.full_name,
+        serviceName: selectedService,
+        scheduledFor,
+        salon: selectedBarber.address || "CHOP CHOP Barbershop, Toshkent",
+        price: priceForService(selectedBarber, selectedService),
+      });
       setNote("");
       setAdminCustomerName("");
       setAdminCustomerPhone("");
-      Alert.alert("Bron yuborildi", "Barber tasdiqlashini kuting.");
       await loadData();
-      setTab("bookings");
     } catch (error) {
       Alert.alert("Bron yaratilmadi", error instanceof Error ? error.message : "Qayta urinib koring.");
     } finally {
@@ -731,39 +984,95 @@ export default function App() {
   );
 
   const renderBookingComposer = () => (
-    <Card style={styles.stack}>
-      <SectionTitle eyebrow="Tez bron" title="Navbat yaratish" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-        {services.map((service) => (
-          <Pill
-            key={service}
-            label={service}
-            selected={selectedService === service}
-            onPress={() => setSelectedService(service)}
-          />
-        ))}
-      </ScrollView>
-      <View style={styles.twoColumn}>
-        <Field label="Sana" value={bookingDate} onChangeText={setBookingDate} placeholder="2026-05-01" />
-        <Field label="Vaqt" value={bookingTime} onChangeText={setBookingTime} placeholder="10:00" />
+    <View style={styles.stack}>
+      {selectedBarber ? (
+        <Card style={styles.bookingPanel}>
+          <View style={styles.bookingProfile}>
+            <BarberAvatar barber={selectedBarber} size={64} />
+            <View style={styles.grow}>
+              <Text style={styles.profileName}>{selectedBarber.full_name}</Text>
+              <Text style={styles.miniBarberRating}>★ {selectedBarber.rating.toFixed(1)} ({selectedBarber.total_bookings})</Text>
+            </View>
+          </View>
+        </Card>
+      ) : (
+        <LoadingCard label="Barberlar yuklanmoqda..." />
+      )}
+
+      <Card style={styles.bookingPanel}>
+        <Text style={styles.panelCardTitle}>Xizmatni tanlang</Text>
+        <View style={styles.serviceList}>
+          {services.map((service) => {
+            const selected = selectedService === service;
+            const price = selectedBarber ? priceForService(selectedBarber, service) : 0;
+            const icon = serviceIcons[service] ?? "content-cut";
+            return (
+              <Pressable
+                key={service}
+                onPress={() => setSelectedService(service)}
+                style={({ pressed }) => [styles.serviceOption, selected && styles.serviceOptionActive, pressed && styles.pressed]}
+              >
+                <View style={styles.serviceIconBox}>
+                  <MaterialCommunityIcons name={icon} size={22} color={colors.goldDark} />
+                </View>
+                <View style={styles.grow}>
+                  <Text style={styles.serviceOptionTitle}>{service.replace(" qirqim", "")}</Text>
+                  <Text style={styles.serviceOptionPrice}>{price ? `${price.toLocaleString()} so'm` : "Narx bor"}</Text>
+                </View>
+                <View style={[styles.checkDot, selected && styles.checkDotActive]}>
+                  {selected ? <Ionicons name="checkmark" size={16} color="#090b0d" /> : null}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      </Card>
+
+      <View style={styles.stack}>
+        <Text style={styles.panelCardTitle}>Sana tanlang</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateStrip}>
+          {dateChoices.map((item) => {
+            const selected = bookingDate === item.value;
+            return (
+              <Pressable
+                key={item.value}
+                onPress={() => setBookingDate(item.value)}
+                style={({ pressed }) => [styles.datePill, selected && styles.datePillActive, pressed && styles.pressed]}
+              >
+                <Text style={[styles.dateKicker, selected && styles.dateKickerActive]}>{item.kicker}</Text>
+                <Text style={[styles.dateLabel, selected && styles.dateLabelActive]}>{item.label}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-        {buildTimeSlots(9, 18).map((slot) => (
-          <Pill
-            key={slot}
-            label={bookedSlots.has(slot) ? `${slot} band` : slot}
-            selected={bookingTime === slot}
-            tone={bookedSlots.has(slot) ? "dark" : "light"}
-            onPress={() => {
-              if (!bookedSlots.has(slot)) {
-                setBookingTime(slot);
-              }
-            }}
-          />
-        ))}
-      </ScrollView>
+
+      <View style={styles.stack}>
+        <Text style={styles.panelCardTitle}>Vaqt tanlang</Text>
+        <View style={styles.timeGrid}>
+          {buildTimeSlots(9, 16).map((slot) => {
+            const booked = bookedSlots.has(slot);
+            const selected = bookingTime === slot;
+            return (
+              <Pressable
+                key={slot}
+                onPress={() => {
+                  if (!booked) setBookingTime(slot);
+                }}
+                style={({ pressed }) => [styles.timeChip, booked && styles.timeChipBooked, selected && styles.timeChipActive, pressed && !booked && styles.pressed]}
+              >
+                <Text style={[styles.timeChipText, selected && styles.timeChipTextActive, booked && styles.timeChipTextBooked]}>
+                  {booked ? `${slot} band` : slot}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
       {role === "admin" ? (
-        <>
+        <Card style={styles.bookingPanel}>
+          <Text style={styles.panelCardTitle}>Mijoz ma'lumoti</Text>
           <Field
             label="Mijoz ismi"
             value={adminCustomerName}
@@ -777,41 +1086,238 @@ export default function App() {
             keyboardType="phone-pad"
             placeholder="998901234567"
           />
-        </>
+        </Card>
       ) : null}
-      <Field label="Izoh" value={note} onChangeText={setNote} placeholder="Masalan, fade qisqaroq" />
-      {selectedBarber ? (
-        <BarberCard barber={selectedBarber} service={selectedService} selected />
-      ) : (
-        <Text style={styles.muted}>Hali barber topilmadi.</Text>
-      )}
-      <PrimaryButton
-        label={role === "admin" ? "Mijoz uchun bron qilish" : "Bron qilish"}
-        onPress={submitBooking}
-        loading={busy}
-        disabled={!selectedBarber || bookedSlots.has(bookingTime)}
-      />
-    </Card>
-  );
 
-  const renderHome = () => (
-    <View style={styles.stack}>
-      {renderHero()}
-      {initialLoading ? <LoadingCard label="Ma'lumotlar yuklanmoqda..." /> : null}
-      {role === "customer" ? renderBookingComposer() : null}
-      <SectionTitle eyebrow="Yaqin navbatlar" title={role === "customer" ? "Mening navbatlarim" : "Bugungi ishlar"} />
-      {bookings.slice(0, 4).map((booking) => (
-        <BookingCard
-          key={booking.id}
-          booking={booking}
-          role={role}
-          onAdvance={handleAdvance}
-          onReject={handleReject}
+      <Field label="Izoh" value={note} onChangeText={setNote} placeholder="Masalan, fade qisqaroq" />
+
+      <Card style={styles.locationRow}>
+        <View style={styles.grow}>
+          <Text style={styles.panelCardTitle}>Manzil</Text>
+          <Text style={styles.muted}>{selectedBarber?.address || "CHOP CHOP Barbershop, Toshkent"}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={21} color={colors.muted} />
+      </Card>
+
+      <View style={styles.totalBar}>
+        <View>
+          <Text style={styles.totalLabel}>Jami</Text>
+          <Text style={styles.totalValue}>{selectedBarber ? priceForService(selectedBarber, selectedService).toLocaleString() : 0} so'm</Text>
+        </View>
+        <PrimaryButton
+          label={role === "admin" ? "Bron yaratish" : "Bronni tasdiqlash"}
+          onPress={submitBooking}
+          loading={busy}
+          disabled={!selectedBarber || bookedSlots.has(bookingTime)}
         />
-      ))}
-      {bookings.length === 0 ? <Text style={styles.emptyText}>Hozircha navbat yoq.</Text> : null}
+      </View>
     </View>
   );
+
+  const renderBookingSuccess = () => {
+    if (!bookingSuccess) return null;
+    return (
+      <View style={styles.successScreen}>
+        <View style={styles.successCheck}>
+          <Ionicons name="checkmark" size={48} color="#fff" />
+        </View>
+        <Text style={styles.successTitle}>Bron muvaffaqiyatli tasdiqlandi!</Text>
+        <Card style={styles.successCard}>
+          {[
+            { icon: "person-outline" as const, label: "Barber", value: bookingSuccess.barberName },
+            { icon: "cut-outline" as const, label: "Xizmat", value: bookingSuccess.serviceName },
+            { icon: "calendar-outline" as const, label: "Sana", value: `${formatDateLabel(bookingSuccess.scheduledFor)}, ${formatTime(bookingSuccess.scheduledFor)}` },
+            { icon: "location-outline" as const, label: "Salon", value: bookingSuccess.salon },
+            { icon: "card-outline" as const, label: "Narx", value: `${bookingSuccess.price.toLocaleString()} so'm` },
+          ].map((item) => (
+            <View key={item.label} style={styles.successDetailRow}>
+              <Ionicons name={item.icon} size={20} color={colors.muted} />
+              <View style={styles.grow}>
+                <Text style={styles.successDetailLabel}>{item.label}</Text>
+                <Text style={styles.successDetailValue}>{item.value}</Text>
+              </View>
+            </View>
+          ))}
+        </Card>
+        <PrimaryButton
+          label="Bronlarimga o'tish"
+          onPress={() => {
+            setBookingSuccess(null);
+            setTab("bookings");
+          }}
+          tone="gold"
+        />
+        <Pressable
+          onPress={() => {
+            setBookingSuccess(null);
+            setTab("home");
+          }}
+          style={styles.linkButton}
+        >
+          <Text style={styles.linkButtonText}>Asosiy sahifaga qaytish</Text>
+        </Pressable>
+      </View>
+    );
+  };
+
+  const renderCustomerHome = () => (
+    <View style={styles.stack}>
+      {initialLoading ? <LoadingCard label="Ma'lumotlar yuklanmoqda..." /> : null}
+      <ImageBackground
+        source={{ uri: selectedBarber?.photo_url || HERO_IMAGE_URL }}
+        imageStyle={styles.customerHeroImage}
+        style={styles.customerHero}
+      >
+        <View style={styles.heroScrim} />
+        <View style={styles.customerHeroContent}>
+          <Text style={styles.heroBrand}>BARBERSHOP</Text>
+          <Text style={styles.customerHeroTitle}>Stay Sharp,{`\n`}Look Sharp.</Text>
+          <PrimaryButton label="Hozir bron qilish" onPress={() => setTab("book")} tone="gold" />
+        </View>
+      </ImageBackground>
+
+      <SectionHeaderRow title="Xizmatlarimiz" action="Barchasi" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tileStrip}>
+        {services.slice(0, 5).map((service) => (
+          <ServiceTile
+            key={service}
+            service={service}
+            barber={selectedBarber}
+            selected={selectedService === service}
+            onPress={() => {
+              setSelectedService(service);
+              setTab("book");
+            }}
+          />
+        ))}
+      </ScrollView>
+
+      <SectionHeaderRow title="Barberlar" action="Barchasi" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.barberStrip}>
+        {barbers.map((barber) => (
+          <Pressable
+            key={barber.id}
+            onPress={() => {
+              setSelectedBarberId(barber.id);
+              setTab("book");
+            }}
+            style={({ pressed }) => [styles.miniBarberCard, selectedBarberId === barber.id && styles.miniBarberActive, pressed && styles.pressed]}
+          >
+            <BarberAvatar barber={barber} size={58} />
+            <Text style={styles.miniBarberName} numberOfLines={1}>{barber.full_name.split(" ")[0]}</Text>
+            <Text style={styles.miniBarberRating}>★ {barber.rating.toFixed(1)}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      <SectionHeaderRow title="Salonlar" />
+      <Card style={styles.salonCard}>
+        <Image source={{ uri: SALON_IMAGE_URL }} style={styles.salonImage} />
+        <View style={styles.grow}>
+          <Text style={styles.cardTitle}>CHOP CHOP Barbershop</Text>
+          <Text style={styles.muted}>{selectedBarber?.address || "Toshkent, Chilonzor 7-kvartal"}</Text>
+          <Text style={styles.miniBarberRating}>★ 4.8 (120)</Text>
+        </View>
+        <Text style={styles.distanceText}>1.2 km</Text>
+      </Card>
+
+      {upcomingBookings.length ? (
+        <>
+          <SectionHeaderRow title="Yaqin bronlar" />
+          {upcomingBookings.slice(0, 3).map((booking) => (
+            <BookingCard key={booking.id} booking={booking} role={role} />
+          ))}
+        </>
+      ) : null}
+    </View>
+  );
+
+  const renderBarberHome = () => (
+    <View style={styles.stack}>
+      {initialLoading ? <LoadingCard label="Ish joyi yuklanmoqda..." /> : null}
+      <Card style={styles.profileHeroCard}>
+        <View style={styles.row}>
+          {barberProfile ? <BarberAvatar barber={barberProfile} size={70} /> : <View style={styles.profileAvatar}><Text style={styles.avatarText}>{initials(session.user.fullName)}</Text></View>}
+          <View style={styles.grow}>
+            <View style={styles.row}>
+              <Text style={styles.profileName}>{barberProfile?.full_name ?? session.user.fullName}</Text>
+              <View style={styles.onlineBadge}>
+                <Text style={styles.onlineText}>Online</Text>
+              </View>
+            </View>
+            <Text style={styles.miniBarberRating}>★ {(barberProfile?.rating ?? 4.9).toFixed(1)} ({barberProfile?.total_bookings ?? bookings.length})</Text>
+          </View>
+        </View>
+      </Card>
+
+      <Card style={styles.panelCard}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.panelCardTitle}>Bugungi bronlar</Text>
+          <View style={styles.countBadge}><Text style={styles.countBadgeText}>{todayBookings.length} ta</Text></View>
+        </View>
+        {todayBookings.slice(0, 5).map((booking) => (
+          <MiniBookingRow key={booking.id} booking={booking} role={role} />
+        ))}
+        {todayBookings.length === 0 ? <Text style={styles.emptyText}>Bugun navbat yoq.</Text> : null}
+        <Pressable onPress={() => setTab("bookings")} style={styles.linkButton}>
+          <Text style={styles.linkButtonText}>Barchasini ko'rish</Text>
+        </Pressable>
+      </Card>
+
+      <Card style={styles.panelCard}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.panelCardTitle}>Statistikalar</Text>
+          <View style={styles.countBadge}><Text style={styles.countBadgeText}>Bugun</Text></View>
+        </View>
+        <View style={styles.metricsRow}>
+          <MetricCard label="Bronlar" value={todayBookings.length} />
+          <MetricCard label="Bajarilgan" value={completedToday} accent={colors.green} />
+          <MetricCard label="Daromad" value={`${Math.round(revenue / 1000)}K`} accent={colors.gold} />
+        </View>
+        <PrimaryButton label="Daromadni ko'rish" onPress={() => setTab("profile")} tone="gold" />
+      </Card>
+    </View>
+  );
+
+  const renderAdminHome = () => (
+    <View style={styles.stack}>
+      {initialLoading ? <LoadingCard label="Admin panel yuklanmoqda..." /> : null}
+      <View style={styles.metricsRow}>
+        <MetricCard label="Salonlar" value="6" icon="business-outline" accent={colors.purple} />
+        <MetricCard label="Barberlar" value={barbers.length} icon="people-outline" accent={colors.green} />
+        <MetricCard label="Mijozlar" value={uniqueClients || "0"} icon="person-outline" accent={colors.gold} />
+      </View>
+      <Card style={styles.revenueCard}>
+        <Text style={styles.muted}>Bugungi daromad</Text>
+        <View style={styles.rowBetween}>
+          <Text style={styles.revenueText}>{revenue.toLocaleString()} so'm</Text>
+          <Ionicons name="stats-chart" size={26} color={colors.gold} />
+        </View>
+      </Card>
+
+      <SectionHeaderRow title="So'nggi bronlar" action="Barchasi" />
+      <Card style={styles.panelCard}>
+        {bookings.slice(0, 5).map((booking) => (
+          <MiniBookingRow key={booking.id} booking={booking} role={role} />
+        ))}
+        {bookings.length === 0 ? <Text style={styles.emptyText}>Bronlar topilmadi.</Text> : null}
+      </Card>
+
+      <SectionHeaderRow title="Tezkor boshqaruv" />
+      <View style={styles.quickGrid}>
+        <QuickAction label="Salonlar" icon="business" onPress={() => setTab("profile")} />
+        <QuickAction label="Barberlar" icon="people" onPress={() => setTab("barbers")} />
+        <QuickAction label="Xizmatlar" icon="options" onPress={() => setTab("book")} />
+        <QuickAction label="Statistika" icon="bar-chart" onPress={() => setTab("profile")} />
+      </View>
+    </View>
+  );
+
+  const renderHome = () => {
+    if (role === "barber") return renderBarberHome();
+    if (role === "admin") return renderAdminHome();
+    return renderCustomerHome();
+  };
 
   const renderBarbers = () => (
     <View style={styles.stack}>
@@ -1160,30 +1666,6 @@ export default function App() {
         <Text style={styles.cardTitle}>Hisob</Text>
         <Text style={styles.muted}>Rol: {roleLabels[role]}</Text>
         <Text style={styles.muted}>Sessiya: faol</Text>
-      </Card>
-    </View>
-  );
-
-  const content = tab === "home"
-    ? renderHome()
-    : tab === "book"
-      ? renderBookingComposer()
-    : tab === "barbers"
-      ? renderBarbers()
-      : tab === "bookings"
-        ? renderBookings()
-        : tab === "discounts"
-          ? renderDiscounts()
-          : renderProfile();
-
-  return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
-      <View style={styles.topBar}>
-        <View>
-          <Text style={styles.topLabel}>{roleLabels[role]}</Text>
-          <Text style={styles.topTitle}>Barber Mobile</Text>
-        </View>
         <PrimaryButton
           label="Chiqish"
           tone="ghost"
@@ -1198,6 +1680,44 @@ export default function App() {
             setTab("home");
           }}
         />
+      </Card>
+    </View>
+  );
+
+  const content = bookingSuccess
+    ? renderBookingSuccess()
+    : tab === "home"
+      ? renderHome()
+      : tab === "book"
+        ? renderBookingComposer()
+      : tab === "barbers"
+        ? renderBarbers()
+        : tab === "bookings"
+          ? renderBookings()
+          : tab === "discounts"
+            ? renderDiscounts()
+            : renderProfile();
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
+      <View style={styles.topBar}>
+        <HeaderIcon
+          name={tab === "book" || bookingSuccess ? "chevron-back" : "menu"}
+          onPress={() => {
+            if (bookingSuccess) {
+              setBookingSuccess(null);
+              setTab("book");
+            } else {
+              setTab(tab === "book" ? "home" : "profile");
+            }
+          }}
+        />
+        <View style={styles.topCenter}>
+          <Text style={[styles.topTitle, { color: roleAccent(role) }]}>{bookingSuccess ? "Bron tasdiqlandi" : topTitleForRole(role)}</Text>
+          {role === "customer" ? <Text style={styles.topLabel}>CLASSIC CUTS</Text> : null}
+        </View>
+        <HeaderIcon name="notifications-outline" onPress={loadData} />
       </View>
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -1206,17 +1726,25 @@ export default function App() {
         {busy ? <LoadingCard label="Amal bajarilmoqda..." /> : null}
         {content}
       </ScrollView>
-      <View style={styles.bottomNav}>
+      {!bookingSuccess ? <View style={styles.bottomNav}>
         {visibleTabs.map((item) => (
           <Pressable
             key={item.key}
-            onPress={() => setTab(item.key)}
+            onPress={() => {
+              setBookingSuccess(null);
+              setTab(item.key);
+            }}
             style={[styles.navItem, tab === item.key && styles.navItemActive]}
           >
+            <Ionicons
+              name={iconForTab(item.key)}
+              size={21}
+              color={tab === item.key ? colors.goldDark : "rgba(255,255,255,0.72)"}
+            />
             <Text style={[styles.navText, tab === item.key && styles.navTextActive]}>{item.label}</Text>
           </Pressable>
         ))}
-      </View>
+      </View> : null}
     </SafeAreaView>
   );
 }
@@ -1234,6 +1762,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
     backgroundColor: colors.paper,
+  },
+  authRoleTabs: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+  },
+  authRolePill: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: colors.line,
+    borderRadius: 9,
+    borderWidth: 1,
+    flex: 1,
+    minHeight: 38,
+    justifyContent: "center",
+  },
+  authRoleText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "900",
   },
   authBrand: {
     alignItems: "center",
@@ -1267,18 +1815,133 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   authCard: {
+    backgroundColor: "rgba(16,19,24,0.94)",
+    borderRadius: 12,
+    borderWidth: 1,
     gap: 14,
+    padding: 14,
     borderColor: colors.lineStrong,
+    ...shadows.soft,
   },
   authTitle: {
     color: colors.text,
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "900",
   },
   authCopy: {
     color: colors.muted,
     fontSize: 14,
     lineHeight: 21,
+  },
+  authHero: {
+    borderColor: colors.lineStrong,
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 430,
+    justifyContent: "space-between",
+    marginBottom: 14,
+    overflow: "hidden",
+    padding: 20,
+    ...shadows.soft,
+  },
+  authHeroImage: {
+    borderRadius: 12,
+  },
+  authHeroLogo: {
+    alignItems: "center",
+    gap: 3,
+  },
+  authHeroBrand: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900",
+    letterSpacing: 0,
+  },
+  authHeroSub: {
+    color: colors.goldDark,
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 0,
+  },
+  authHeroCopyWrap: {
+    gap: 10,
+  },
+  authHeroTitle: {
+    color: "#fff",
+    fontSize: 25,
+    fontWeight: "900",
+    lineHeight: 31,
+  },
+  authHeroCopy: {
+    color: "rgba(255,255,255,0.76)",
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 19,
+    maxWidth: 230,
+  },
+  authHeroActions: {
+    gap: 10,
+  },
+  authField: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.055)",
+    borderColor: colors.line,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 52,
+    paddingHorizontal: 12,
+  },
+  authInput: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    minHeight: 48,
+    padding: 0,
+  },
+  authDivider: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  authDividerLine: {
+    backgroundColor: colors.lineStrong,
+    flex: 1,
+    height: 1,
+  },
+  authDividerText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  socialRow: {
+    flexDirection: "row",
+    gap: 14,
+    justifyContent: "center",
+  },
+  socialButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.045)",
+    borderColor: colors.lineStrong,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 46,
+    justifyContent: "center",
+    width: 46,
+  },
+  authSwitch: {
+    alignItems: "center",
+    minHeight: 28,
+    justifyContent: "center",
+  },
+  authSwitchText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
   },
   rowWrap: {
     flexDirection: "row",
@@ -1333,34 +1996,507 @@ const styles = StyleSheet.create({
   },
   topBar: {
     alignItems: "center",
-    backgroundColor: "rgba(5,5,10,0.94)",
-    borderBottomColor: colors.line,
-    borderBottomWidth: 1,
+    backgroundColor: colors.paper,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingTop: 12,
+    paddingBottom: 10,
+  },
+  topCenter: {
+    alignItems: "center",
+    flex: 1,
+    gap: 1,
+  },
+  headerIcon: {
+    alignItems: "center",
+    height: 42,
+    justifyContent: "center",
+    width: 42,
   },
   topLabel: {
-    color: colors.cyan,
-    fontSize: 12,
+    color: colors.gold,
+    fontSize: 9,
     fontWeight: "900",
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   topTitle: {
     color: colors.text,
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "900",
+    letterSpacing: 0,
   },
   scroll: {
     backgroundColor: colors.paper,
-    paddingHorizontal: 18,
-    paddingBottom: 104,
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 106,
+    paddingTop: 4,
   },
   stack: {
     gap: 14,
+  },
+  customerHero: {
+    borderRadius: 12,
+    height: 230,
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    padding: 18,
+    ...shadows.soft,
+  },
+  customerHeroImage: {
+    borderRadius: 12,
+  },
+  heroScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.42)",
+  },
+  customerHeroContent: {
+    gap: 12,
+    maxWidth: 220,
+  },
+  heroBrand: {
+    color: colors.goldDark,
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 0,
+  },
+  customerHeroTitle: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "900",
+    lineHeight: 31,
+  },
+  sectionRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 2,
+  },
+  panelSectionTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  sectionAction: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  tileStrip: {
+    gap: 10,
+    paddingRight: 16,
+  },
+  serviceTile: {
+    alignItems: "flex-start",
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 7,
+    minHeight: 104,
+    padding: 12,
+    width: 96,
+  },
+  serviceTileActive: {
+    borderColor: colors.gold,
+    backgroundColor: "rgba(215,170,85,0.1)",
+  },
+  serviceTitle: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  servicePrice: {
+    color: colors.muted,
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  barberStrip: {
+    gap: 14,
+    paddingRight: 16,
+  },
+  miniBarberCard: {
+    alignItems: "center",
+    gap: 6,
+    width: 72,
+  },
+  miniBarberActive: {
+    opacity: 1,
+  },
+  miniBarberName: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  miniBarberRating: {
+    color: colors.goldDark,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  salonCard: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  salonImage: {
+    backgroundColor: colors.haze,
+    borderRadius: 10,
+    height: 70,
+    width: 86,
+  },
+  distanceText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  bookingPanel: {
+    backgroundColor: "rgba(15,18,22,0.96)",
+    borderColor: colors.lineStrong,
+    gap: 13,
+  },
+  bookingProfile: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 13,
+  },
+  serviceList: {
+    borderColor: colors.line,
+    borderRadius: 11,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  serviceOption: {
+    alignItems: "center",
+    borderBottomColor: colors.line,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 11,
+    minHeight: 62,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  serviceOptionActive: {
+    backgroundColor: "rgba(215,170,85,0.08)",
+  },
+  serviceIconBox: {
+    alignItems: "center",
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  serviceOptionTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  serviceOptionPrice: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  checkDot: {
+    alignItems: "center",
+    borderColor: colors.lineStrong,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 24,
+    justifyContent: "center",
+    width: 24,
+  },
+  checkDotActive: {
+    backgroundColor: colors.gold,
+    borderColor: colors.gold,
+  },
+  dateStrip: {
+    gap: 10,
+    paddingRight: 16,
+  },
+  datePill: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderRadius: 9,
+    borderWidth: 1,
+    minHeight: 58,
+    justifyContent: "center",
+    paddingHorizontal: 13,
+    width: 84,
+  },
+  datePillActive: {
+    backgroundColor: "rgba(215,170,85,0.11)",
+    borderColor: colors.gold,
+  },
+  dateKicker: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  dateKickerActive: {
+    color: colors.goldDark,
+  },
+  dateLabel: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "900",
+    marginTop: 3,
+  },
+  dateLabelActive: {
+    color: colors.goldDark,
+  },
+  timeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  timeChip: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 42,
+    justifyContent: "center",
+    width: "22.8%",
+  },
+  timeChipActive: {
+    backgroundColor: "rgba(215,170,85,0.1)",
+    borderColor: colors.gold,
+  },
+  timeChipBooked: {
+    opacity: 0.45,
+  },
+  timeChipText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  timeChipTextActive: {
+    color: colors.goldDark,
+  },
+  timeChipTextBooked: {
+    color: colors.muted,
+    fontSize: 10,
+  },
+  locationRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  totalBar: {
+    alignItems: "center",
+    borderTopColor: colors.line,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 14,
+    justifyContent: "space-between",
+    paddingTop: 12,
+  },
+  totalLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  totalValue: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "900",
+    marginTop: 3,
+  },
+  successScreen: {
+    alignItems: "center",
+    gap: 18,
+    paddingTop: 28,
+  },
+  successCheck: {
+    alignItems: "center",
+    backgroundColor: "#10b981",
+    borderRadius: 999,
+    height: 92,
+    justifyContent: "center",
+    width: 92,
+    boxShadow: "0px 18px 32px rgba(16, 185, 129, 0.34)",
+    elevation: 9,
+  },
+  successTitle: {
+    color: colors.text,
+    fontSize: 21,
+    fontWeight: "900",
+    lineHeight: 28,
+    maxWidth: 260,
+    textAlign: "center",
+  },
+  successCard: {
+    alignSelf: "stretch",
+    gap: 12,
+  },
+  successDetailRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 44,
+  },
+  successDetailLabel: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  successDetailValue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900",
+    marginTop: 2,
+  },
+  profileHeroCard: {
+    backgroundColor: "rgba(14,18,22,0.96)",
+    borderColor: colors.lineStrong,
+    gap: 14,
+  },
+  profileName: {
+    color: colors.text,
+    flexShrink: 1,
+    fontSize: 19,
+    fontWeight: "900",
+  },
+  onlineBadge: {
+    backgroundColor: "rgba(74,222,128,0.14)",
+    borderColor: "rgba(74,222,128,0.22)",
+    borderRadius: 7,
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 4,
+  },
+  onlineText: {
+    color: colors.green,
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  panelCard: {
+    backgroundColor: "rgba(20,24,29,0.96)",
+    borderColor: colors.lineStrong,
+    gap: 13,
+  },
+  panelCardTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  countBadge: {
+    backgroundColor: "rgba(215,170,85,0.13)",
+    borderColor: "rgba(215,170,85,0.22)",
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  countBadgeText: {
+    color: colors.goldDark,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  miniBookingRow: {
+    alignItems: "center",
+    borderBottomColor: colors.line,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 52,
+    paddingVertical: 8,
+  },
+  miniBookingTime: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+    width: 56,
+  },
+  miniBookingTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  miniBookingSub: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  smallStatus: {
+    borderRadius: 7,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  smallStatusText: {
+    fontSize: 10,
+    fontWeight: "900",
+  },
+  metricsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  metricCard: {
+    backgroundColor: "rgba(255,255,255,0.055)",
+    borderColor: colors.line,
+    borderRadius: 10,
+    borderWidth: 1,
+    flex: 1,
+    minHeight: 86,
+    justifyContent: "space-between",
+    padding: 12,
+  },
+  metricLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  metricValue: {
+    color: colors.text,
+    fontSize: 25,
+    fontWeight: "900",
+    marginTop: 10,
+  },
+  revenueCard: {
+    backgroundColor: "rgba(20,24,29,0.96)",
+    borderColor: colors.lineStrong,
+    gap: 10,
+  },
+  revenueText: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: "900",
+  },
+  linkButton: {
+    alignItems: "center",
+    minHeight: 36,
+    justifyContent: "center",
+  },
+  linkButtonText: {
+    color: colors.goldDark,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  quickGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  quickAction: {
+    alignItems: "center",
+    backgroundColor: "rgba(20,24,29,0.96)",
+    borderColor: colors.line,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 9,
+    minHeight: 96,
+    justifyContent: "center",
+    padding: 12,
+    width: "47%",
+    ...shadows.soft,
+  },
+  quickActionText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "900",
   },
   formCard: {
     gap: 13,
@@ -1601,7 +2737,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   bottomNav: {
-    backgroundColor: "rgba(9,10,20,0.96)",
+    backgroundColor: "rgba(5,7,9,0.98)",
     borderColor: colors.line,
     borderTopWidth: 1,
     bottom: 0,
@@ -1616,14 +2752,15 @@ const styles = StyleSheet.create({
   },
   navItem: {
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: 10,
     flex: 1,
-    minHeight: 46,
+    gap: 4,
+    minHeight: 50,
     justifyContent: "center",
   },
   navItemActive: {
-    backgroundColor: colors.purple,
-    borderColor: "rgba(103,232,249,0.22)",
+    backgroundColor: "rgba(215,170,85,0.1)",
+    borderColor: "rgba(215,170,85,0.18)",
     borderWidth: 1,
   },
   navText: {

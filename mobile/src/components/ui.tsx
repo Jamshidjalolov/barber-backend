@@ -150,11 +150,11 @@ export function Stat({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "rgba(17,17,29,0.92)",
+    backgroundColor: "rgba(20,24,29,0.94)",
     borderColor: colors.line,
-    borderRadius: 26,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: 18,
+    padding: 16,
     ...shadows.soft,
   },
   darkCard: {
@@ -180,21 +180,21 @@ const styles = StyleSheet.create({
   },
   pill: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.045)",
     borderColor: colors.line,
-    borderRadius: 999,
+    borderRadius: 10,
     borderWidth: 1,
     minHeight: 42,
     justifyContent: "center",
     paddingHorizontal: 16,
   },
   pillSelected: {
-    backgroundColor: colors.purple,
-    borderColor: "rgba(103,232,249,0.28)",
+    backgroundColor: "rgba(215,170,85,0.14)",
+    borderColor: colors.gold,
   },
   pillDark: {
-    backgroundColor: colors.purple,
-    borderColor: "rgba(103,232,249,0.28)",
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderColor: colors.lineStrong,
   },
   pillGreen: {
     backgroundColor: "rgba(52,211,153,0.12)",
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   pillTextSelected: {
-    color: "#fff",
+    color: colors.goldDark,
   },
   pillTextDark: {
     color: "#fff",
@@ -216,14 +216,14 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    backgroundColor: colors.purple,
-    borderColor: "rgba(103,232,249,0.24)",
+    backgroundColor: colors.gold,
+    borderColor: "rgba(242,201,109,0.34)",
     borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: 10,
     minHeight: 54,
     justifyContent: "center",
     paddingHorizontal: 18,
-    boxShadow: "0px 12px 20px rgba(139, 92, 246, 0.28)",
+    boxShadow: "0px 12px 24px rgba(215, 170, 85, 0.25)",
     elevation: 6,
   },
   buttonGold: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   buttonText: {
-    color: "#fff",
+    color: "#090b0d",
     fontSize: 15,
     fontWeight: "900",
   },
@@ -261,9 +261,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   input: {
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.045)",
     borderColor: colors.line,
-    borderRadius: 18,
+    borderRadius: 10,
     borderWidth: 1,
     color: colors.text,
     fontSize: 16,
@@ -271,25 +271,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   stat: {
-    backgroundColor: colors.purple,
-    borderColor: "rgba(103,232,249,0.2)",
+    backgroundColor: "rgba(255,255,255,0.055)",
+    borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 12,
     flex: 1,
     minHeight: 92,
     justifyContent: "center",
     padding: 14,
   },
   statGold: {
-    backgroundColor: colors.gold,
-    borderColor: "rgba(246,200,95,0.24)",
+    backgroundColor: "rgba(215,170,85,0.14)",
+    borderColor: "rgba(215,170,85,0.3)",
   },
   statGreen: {
-    backgroundColor: colors.green,
+    backgroundColor: "rgba(74,222,128,0.13)",
     borderColor: "rgba(52,211,153,0.24)",
   },
   statValue: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 26,
     fontWeight: "900",
   },
