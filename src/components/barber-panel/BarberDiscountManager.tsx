@@ -162,8 +162,9 @@ export function BarberDiscountManager({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "18px",
-                  backgroundColor: alpha("#d5a546", 0.16),
-                  color: "#a1741a",
+                  backgroundColor: alpha("#f6c85f", 0.14),
+                  color: "#fde68a",
+                  border: `1px solid ${alpha("#f6c85f", 0.18)}`,
                 }}
               >
                 <SavingsRoundedIcon />
@@ -183,8 +184,9 @@ export function BarberDiscountManager({
                 sx={{
                   height: 34,
                   borderRadius: "999px",
-                  backgroundColor: alpha("#d5a546", 0.12),
-                  color: "#8f6617",
+                  backgroundColor: alpha("#f6c85f", 0.12),
+                  color: "#fde68a",
+                  border: `1px solid ${alpha("#f6c85f", 0.16)}`,
                   "& .MuiChip-label": { px: 1.1, fontWeight: 700 },
                 }}
               />
@@ -194,7 +196,8 @@ export function BarberDiscountManager({
                   width: 42,
                   height: 42,
                   borderRadius: "14px",
-                  border: `1px solid ${alpha("#111111", 0.08)}`,
+                  border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                  backgroundColor: alpha("#ffffff", 0.06),
                 }}
               >
                 <CloseRoundedIcon fontSize="small" />
@@ -215,9 +218,10 @@ export function BarberDiscountManager({
               sx={{
                   p: 1.5,
                   borderRadius: "24px",
-                  backgroundColor: (theme) => theme.palette.background.paper,
-                  border: `1px solid ${alpha("#111111", 0.06)}`,
-                  boxShadow: "0 16px 34px rgba(17,17,17,0.04)",
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%)",
+                  border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                  boxShadow: "0 16px 34px rgba(0,0,0,0.2)",
                 }}
             >
               <Stack spacing={1.25}>
@@ -309,7 +313,7 @@ export function BarberDiscountManager({
                       px: 2.1,
                       borderRadius: "16px",
                       textTransform: "none",
-                      borderColor: alpha("#111111", 0.12),
+                      borderColor: alpha("#c4b5fd", 0.18),
                     }}
                   >
                     Tozalash
@@ -322,8 +326,9 @@ export function BarberDiscountManager({
               sx={{
                 p: 1.3,
                 borderRadius: "24px",
-                backgroundColor: (theme) => theme.palette.background.paper,
-                border: `1px solid ${alpha("#111111", 0.06)}`,
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%)",
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
               }}
             >
               <Stack spacing={1}>
@@ -338,8 +343,8 @@ export function BarberDiscountManager({
                       sx={{
                         p: 1.2,
                         borderRadius: "20px",
-                        border: `1px solid ${alpha("#111111", 0.06)}`,
-                        backgroundColor: "#fff",
+                        border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                        backgroundColor: alpha("#ffffff", 0.06),
                       }}
                     >
                       <Stack
@@ -363,8 +368,9 @@ export function BarberDiscountManager({
                               sx={{
                                 height: 26,
                                 borderRadius: "999px",
-                                backgroundColor: alpha("#3aa66f", 0.12),
-                                color: "#207a49",
+                                backgroundColor: alpha("#34d399", 0.12),
+                                color: "#86efac",
+                                border: `1px solid ${alpha("#34d399", 0.16)}`,
                                 "& .MuiChip-label": { px: 1, fontWeight: 800 },
                               }}
                             />
@@ -412,9 +418,9 @@ export function BarberDiscountManager({
                     sx={{
                       p: 1.4,
                       borderRadius: "20px",
-                      border: `1px dashed ${alpha("#111111", 0.12)}`,
+                      border: `1px dashed ${alpha("#c4b5fd", 0.22)}`,
                       color: "text.primary",
-                      backgroundColor: alpha("#111111", 0.02),
+                      backgroundColor: alpha("#ffffff", 0.04),
                     }}
                   >
                     Hozircha skidka yo'q. Yangi skidka qo'ysangiz foydalanuvchi va botga xabar boradi.
@@ -466,7 +472,7 @@ function Field({
                 : alpha("#f7efe8", 0.95),
           },
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: alpha("#7a5d31", 0.1),
+            borderColor: alpha("#c4b5fd", 0.16),
           },
           "& .MuiInputBase-input": {
             py: 1.6,
@@ -491,8 +497,9 @@ function MetaPill({ icon, label }: { icon: ReactNode; label: string }) {
         px: 1,
         py: 0.75,
         borderRadius: "999px",
-        backgroundColor: alpha("#111111", 0.04),
-        color: "#5f5b54",
+        backgroundColor: alpha("#ffffff", 0.06),
+        color: "#cbd5e1",
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
       {icon}

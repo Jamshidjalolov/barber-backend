@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -25,7 +25,7 @@ import {
   registerCustomer,
   updateBookingStatus,
 } from "./src/api/client";
-import { Card, Field, Pill, PrimaryButton, SectionTitle, Stat } from "./src/components/ui";
+import { Card, Field, LoadingCard, Pill, PrimaryButton, SectionTitle, Stat } from "./src/components/ui";
 import { colors, shadows } from "./src/theme/colors";
 import { ApiBarber, ApiBooking, ApiBookingStatus, ApiDiscount, ApiRole, AuthSession } from "./src/types";
 import { buildIsoFromLocal, buildTimeSlots, formatDateLabel, formatTime, getLocalDateInput } from "./src/utils/date";
@@ -119,7 +119,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.authScroll} keyboardShouldPersistTaps="handled">
           <View style={styles.authBrand}>
@@ -290,6 +290,7 @@ export default function App() {
   const [discounts, setDiscounts] = useState<ApiDiscount[]>([]);
   const [services, setServices] = useState<string[]>(defaultServices);
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [selectedBarberId, setSelectedBarberId] = useState("");
   const [selectedService, setSelectedService] = useState("Soch olish");
@@ -298,6 +299,7 @@ export default function App() {
   const [note, setNote] = useState("");
 
   const role = session?.user.role ?? "customer";
+  const loadedOnceRef = useRef(false);
   const selectedBarber = barbers.find((item) => item.id === selectedBarberId) ?? barbers[0];
 
   const upcomingBookings = useMemo(
@@ -307,6 +309,8 @@ export default function App() {
   const completedToday = useMemo(() => bookings.filter((item) => item.status === "completed").length, [bookings]);
 
   const loadData = useCallback(async () => {
+    const isInitial = !loadedOnceRef.current;
+    setInitialLoading(isInitial);
     setRefreshing(true);
     try {
       const [barberItems, serviceOptions] = await Promise.all([getBarbers(), getServices()]);
@@ -327,6 +331,8 @@ export default function App() {
       Alert.alert("Xato", error instanceof Error ? error.message : "Malumot yuklanmadi.");
     } finally {
       setRefreshing(false);
+      loadedOnceRef.current = true;
+      setInitialLoading(false);
     }
   }, [selectedBarberId, session]);
 
@@ -391,7 +397,14 @@ export default function App() {
   }
 
   if (!session) {
-    return <AuthScreen onAuthenticated={setSession} />;
+    return (
+      <AuthScreen
+        onAuthenticated={(nextSession) => {
+          loadedOnceRef.current = false;
+          setSession(nextSession);
+        }}
+      />
+    );
   }
 
   const renderHero = () => (
@@ -448,6 +461,7 @@ export default function App() {
   const renderHome = () => (
     <View style={styles.stack}>
       {renderHero()}
+      {initialLoading ? <LoadingCard label="Ma'lumotlar yuklanmoqda..." /> : null}
       {role === "customer" ? renderBookingComposer() : null}
       <SectionTitle eyebrow="Yaqin navbatlar" title={role === "customer" ? "Mening navbatlarim" : "Bugungi ishlar"} />
       {bookings.slice(0, 4).map((booking) => (
@@ -466,6 +480,7 @@ export default function App() {
   const renderBarbers = () => (
     <View style={styles.stack}>
       <SectionTitle eyebrow="Jamoa" title="Barberlar" />
+      {initialLoading ? <LoadingCard label="Barberlar yuklanmoqda..." /> : null}
       {barbers.map((barber) => (
         <BarberCard
           key={barber.id}
@@ -486,6 +501,7 @@ export default function App() {
   const renderBookings = () => (
     <View style={styles.stack}>
       <SectionTitle eyebrow="Operatsiya" title="Navbatlar" />
+      {initialLoading ? <LoadingCard label="Navbatlar yuklanmoqda..." /> : null}
       {bookings.map((booking) => (
         <BookingCard
           key={booking.id}
@@ -502,6 +518,7 @@ export default function App() {
   const renderDiscounts = () => (
     <View style={styles.stack}>
       <SectionTitle eyebrow="Takliflar" title="Skidkalar" />
+      {initialLoading ? <LoadingCard label="Skidkalar yuklanmoqda..." /> : null}
       {discounts.map((discount) => (
         <Card key={discount.id} style={styles.discountCard}>
           <View style={styles.row}>
@@ -533,7 +550,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.paper} />
       <View style={styles.topBar}>
         <View>
           <Text style={styles.topLabel}>{roleLabels[role]}</Text>
@@ -546,14 +563,16 @@ export default function App() {
             setSession(null);
             setBookings([]);
             setDiscounts([]);
+            loadedOnceRef.current = false;
             setTab("home");
           }}
         />
       </View>
       <ScrollView
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadData} tintColor={colors.gold} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadData} tintColor={colors.cyan} />}
       >
+        {busy ? <LoadingCard label="Amal bajarilmoqda..." /> : null}
         {content}
       </ScrollView>
       <View style={styles.bottomNav}>
@@ -583,6 +602,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+    backgroundColor: colors.paper,
   },
   authBrand: {
     alignItems: "center",
@@ -590,8 +610,8 @@ const styles = StyleSheet.create({
   },
   logoMark: {
     alignItems: "center",
-    backgroundColor: colors.ink,
-    borderColor: colors.gold,
+    backgroundColor: colors.surface,
+    borderColor: colors.cyan,
     borderRadius: 28,
     borderWidth: 2,
     height: 72,
@@ -604,7 +624,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   appName: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 30,
     fontWeight: "900",
     letterSpacing: 0,
@@ -617,9 +637,10 @@ const styles = StyleSheet.create({
   },
   authCard: {
     gap: 14,
+    borderColor: colors.lineStrong,
   },
   authTitle: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 24,
     fontWeight: "900",
   },
@@ -643,7 +664,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   segment: {
-    backgroundColor: colors.haze,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: colors.line,
+    borderWidth: 1,
     borderRadius: 18,
     flexDirection: "row",
     padding: 4,
@@ -656,7 +679,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   segmentItemActive: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.purple,
     ...shadows.soft,
   },
   segmentText: {
@@ -665,11 +688,11 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   segmentTextActive: {
-    color: colors.ink,
+    color: "#fff",
   },
   errorText: {
-    backgroundColor: "#fff0ee",
-    borderColor: "#f3ccc6",
+    backgroundColor: "rgba(251,113,133,0.12)",
+    borderColor: "rgba(251,113,133,0.22)",
     borderRadius: 14,
     borderWidth: 1,
     color: colors.red,
@@ -679,6 +702,9 @@ const styles = StyleSheet.create({
   },
   topBar: {
     alignItems: "center",
+    backgroundColor: "rgba(5,5,10,0.94)",
+    borderBottomColor: colors.line,
+    borderBottomWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 18,
@@ -686,17 +712,18 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   topLabel: {
-    color: colors.goldDark,
+    color: colors.cyan,
     fontSize: 12,
     fontWeight: "900",
     textTransform: "uppercase",
   },
   topTitle: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 22,
     fontWeight: "900",
   },
   scroll: {
+    backgroundColor: colors.paper,
     paddingHorizontal: 18,
     paddingBottom: 104,
     paddingTop: 8,
@@ -707,6 +734,8 @@ const styles = StyleSheet.create({
   hero: {
     gap: 16,
     overflow: "hidden",
+    backgroundColor: colors.darkPanel,
+    borderColor: colors.lineStrong,
   },
   heroKicker: {
     color: colors.gold,
@@ -740,12 +769,12 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   selectedCard: {
-    borderColor: colors.gold,
+    borderColor: colors.cyan,
     borderWidth: 2,
   },
   avatar: {
     alignItems: "center",
-    backgroundColor: colors.ink,
+    backgroundColor: colors.purple,
     justifyContent: "center",
   },
   avatarImage: {
@@ -753,12 +782,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.haze,
   },
   avatarText: {
-    color: colors.gold,
+    color: "#fff",
     fontSize: 17,
     fontWeight: "900",
   },
   cardTitle: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 17,
     fontWeight: "900",
   },
@@ -769,7 +798,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   ratingPill: {
-    backgroundColor: "#fff4d6",
+    backgroundColor: "rgba(246,200,95,0.14)",
+    borderColor: "rgba(246,200,95,0.22)",
+    borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -785,7 +816,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   infoText: {
-    backgroundColor: colors.haze,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderColor: colors.line,
+    borderWidth: 1,
     borderRadius: 999,
     color: colors.muted,
     fontSize: 12,
@@ -804,7 +837,9 @@ const styles = StyleSheet.create({
   },
   timeBox: {
     alignItems: "center",
-    backgroundColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.22)",
+    borderWidth: 1,
     borderRadius: 18,
     minWidth: 70,
     paddingHorizontal: 10,
@@ -822,7 +857,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   priceText: {
-    color: colors.ink,
+    color: colors.cyan,
     fontSize: 13,
     fontWeight: "900",
     marginTop: 4,
@@ -837,7 +872,9 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   noteText: {
-    backgroundColor: colors.paper,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: colors.line,
+    borderWidth: 1,
     borderRadius: 14,
     color: colors.muted,
     fontSize: 13,
@@ -854,6 +891,8 @@ const styles = StyleSheet.create({
   discountBadge: {
     alignItems: "center",
     backgroundColor: colors.gold,
+    borderColor: "rgba(246,200,95,0.24)",
+    borderWidth: 1,
     borderRadius: 20,
     height: 58,
     justifyContent: "center",
@@ -871,7 +910,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   bottomNav: {
-    backgroundColor: "rgba(255,250,243,0.96)",
+    backgroundColor: "rgba(9,10,20,0.96)",
     borderColor: colors.line,
     borderTopWidth: 1,
     bottom: 0,
@@ -892,7 +931,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   navItemActive: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.22)",
+    borderWidth: 1,
   },
   navText: {
     color: colors.muted,

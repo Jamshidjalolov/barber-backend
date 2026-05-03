@@ -181,6 +181,9 @@ export function BarberSettingsDialog({
         sx: {
           borderRadius: fullScreen ? 0 : "28px",
           overflow: "hidden",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: fullScreen ? "none" : `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -309,8 +312,8 @@ function Panel({
       sx={{
         p: 1.35,
         borderRadius: "22px",
-        backgroundColor: (theme) => alpha("#ffffff", 0.04),
-        border: `1px solid ${alpha("#111111", 0.05)}`,
+        backgroundColor: alpha("#ffffff", 0.05),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
       <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1.2 }}>
@@ -321,8 +324,8 @@ function Panel({
             borderRadius: "12px",
             display: "grid",
             placeItems: "center",
-            backgroundColor: alpha("#111111", 0.05),
-            color: "#a37a22",
+            backgroundColor: alpha("#22d3ee", 0.12),
+            color: "#67e8f9",
           }}
         >
           {icon}

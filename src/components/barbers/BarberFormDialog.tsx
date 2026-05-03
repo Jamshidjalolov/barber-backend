@@ -126,10 +126,10 @@ function Field({
           "& .MuiOutlinedInput-root": {
             minHeight: props.multiline ? "unset" : 50,
             borderRadius: "16px",
-            backgroundColor: (theme) => theme.palette.background.paper,
+            backgroundColor: alpha("#ffffff", 0.06),
           },
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: alpha("#7a5d31", 0.1),
+            borderColor: alpha("#c4b5fd", 0.16),
           },
           "& .MuiInputBase-input": {
             py: 1.6,
@@ -281,6 +281,9 @@ export function BarberFormDialog({
           borderRadius: isMobile ? 0 : "28px",
           overflow: "hidden",
           maxHeight: isMobile ? "100dvh" : "calc(100dvh - 24px)",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: isMobile ? "none" : `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -515,7 +518,7 @@ export function BarberFormDialog({
                   minHeight: 50,
                   borderRadius: "18px",
                   textTransform: "none",
-                  borderColor: alpha("#121212", 0.12),
+                  borderColor: alpha("#c4b5fd", 0.18),
                   color: "text.secondary",
                 }}
               >

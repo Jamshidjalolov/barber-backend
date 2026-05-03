@@ -65,8 +65,9 @@ export function RejectBookingDialog({
               borderRadius: "14px",
               display: "grid",
               placeItems: "center",
-              color: "#a23c3c",
-              bgcolor: alpha("#d96868", 0.12),
+              color: "#fecdd3",
+              bgcolor: alpha("#fb7185", 0.12),
+              border: `1px solid ${alpha("#fb7185", 0.18)}`,
             }}
           >
             <ReportProblemRoundedIcon />
@@ -93,7 +94,7 @@ export function RejectBookingDialog({
                   minHeight: 36,
                   px: 1.25,
                   borderRadius: "999px",
-                  borderColor: alpha("#111111", 0.08),
+                  borderColor: alpha("#c4b5fd", 0.16),
                 }}
               >
                 {item}

@@ -36,6 +36,10 @@ export function DeleteBarberDialog({
         sx: {
           borderRadius: "28px",
           width: "min(520px, calc(100% - 24px))",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.16)}`,
+          boxShadow: "0 34px 100px rgba(0,0,0,0.58)",
         },
       }}
     >
@@ -50,8 +54,9 @@ export function DeleteBarberDialog({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "18px",
-                  backgroundColor: alpha("#d94f4f", 0.12),
-                  color: "#c53d3d",
+                  backgroundColor: alpha("#fb7185", 0.13),
+                  color: "#fecdd3",
+                  border: `1px solid ${alpha("#fb7185", 0.18)}`,
                 }}
               >
                 <WarningAmberRoundedIcon />
@@ -72,7 +77,8 @@ export function DeleteBarberDialog({
                 width: 42,
                 height: 42,
                 borderRadius: "14px",
-                border: `1px solid ${alpha("#121212", 0.08)}`,
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+                backgroundColor: alpha("#ffffff", 0.06),
               }}
             >
               <CloseRoundedIcon fontSize="small" />
@@ -87,8 +93,9 @@ export function DeleteBarberDialog({
               sx={{
                 p: 2,
                 borderRadius: "20px",
-                backgroundColor: (theme) => theme.palette.background.paper,
-                border: `1px solid ${alpha("7a5d31", 0.08)}`,
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%)",
+                border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
               }}
             >
               <Avatar
@@ -127,7 +134,7 @@ export function DeleteBarberDialog({
                 minHeight: 50,
                 borderRadius: "18px",
                 textTransform: "none",
-                borderColor: alpha("#121212", 0.12),
+                borderColor: alpha("#c4b5fd", 0.18),
                 color: "text.secondary",
               }}
             >
@@ -142,10 +149,10 @@ export function DeleteBarberDialog({
                 borderRadius: "18px",
                 textTransform: "none",
                 fontWeight: 700,
-                backgroundColor: "#d94f4f",
+                background: "linear-gradient(135deg, #fb7185 0%, #be123c 100%)",
                 boxShadow: "none",
                 "&:hover": {
-                  backgroundColor: "#c53d3d",
+                  background: "linear-gradient(135deg, #fb7185 0%, #9f1239 100%)",
                 },
               }}
             >

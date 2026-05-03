@@ -36,6 +36,9 @@ export function BookingSuccessDialog({
         sx: {
           borderRadius: "28px",
           overflow: "hidden",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -49,8 +52,9 @@ export function BookingSuccessDialog({
               borderRadius: "20px",
               display: "grid",
               placeItems: "center",
-              backgroundColor: alpha("#3aa66f", 0.12),
-              color: "#1f7d4c",
+              backgroundColor: alpha("#34d399", 0.12),
+              color: "#86efac",
+              border: `1px solid ${alpha("#34d399", 0.16)}`,
             }}
           >
             <CheckCircleRoundedIcon sx={{ fontSize: "1.8rem" }} />
@@ -65,7 +69,8 @@ export function BookingSuccessDialog({
             sx={{
               p: 1.3,
               borderRadius: "18px",
-              backgroundColor: (theme) => theme.palette.background.paper,
+              backgroundColor: alpha("#ffffff", 0.06),
+              border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
             }}
           >
             <Stack spacing={0.45}>

@@ -41,18 +41,18 @@ function formatMoney(value?: number) {
 
 function getStatusTone(status: BookingItem["status"]) {
   if (status === "Tugallandi") {
-    return { bg: alpha("#39a96b", 0.12), color: "#1f7d4c" };
+    return { bg: alpha("#34d399", 0.12), color: "#86efac" };
   }
   if (status === "Rad etildi") {
-    return { bg: alpha("#d96868", 0.12), color: "#a23c3c" };
+    return { bg: alpha("#fb7185", 0.12), color: "#fecdd3" };
   }
   if (status === "Jarayonda") {
-    return { bg: alpha("#5a7bd8", 0.12), color: "#3354b8" };
+    return { bg: alpha("#22d3ee", 0.12), color: "#67e8f9" };
   }
   if (status === "Tasdiqlandi") {
-    return { bg: alpha("#1f7d4c", 0.12), color: "#1f7d4c" };
+    return { bg: alpha("#34d399", 0.12), color: "#86efac" };
   }
-  return { bg: alpha("#d5a546", 0.12), color: "#986c00" };
+  return { bg: alpha("#f6c85f", 0.12), color: "#fde68a" };
 }
 
 function InfoRow({
@@ -72,8 +72,8 @@ function InfoRow({
       sx={{
         p: 1.05,
         borderRadius: "16px",
-        backgroundColor: (theme) => theme.palette.background.paper,
-        border: `1px solid ${alpha("#111111", 0.05)}`,
+        backgroundColor: alpha("#ffffff", 0.06),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
       <Box
@@ -83,8 +83,8 @@ function InfoRow({
           borderRadius: "12px",
           display: "grid",
           placeItems: "center",
-          color: "#a37a22",
-          backgroundColor: alpha("#d5a546", 0.12),
+          color: "#67e8f9",
+          backgroundColor: alpha("#22d3ee", 0.12),
           flexShrink: 0,
         }}
       >
@@ -123,6 +123,9 @@ export function BookingDetailsDialog({
         sx: {
           borderRadius: "28px",
           overflow: "hidden",
+          background:
+            "linear-gradient(180deg, rgba(18,18,31,0.96) 0%, rgba(9,10,20,0.94) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.16)}`,
         },
       }}
     >
@@ -146,8 +149,9 @@ export function BookingDetailsDialog({
             sx={{
               p: 1.35,
               borderRadius: "22px",
-              backgroundColor: (theme) => theme.palette.background.paper,
-              border: `1px solid ${alpha("#111111", 0.05)}`,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.04) 100%)",
+              border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
             }}
           >
             <Stack
@@ -218,11 +222,11 @@ export function BookingDetailsDialog({
                 px: 1.2,
                 py: 0.95,
                 borderRadius: "16px",
-                backgroundColor: alpha("#3aa66f", 0.08),
-                border: `1px solid ${alpha("#3aa66f", 0.12)}`,
+                backgroundColor: alpha("#34d399", 0.1),
+                border: `1px solid ${alpha("#34d399", 0.16)}`,
               }}
             >
-              <Typography variant="body2" sx={{ color: "#1f7d4c", fontWeight: 700 }}>
+              <Typography variant="body2" sx={{ color: "#86efac", fontWeight: 700 }}>
                 Ushbu bron uchun {booking.appliedDiscountPercent}% skidka qo'llangan.
               </Typography>
             </Box>
@@ -234,14 +238,14 @@ export function BookingDetailsDialog({
                 px: 1.2,
                 py: 0.95,
                 borderRadius: "16px",
-                backgroundColor: alpha("#d96868", 0.08),
-                border: `1px solid ${alpha("#d96868", 0.12)}`,
+                backgroundColor: alpha("#fb7185", 0.1),
+                border: `1px solid ${alpha("#fb7185", 0.16)}`,
               }}
             >
-              <Typography variant="caption" sx={{ color: "#a23c3c", fontWeight: 700 }}>
+              <Typography variant="caption" sx={{ color: "#fecdd3", fontWeight: 700 }}>
                 Rad etish sababi
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6d3f3f", mt: 0.35 }}>
+              <Typography variant="body2" sx={{ color: "#ffe4e6", mt: 0.35 }}>
                 {booking.rejectionReason}
               </Typography>
             </Box>

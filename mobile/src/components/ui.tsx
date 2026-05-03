@@ -100,11 +100,20 @@ export function PrimaryButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={tone === "ghost" ? colors.ink : "#fff"} />
+        <ActivityIndicator color={tone === "ghost" ? colors.cyan : "#fff"} />
       ) : (
         <Text style={[styles.buttonText, tone === "ghost" && styles.buttonGhostText]}>{label}</Text>
       )}
     </Pressable>
+  );
+}
+
+export function LoadingCard({ label = "Yuklanmoqda..." }: { label?: string }) {
+  return (
+    <Card style={styles.loadingCard}>
+      <ActivityIndicator color={colors.cyan} />
+      <Text style={styles.loadingText}>{label}</Text>
+    </Card>
   );
 }
 
@@ -113,7 +122,7 @@ export function Field({ label, ...props }: TextInputProps & { label: string }) {
     <View style={styles.fieldWrap}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
-        placeholderTextColor="#9b9387"
+        placeholderTextColor="rgba(203,213,225,0.55)"
         style={styles.input}
         autoCapitalize="none"
         {...props}
@@ -141,37 +150,37 @@ export function Stat({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: "rgba(17,17,29,0.92)",
     borderColor: colors.line,
-    borderRadius: 24,
+    borderRadius: 26,
     borderWidth: 1,
     padding: 18,
     ...shadows.soft,
   },
   darkCard: {
     backgroundColor: colors.darkPanel,
-    borderColor: "#2b2b2b",
+    borderColor: colors.lineStrong,
   },
   sectionHeader: {
     gap: 4,
     marginBottom: 12,
   },
   eyebrow: {
-    color: colors.goldDark,
+    color: colors.cyan,
     fontSize: 12,
     fontWeight: "800",
     letterSpacing: 0,
     textTransform: "uppercase",
   },
   sectionTitle: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 0,
   },
   pill: {
     alignItems: "center",
-    backgroundColor: colors.haze,
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: colors.line,
     borderRadius: 999,
     borderWidth: 1,
@@ -180,16 +189,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   pillSelected: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.28)",
   },
   pillDark: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.28)",
   },
   pillGreen: {
-    backgroundColor: "#e9f7ef",
-    borderColor: "#ccebd9",
+    backgroundColor: "rgba(52,211,153,0.12)",
+    borderColor: "rgba(52,211,153,0.22)",
   },
   pillText: {
     color: colors.muted,
@@ -207,19 +216,29 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    backgroundColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.24)",
+    borderWidth: 1,
     borderRadius: 18,
     minHeight: 54,
     justifyContent: "center",
     paddingHorizontal: 18,
+    shadowColor: colors.purple,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    elevation: 6,
   },
   buttonGold: {
     backgroundColor: colors.gold,
+    borderColor: "rgba(246,200,95,0.32)",
   },
   buttonGhost: {
-    backgroundColor: colors.haze,
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: colors.line,
     borderWidth: 1,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
     color: "#fff",
@@ -227,7 +246,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   buttonGhostText: {
-    color: colors.ink,
+    color: colors.text,
   },
   disabled: {
     opacity: 0.55,
@@ -240,22 +259,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   fieldLabel: {
-    color: colors.ink,
+    color: colors.text,
     fontSize: 13,
     fontWeight: "800",
   },
   input: {
-    backgroundColor: colors.paper,
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: colors.line,
     borderRadius: 18,
     borderWidth: 1,
-    color: colors.ink,
+    color: colors.text,
     fontSize: 16,
     minHeight: 52,
     paddingHorizontal: 14,
   },
   stat: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.purple,
+    borderColor: "rgba(103,232,249,0.2)",
+    borderWidth: 1,
     borderRadius: 20,
     flex: 1,
     minHeight: 92,
@@ -264,9 +285,11 @@ const styles = StyleSheet.create({
   },
   statGold: {
     backgroundColor: colors.gold,
+    borderColor: "rgba(246,200,95,0.24)",
   },
   statGreen: {
     backgroundColor: colors.green,
+    borderColor: "rgba(52,211,153,0.24)",
   },
   statValue: {
     color: "#fff",
@@ -278,5 +301,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     marginTop: 3,
+  },
+  loadingCard: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "center",
+    minHeight: 72,
+  },
+  loadingText: {
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: "800",
   },
 });

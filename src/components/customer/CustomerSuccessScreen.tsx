@@ -45,7 +45,8 @@ export function CustomerSuccessScreen({
               borderRadius: "50%",
               display: "grid",
               placeItems: "center",
-              bgcolor: "#0f0f0f",
+              background:
+                "linear-gradient(135deg, rgba(139,92,246,1) 0%, rgba(34,211,238,0.88) 100%)",
               color: "#fff",
             }}
           >
@@ -62,7 +63,7 @@ export function CustomerSuccessScreen({
               borderRadius: "50%",
               display: "grid",
               placeItems: "center",
-              bgcolor: "#16d46b",
+              bgcolor: "#34d399",
               color: "#fff",
             }}
           >
@@ -82,8 +83,10 @@ export function CustomerSuccessScreen({
         sx={{
           p: { xs: 1.3, md: 1.55 },
           borderRadius: "24px",
-          backgroundColor: "#f8f9fd",
-          border: `1px solid ${alpha("#111111", 0.05)}`,
+          background:
+            "linear-gradient(180deg, rgba(19,20,34,0.86) 0%, rgba(10,11,22,0.72) 100%)",
+          border: `1px solid ${alpha("#c4b5fd", 0.14)}`,
+          boxShadow: "0 20px 50px rgba(0,0,0,0.24)",
         }}
       >
         <Box
@@ -100,9 +103,9 @@ export function CustomerSuccessScreen({
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "#9aa2ba",
+                    color: "#8d96ad",
                     textTransform: "uppercase",
-                    letterSpacing: "0.08em",
+                    letterSpacing: 0,
                     fontWeight: 700,
                   }}
                 >
@@ -119,14 +122,14 @@ export function CustomerSuccessScreen({
                 sx={{
                   height: 32,
                   borderRadius: "999px",
-                  backgroundColor: alpha("#3aa66f", 0.16),
-                  color: "#1f7d4c",
+                  backgroundColor: alpha("#34d399", 0.16),
+                  color: "#86efac",
                   "& .MuiChip-label": { px: 1.2, fontWeight: 700 },
                 }}
               />
             </Stack>
 
-            <Box sx={{ height: 1, bgcolor: alpha("#111111", 0.06) }} />
+            <Box sx={{ height: 1, bgcolor: alpha("#c4b5fd", 0.12) }} />
 
             <Stack direction="row" spacing={0.9} alignItems="center">
               <Avatar
@@ -159,10 +162,11 @@ export function CustomerSuccessScreen({
                 px: 1.05,
                 py: 0.95,
                 borderRadius: "16px",
-                backgroundColor: "#fff",
+                backgroundColor: alpha("#ffffff", 0.06),
+                border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
               }}
             >
-              <Typography variant="caption" sx={{ color: "#9aa2ba" }}>
+              <Typography variant="caption" sx={{ color: "#8d96ad" }}>
                 Mijoz
               </Typography>
               <Typography variant="subtitle1" sx={{ mt: 0.18 }}>
@@ -216,11 +220,12 @@ function InfoPill({
         px: 1.05,
         py: 0.95,
         borderRadius: "16px",
-        backgroundColor: "#fff",
+        backgroundColor: alpha("#ffffff", 0.06),
+        border: `1px solid ${alpha("#c4b5fd", 0.12)}`,
       }}
     >
-      <Box sx={{ color: "#9aa2ba", display: "grid", placeItems: "center" }}>{icon}</Box>
-      <Typography variant="body2" sx={{ fontSize: "0.98rem", color: "#1f2430" }}>
+      <Box sx={{ color: "#8d96ad", display: "grid", placeItems: "center" }}>{icon}</Box>
+      <Typography variant="body2" sx={{ fontSize: "0.98rem", color: "#f8fafc" }}>
         {label}
       </Typography>
     </Stack>
