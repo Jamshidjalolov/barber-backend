@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     booking_reminder_check_interval_seconds: int = 30
     database_connect_timeout_seconds: int = 8
     database_command_timeout_seconds: int = 15
+    database_startup_max_attempts: int = 3
+    database_startup_retry_seconds: int = 5
 
     @field_validator("database_url", mode="before")
     @classmethod
@@ -66,7 +68,7 @@ class Settings(BaseSettings):
         parts = urlsplit(value)
         if parts.scheme != "postgresql+asyncpg" or not parts.netloc or not parts.path.strip("/"):
             raise ValueError(
-                "DATABASE_URL must be the Render PostgreSQL Internal Database URL, "
+                "DATABASE_URL must be a PostgreSQL connection URL, "
                 "for example postgresql://user:password@host:5432/database. "
                 "Do not paste the psql command or the DATABASE_URL= prefix."
             )
@@ -74,6 +76,11 @@ class Settings(BaseSettings):
         sslmode = query.pop("sslmode", None)
         if sslmode and "ssl" not in query:
             query["ssl"] = sslmode
+        query.pop("channel_binding", None)
+        if parts.hostname and parts.hostname.endswith(".neon.tech") and "ssl" not in query:
+            query["ssl"] = "require"
+        if parts.hostname and "-pooler." in parts.hostname and "prepared_statement_cache_size" not in query:
+            query["prepared_statement_cache_size"] = "0"
 
         return urlunsplit(parts._replace(query=urlencode(query)))
 

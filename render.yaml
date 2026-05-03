@@ -11,7 +11,7 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: FRONTEND_URL
-        value: https://barber-fron-kxb7codgp-jamshidjalolovs-projects.vercel.app
+        value: https://barber-fron-gilt.vercel.app
       - key: CORS_ALLOWED_ORIGIN_REGEX
         value: https://.*\.vercel\.app
       - key: PYTHON_VERSION
@@ -19,14 +19,6 @@ services:
       - key: POETRY_VIRTUALENVS_IN_PROJECT
         value: "true"
       - key: DATABASE_URL
-        fromDatabase:
-          name: barber-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET_KEY
         generateValue: true
-
-databases:
-  - name: barber-db
-    plan: free
-    databaseName: barbershop
-    user: barbershop_user

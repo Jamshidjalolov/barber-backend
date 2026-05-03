@@ -22,13 +22,38 @@ Backend ichida statuslar mashina uchun inglizcha saqlanadi:
 
 Frontenddagi o'zbekcha statuslar keyin API adapter orqali shu qiymatlarga map qilinadi.
 
-## Ishga tushirish
+## Neon PostgreSQL ulash
 
-1. `backend/.env.example` nusxasidan `.env` yarating
-2. PostgreSQL bazani tayyorlang
-3. `pip install -e .`
-4. `alembic upgrade head`
-5. `uvicorn app.main:app --reload`
+1. Neon dashboardda project yarating.
+2. `Connect` bo'limidan PostgreSQL connection string oling. `psql` komandasini emas, faqat URLni oling.
+3. `backend/.env.example` nusxasidan `backend/.env` yarating.
+4. `DATABASE_URL` qiymatiga Neon URLni qo'ying:
+
+```env
+DATABASE_URL=postgresql://neondb_owner:password@ep-example.us-east-1.aws.neon.tech/neondb?sslmode=require
+```
+
+Neon pooled URL ham ishlaydi. URL ichida `channel_binding=require` bo'lsa ham backend uni avtomatik olib tashlaydi, chunki `asyncpg` driveri uni SQLAlchemy orqali connection keyword sifatida qabul qilmaydi.
+
+## Local ishga tushirish
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8001
+```
+
+Backend start bo'lganda Alembic migrationlar avtomatik ishlaydi va admin user seed qilinadi. Agar `DATABASE_URL` noto'g'ri bo'lsa, backend ochiq port ko'rsatib turmaydi, logda aniq DB xatosi chiqadi.
+
+## Render deploy
+
+Render service environment variables:
+
+- `DATABASE_URL`: Neon connection string
+- `FRONTEND_URL`: Vercel frontend URL
+- `CORS_ALLOWED_ORIGIN_REGEX`: `https://.*\.vercel\.app`
+- `JWT_SECRET_KEY`: kuchli random secret
+
+Render start command `backend/render-start.sh` orqali ishlaydi va FastAPI lifespan yoqilgan bo'lishi kerak, shunda migration/seed avtomatik yuradi.
 
 ## Realtime oqim
 
