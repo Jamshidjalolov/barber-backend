@@ -10,7 +10,6 @@ import { BarberFormPayload, BarberProfile } from "../types";
 
 interface BarbersPageProps {
   items: BarberProfile[];
-  telegramBotUsername?: string;
   onCreateBarber: (payload: BarberFormPayload) => Promise<void>;
   onUpdateBarber: (barberId: string, payload: BarberFormPayload) => Promise<void>;
   onDeleteBarber: (barberId: string) => Promise<void>;
@@ -19,7 +18,6 @@ interface BarbersPageProps {
 
 export function BarbersPage({
   items,
-  telegramBotUsername,
   onCreateBarber,
   onUpdateBarber,
   onDeleteBarber,
@@ -94,7 +92,6 @@ export function BarbersPage({
 
       <BarbersGrid
         items={items}
-        telegramBotUsername={telegramBotUsername}
         expandedId={expandedId}
         onEdit={handleEdit}
         onDelete={setDeleteTarget}

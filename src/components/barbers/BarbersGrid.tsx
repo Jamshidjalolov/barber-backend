@@ -21,12 +21,10 @@ import {
 import { alpha } from "@mui/material/styles";
 import { ReactNode } from "react";
 import { BarberProfile } from "../../types";
-import { TelegramQRCode } from "../common/TelegramQRCode";
 import { SectionCard } from "../common/SectionCard";
 
 interface BarbersGridProps {
   items: BarberProfile[];
-  telegramBotUsername?: string;
   expandedId: string | null;
   onEdit: (barber: BarberProfile) => void;
   onDelete: (barber: BarberProfile) => void;
@@ -113,7 +111,6 @@ function ActionButton({
 
 export function BarbersGrid({
   items,
-  telegramBotUsername,
   expandedId,
   onEdit,
   onDelete,
@@ -352,9 +349,7 @@ export function BarbersGrid({
                     maxWidth: "100%",
                     gridTemplateColumns: {
                       xs: "1fr",
-                      md: telegramBotUsername
-                        ? "minmax(240px, 290px) 252px minmax(220px, 260px)"
-                        : "minmax(260px, 310px) 272px",
+                      md: "minmax(260px, 310px) 272px",
                     },
                     gap: 0.9,
                     alignItems: "stretch",
@@ -550,28 +545,6 @@ export function BarbersGrid({
                     </Box>
                   </Box>
 
-                  {telegramBotUsername && barber.userId ? (
-                    <Box sx={{ width: "100%" }}>
-                      <TelegramQRCode
-                        botUsername={telegramBotUsername}
-                        role="barber"
-                        subjectId={barber.userId}
-                        linked={Boolean(barber.telegramConnected)}
-                        chatId={barber.telegramChatId}
-                        size={108}
-                        title={
-                          barber.telegramConnected
-                            ? "Telegram ulangan"
-                            : "Shu barberni ulang"
-                        }
-                        description={
-                          barber.telegramConnected
-                            ? "Faqat shu barberga tegishli bron va eslatmalar shu botga boradi."
-                            : "Start bosilgach faqat shu barberning navbatlari, bo'sh-band vaqtlari va eslatmalari ko'rinadi."
-                        }
-                      />
-                    </Box>
-                  ) : null}
                 </Box>
               </Collapse>
             </Stack>

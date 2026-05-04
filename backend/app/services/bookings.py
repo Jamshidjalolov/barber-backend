@@ -246,11 +246,21 @@ def _build_status_message(booking: Booking) -> str:
 
 
 def _get_service_price(barber: Barber, service_name: str) -> int:
-    mapping = {
-        "Soch olish": barber.price_haircut,
-        "Fade qirqim": barber.price_fade,
-        "Soch + soqol": barber.price_hair_beard,
-        "Premium paket": barber.price_premium,
-        "Soqol dizayni": barber.price_beard,
-    }
-    return mapping.get(service_name, barber.price_haircut)
+    normalized = (
+        service_name.lower()
+        .replace("+", " ")
+        .replace("-", " ")
+        .replace("_", " ")
+        .strip()
+    )
+    words = set(normalized.split())
+
+    if "premium" in words or "paket" in words:
+        return barber.price_premium
+    if "fade" in words:
+        return barber.price_fade
+    if ("soch" in words and "soqol" in words) or ("hair" in words and "beard" in words):
+        return barber.price_hair_beard
+    if "soqol" in words or "beard" in words:
+        return barber.price_beard
+    return barber.price_haircut

@@ -1336,8 +1336,17 @@ class TelegramNotifier:
             f"✂️ Xizmat: {booking.service_name}",
             f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
             f"{self._status_icon(booking.status)} Holat: {self._label_for_status(booking.status)}",
-            f"💵 Narx: {format_price(booking.final_price)}",
         ]
+        if booking.applied_discount_percent:
+            lines.extend(
+                [
+                    f"💵 Asl narx: {format_price(booking.original_price)}",
+                    f"🔥 Skidka: -{booking.applied_discount_percent}%",
+                    f"✅ To'lov: {format_price(booking.final_price)}",
+                ]
+            )
+        else:
+            lines.append(f"💵 Narx: {format_price(booking.original_price)}")
         if include_customer:
             lines.insert(2, f"🙋 Mijoz: {booking.customer_name}")
             lines.insert(3, f"📞 Telefon: {booking.customer_phone}")

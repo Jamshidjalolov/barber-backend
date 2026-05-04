@@ -1627,13 +1627,6 @@ export default function App() {
         </View>
       </ImageBackground>
 
-      <TelegramConnectCard
-        botUsername={telegramBotUsername}
-        role={role}
-        user={session.user}
-        reminderMinutes={reminderMinutes}
-      />
-
       <SectionHeaderRow title="Xizmatlarimiz" action="Barchasi" />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tileStrip}>
         {services.slice(0, 5).map((service) => (
@@ -1708,13 +1701,6 @@ export default function App() {
         </View>
       </Card>
 
-      <TelegramConnectCard
-        botUsername={telegramBotUsername}
-        role={role}
-        user={session.user}
-        reminderMinutes={reminderMinutes}
-      />
-
       <Card style={styles.panelCard}>
         <View style={styles.rowBetween}>
           <Text style={styles.panelCardTitle}>Bugungi bronlar</Text>
@@ -1759,13 +1745,6 @@ export default function App() {
           <Ionicons name="stats-chart" size={26} color={colors.gold} />
         </View>
       </Card>
-
-      <TelegramConnectCard
-        botUsername={telegramBotUsername}
-        role={role}
-        user={session.user}
-        reminderMinutes={reminderMinutes}
-      />
 
       <SectionHeaderRow title="So'nggi bronlar" action="Barchasi" />
       <Card style={styles.panelCard}>
@@ -1979,6 +1958,7 @@ export default function App() {
         </View>
       </Card>
 
+      <SectionHeaderRow title="Telegram bot" />
       <TelegramConnectCard
         botUsername={telegramBotUsername}
         role={role}

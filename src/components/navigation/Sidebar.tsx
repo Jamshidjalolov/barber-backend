@@ -3,6 +3,7 @@ import EventNoteRoundedIcon from "@mui/icons-material/EventNoteRounded";
 import Groups2RoundedIcon from "@mui/icons-material/Groups2Rounded";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import {
   alpha,
   Avatar,
@@ -33,6 +34,7 @@ const navigationItems = [
   { key: "barberlar" as const, label: "Barberlar", icon: Groups2RoundedIcon },
   { key: "navbatlar" as const, label: "Navbatlar", icon: EventNoteRoundedIcon },
   { key: "skidkalar" as const, label: "Skidkalar", icon: LocalOfferRoundedIcon },
+  { key: "sozlamalar" as const, label: "Sozlamalar", icon: SettingsRoundedIcon },
 ];
 
 function formatLoginLabel(username: string) {

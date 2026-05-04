@@ -24,6 +24,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
 import { BarberProfile, BarberSettingsPayload } from "../../types";
+import { TelegramQRCode } from "../common/TelegramQRCode";
 import { BarberLocationPickerMap } from "../maps/BarberLocationPickerMap";
 
 interface BarberSettingsDialogProps {
@@ -32,6 +33,8 @@ interface BarberSettingsDialogProps {
   onClose: () => void;
   onSubmit: (payload: BarberSettingsPayload) => Promise<unknown>;
   onUploadMedia: (file: File) => Promise<string>;
+  telegramBotUsername?: string;
+  reminderMinutes: number;
 }
 
 interface FormValues {
@@ -84,6 +87,8 @@ export function BarberSettingsDialog({
   onClose,
   onSubmit,
   onUploadMedia,
+  telegramBotUsername,
+  reminderMinutes,
 }: BarberSettingsDialogProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -271,6 +276,29 @@ export function BarberSettingsDialog({
 
       <DialogContent sx={{ px: { xs: 2.2, md: 2.6 }, py: { xs: 2, md: 2.3 } }}>
         <Stack spacing={1.6}>
+          {telegramBotUsername && barber.userId ? (
+            <Panel
+              icon={<ScheduleRoundedIcon sx={{ fontSize: "1rem" }} />}
+              title="Telegram bot"
+            >
+              <TelegramQRCode
+                botUsername={telegramBotUsername}
+                role="barber"
+                subjectId={barber.userId}
+                size={132}
+                compact
+                linked={Boolean(barber.telegramConnected)}
+                chatId={barber.telegramChatId}
+                title={barber.telegramConnected ? "Telegram sozlamalari" : "Telegram botni ulash"}
+                description={
+                  barber.telegramConnected
+                    ? "Yangi bronlar, qabul/rad/tugatish tugmalari va eslatmalar shu botga keladi."
+                    : `Start bosing. Navbatlar va ${reminderMinutes} daqiqa oldingi eslatmalar shu yerga keladi.`
+                }
+              />
+            </Panel>
+          ) : null}
+
           <Panel
             icon={<PersonRoundedIcon sx={{ fontSize: "1rem" }} />}
             title="Profil ko'rinishi"

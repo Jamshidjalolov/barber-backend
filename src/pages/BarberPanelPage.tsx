@@ -9,7 +9,6 @@ import { BarberSettingsDialog } from "../components/barber-panel/BarberSettingsD
 import { RejectBookingDialog } from "../components/barber-panel/RejectBookingDialog";
 import { BarberStatsOverview } from "../components/barber-panel/BarberStatsOverview";
 import { BarberWorkspaceHero } from "../components/barber-panel/BarberWorkspaceHero";
-import { TelegramQRCode } from "../components/common/TelegramQRCode";
 import { LogoutConfirmDialog } from "../components/navigation/LogoutConfirmDialog";
 import { BarberProfile, BarberSettingsPayload, BookingItem, BookingStatus, DiscountFormPayload, DiscountItem } from "../types";
 import { formatUzbekReadableDate, formatUzbekReadableIsoDate, getLocalIsoDate } from "../utils/date";
@@ -289,28 +288,6 @@ export function BarberPanelPage({
               }
             />
 
-            {telegramBotUsername && !barber.telegramConnected ? (
-              <Box
-                sx={{
-                  p: 1.35,
-                  borderRadius: "24px",
-                  border: `1px solid ${alpha("#22d3ee", 0.16)}`,
-                  backgroundColor: alpha("#22d3ee", 0.08),
-                  backdropFilter: "blur(16px)",
-                }}
-              >
-                <TelegramQRCode
-                  botUsername={telegramBotUsername}
-                  role="barber"
-                  subjectId={barber.userId}
-                  size={108}
-                  compact
-                  title="Telegram ulash"
-                  description={`Navbatlar va ${reminderMinutes} daqiqa oldingi eslatmalar shu yerga keladi.`}
-                />
-              </Box>
-            ) : null}
-
             {latestBooking ? (
               <Alert
                 icon={<CampaignRoundedIcon fontSize="inherit" />}
@@ -371,6 +348,8 @@ export function BarberPanelPage({
         onClose={() => setSettingsOpen(false)}
         onSubmit={onUpdateSettings}
         onUploadMedia={onUploadMedia}
+        telegramBotUsername={telegramBotUsername}
+        reminderMinutes={reminderMinutes}
       />
 
       <BarberDiscountManager

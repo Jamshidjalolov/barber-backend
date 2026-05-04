@@ -47,6 +47,7 @@ import {
   writeStoredSession,
 } from "./lib/session";
 import { AdminLayout } from "./layouts/AdminLayout";
+import { AdminSettingsPage } from "./pages/AdminSettingsPage";
 import { BarbersPage } from "./pages/BarbersPage";
 import { BarberPanelPage } from "./pages/BarberPanelPage";
 import { BookingsPage } from "./pages/BookingsPage";
@@ -657,7 +658,6 @@ export default function App() {
       return (
         <BarbersPage
           items={barbers}
-          telegramBotUsername={telegramBotUsername}
           onCreateBarber={handleCreateBarber}
           onUpdateBarber={handleUpdateBarber}
           onDeleteBarber={handleDeleteBarber}
@@ -675,6 +675,16 @@ export default function App() {
         <DiscountsPage
           items={discounts}
           onDeleteDiscount={handleDeleteDiscount}
+        />
+      );
+    }
+
+    if (activePage === "sozlamalar" && currentAdmin) {
+      return (
+        <AdminSettingsPage
+          currentUser={currentAdmin}
+          telegramBotUsername={telegramBotUsername}
+          reminderMinutes={reminderMinutes}
         />
       );
     }
@@ -698,6 +708,8 @@ export default function App() {
     performanceItems,
     recentItems,
     telegramBotUsername,
+    reminderMinutes,
+    currentAdmin,
     session,
   ]);
 
@@ -842,7 +854,6 @@ export default function App() {
       <AdminLayout
         activePage={activePage}
         currentUser={currentAdmin}
-        telegramBotUsername={telegramBotUsername}
         onLogout={() => switchToAuth("admin-login")}
         onPageChange={setActivePage}
       >

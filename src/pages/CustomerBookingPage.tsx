@@ -625,20 +625,6 @@ export function CustomerBookingPage({
           onLogout={() => setLogoutOpen(true)}
         />
 
-        {signedInCustomer && telegramBotUsername && !signedInCustomer.telegramConnected ? (
-          <Box sx={{ display: { xs: "block", lg: "none" } }}>
-            <TelegramQRCode
-              botUsername={telegramBotUsername}
-              role="customer"
-              subjectId={signedInCustomer.id}
-              size={108}
-              compact
-              title="Telegram ulash"
-              description={`Bron va ${reminderMinutes} daqiqa oldingi eslatma shu yerga keladi.`}
-            />
-          </Box>
-        ) : null}
-
         <CustomerDiscountBoard items={visibleDiscounts} onChooseBarber={handleDiscountChoose} />
 
         {rankedBarbers.length ? (
@@ -687,26 +673,6 @@ export function CustomerBookingPage({
               value={selectedWorkHoursLabel}
             />
           </Box>
-
-          {signedInCustomer && telegramBotUsername ? (
-            <Box sx={{ my: 1.2 }}>
-              <TelegramQRCode
-                botUsername={telegramBotUsername}
-                role="customer"
-                subjectId={signedInCustomer.id}
-                size={102}
-                compact
-                linked={Boolean(signedInCustomer.telegramConnected)}
-                chatId={signedInCustomer.telegramChatId ?? undefined}
-                title={signedInCustomer.telegramConnected ? "Telegram ulangan" : "Telegram ulash"}
-                description={
-                  signedInCustomer.telegramConnected
-                    ? "Faqat shu akkauntning xabarlari shu yerga keladi."
-                    : "Faqat o'zingizga tegishli xabarlar shu yerga keladi."
-                }
-              />
-            </Box>
-          ) : null}
 
           <Stack spacing={0.85}>
             {rankedBarbers.slice(0, 2).map((barber) => (
@@ -906,22 +872,42 @@ export function CustomerBookingPage({
           alignItems: "start",
         }}
       >
-        <CustomerProfileCard
-          barber={selectedBarber}
-          dateLabel={selectedDateLabel}
-          timeLabel={selectedTimeLabel}
-          workHoursLabel={selectedWorkHoursLabel}
-          originalPriceLabel={formatMoney(selectedBasePrice)}
-          finalPriceLabel={formatMoney(selectedFinalPrice)}
-          discountPercent={selectedBarberDiscount?.percent}
-          serviceOptions={serviceOptions}
-          value={customer}
-          onBack={() => setStep("time")}
-          onChange={(field, nextValue) =>
-            setCustomer((current) => ({ ...current, [field]: nextValue }))
-          }
-          onSubmit={handleConfirmBooking}
-        />
+        <Stack spacing={2.1}>
+          <CustomerProfileCard
+            barber={selectedBarber}
+            dateLabel={selectedDateLabel}
+            timeLabel={selectedTimeLabel}
+            workHoursLabel={selectedWorkHoursLabel}
+            originalPriceLabel={formatMoney(selectedBasePrice)}
+            finalPriceLabel={formatMoney(selectedFinalPrice)}
+            discountPercent={selectedBarberDiscount?.percent}
+            serviceOptions={serviceOptions}
+            value={customer}
+            onBack={() => setStep("time")}
+            onChange={(field, nextValue) =>
+              setCustomer((current) => ({ ...current, [field]: nextValue }))
+            }
+            onSubmit={handleConfirmBooking}
+          />
+
+          {signedInCustomer && telegramBotUsername ? (
+            <TelegramQRCode
+              botUsername={telegramBotUsername}
+              role="customer"
+              subjectId={signedInCustomer.id}
+              size={128}
+              compact
+              linked={Boolean(signedInCustomer.telegramConnected)}
+              chatId={signedInCustomer.telegramChatId ?? undefined}
+              title={signedInCustomer.telegramConnected ? "Telegram sozlamalari" : "Telegram botni ulash"}
+              description={
+                signedInCustomer.telegramConnected
+                  ? "Bron statuslari, eslatmalar va bot ichidagi bron qilish shu akkauntga ulangan."
+                  : `Start bosing. Bron va ${reminderMinutes} daqiqa oldingi eslatmalar Telegramga keladi.`
+              }
+            />
+          ) : null}
+        </Stack>
 
         <Box sx={{ display: { xs: "none", lg: "block" } }}>
           <DesktopAsideCard

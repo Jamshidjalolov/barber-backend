@@ -1,4 +1,4 @@
-export type PageKey = "dashboard" | "barberlar" | "navbatlar" | "skidkalar";
+export type PageKey = "dashboard" | "barberlar" | "navbatlar" | "skidkalar" | "sozlamalar";
 export type AppMode = "auth" | "customer" | "admin" | "barber";
 export type AuthScreen =
   | "customer-login"
