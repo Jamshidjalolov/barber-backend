@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+from contextlib import suppress
 from ipaddress import ip_address
 from urllib.parse import urlsplit
 
@@ -17,8 +19,11 @@ from app.api.routes.meta import router as meta_router
 from app.api.routes.realtime import router as realtime_router
 from app.api.routes.uploads import UPLOADS_DIR, router as uploads_router
 from app.core.config import settings
+from app.services.reminders import booking_reminder_worker
+from app.services.telegram import telegram_notifier
 
 app = FastAPI(title=settings.app_name)
+background_tasks: list[asyncio.Task] = []
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
@@ -80,6 +85,25 @@ async def add_browser_cors_headers(request: Request, call_next):
 @app.get("/health")
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+async def start_background_workers() -> None:
+    if telegram_notifier.is_enabled():
+        background_tasks.append(asyncio.create_task(telegram_notifier.run_polling()))
+    background_tasks.append(asyncio.create_task(booking_reminder_worker.run()))
+
+
+@app.on_event("shutdown")
+async def stop_background_workers() -> None:
+    for task in background_tasks:
+        task.cancel()
+
+    for task in background_tasks:
+        with suppress(asyncio.CancelledError):
+            await task
+
+    background_tasks.clear()
 
 
 app.include_router(auth_router, prefix=settings.api_v1_prefix)

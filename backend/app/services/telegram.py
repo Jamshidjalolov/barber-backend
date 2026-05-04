@@ -405,6 +405,8 @@ class TelegramNotifier:
         if not self.is_enabled():
             return
 
+        await self._delete_webhook()
+
         while True:
             try:
                 updates = await self._fetch_updates()
@@ -416,6 +418,16 @@ class TelegramNotifier:
             except Exception:
                 logger.exception("Telegram polling loop error")
                 await asyncio.sleep(settings.telegram_poll_retry_seconds)
+
+    async def _delete_webhook(self) -> None:
+        url = f"{settings.telegram_api_base}/bot{settings.telegram_bot_token}/deleteWebhook"
+        payload = {"drop_pending_updates": False}
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.post(url, json=payload)
+                response.raise_for_status()
+        except Exception:
+            logger.exception("Telegram deleteWebhook failed")
 
     async def _fetch_updates(self) -> list[dict[str, object]]:
         url = f"{settings.telegram_api_base}/bot{settings.telegram_bot_token}/getUpdates"
