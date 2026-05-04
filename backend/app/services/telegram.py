@@ -26,29 +26,29 @@ except ZoneInfoNotFoundError:
 
 
 CUSTOMER_MENU = {
-    "my": "📌 Bronlarim",
-    "book": "✂️ Bron qilish",
-    "discounts": "🏷 Skidkalar",
-    "help": "ℹ️ Yordam",
+    "my": "📅 Bronlarim",
+    "book": "💈 Bron qilish",
+    "discounts": "🔥 Skidkalar",
+    "help": "💬 Yordam",
 }
 BARBER_MENU = {
     "today": "📋 Bugungi bronlar",
-    "pending": "⏳ Kutilayotganlar",
-    "next": "⏰ Keyingi bron",
+    "pending": "🟡 Kutilayotganlar",
+    "next": "⏱ Keyingi bron",
     "stats": "📊 Statistika",
-    "discounts": "🏷 Skidkalarim",
+    "discounts": "🎁 Skidkalarim",
 }
 ADMIN_MENU = {
-    "today": "📣 Bugungi holat",
-    "recent": "📋 So'nggi bronlar",
-    "help": "ℹ️ Yordam",
+    "today": "📊 Bugungi holat",
+    "recent": "🧾 So'nggi bronlar",
+    "help": "💬 Yordam",
 }
 SERVICE_OPTIONS = [
-    ("s1", "Soch olish", "Soch olish"),
-    ("s2", "Fade qirqim", "Fade qirqim"),
-    ("s3", "Soch + soqol", "Soch + soqol"),
-    ("s4", "Premium paket", "Premium paket"),
-    ("s5", "Soqol dizayni", "Soqol dizayni"),
+    ("s1", "Soch olish", "✂️ Soch olish"),
+    ("s2", "Fade qirqim", "💇 Fade qirqim"),
+    ("s3", "Soch + soqol", "🧔 Soch + soqol"),
+    ("s4", "Premium paket", "👑 Premium paket"),
+    ("s5", "Soqol dizayni", "🪒 Soqol dizayni"),
 ]
 ACTIVE_STATUSES = [
     BookingStatusEnum.pending,
@@ -88,10 +88,10 @@ def build_map_link(latitude: float | None, longitude: float | None, address: str
 def build_location_lines(barber: Barber) -> list[str]:
     lines: list[str] = []
     if barber.address:
-        lines.append(f"Manzil: {barber.address}")
+        lines.append(f"📍 Manzil: {barber.address}")
     map_link = build_map_link(barber.latitude, barber.longitude, barber.address)
     if map_link:
-        lines.append(f"Xarita: {map_link}")
+        lines.append(f"🗺 Xarita: {map_link}")
     return lines
 
 
@@ -229,21 +229,21 @@ class TelegramNotifier:
         location_lines = build_location_lines(booking.barber)
         customer_text = "\n".join(
             [
-                "Yangi bron so'rovi yuborildi",
-                f"Barber: {booking.barber.display_name}",
-                f"Xizmat: {booking.service_name}",
-                f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
-                "Holat: javob kutilmoqda",
+                "💈 Yangi bron so'rovi yuborildi",
+                f"👤 Barber: {booking.barber.display_name}",
+                f"✂️ Xizmat: {booking.service_name}",
+                f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                "🟡 Holat: javob kutilmoqda",
                 *location_lines,
             ]
         )
         barber_text = "\n".join(
             [
-                "Yangi bron so'rovi",
-                f"Mijoz: {booking.customer_name}",
-                f"Xizmat: {booking.service_name}",
-                f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
-                f"Telefon: {booking.customer_phone}",
+                "🔔 Yangi bron so'rovi",
+                f"🙋 Mijoz: {booking.customer_name}",
+                f"✂️ Xizmat: {booking.service_name}",
+                f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                f"📞 Telefon: {booking.customer_phone}",
                 *location_lines,
             ]
         )
@@ -261,10 +261,10 @@ class TelegramNotifier:
         await self.send_admin_alert(
             "\n".join(
                 [
-                    "Yangi bron tushdi",
-                    f"Mijoz: {booking.customer_name}",
-                    f"Barber: {booking.barber.display_name}",
-                    f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                    "🔔 Yangi bron tushdi",
+                    f"🙋 Mijoz: {booking.customer_name}",
+                    f"💈 Barber: {booking.barber.display_name}",
+                    f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
                     *location_lines,
                 ]
             )
@@ -274,20 +274,20 @@ class TelegramNotifier:
         location_lines = build_location_lines(booking.barber)
         status_text = {
             BookingStatusEnum.accepted: (
-                "Bron qabul qilindi",
-                "Barber broningizni tasdiqladi.",
+                "✅ Bron qabul qilindi",
+                "💈 Barber broningizni tasdiqladi.",
             ),
             BookingStatusEnum.in_service: (
-                "Xizmat boshlandi",
-                "Barber hozir navbatingiz bilan ishlayapti.",
+                "✂️ Xizmat boshlandi",
+                "💈 Barber hozir navbatingiz bilan ishlayapti.",
             ),
             BookingStatusEnum.completed: (
-                "Navbat yakunlandi",
-                "Xizmat tugadi. Endi yangi bron qilishingiz mumkin.",
+                "🏁 Navbat yakunlandi",
+                "✅ Xizmat tugadi. Endi yangi bron qilishingiz mumkin.",
             ),
             BookingStatusEnum.rejected: (
-                "Bron rad etildi",
-                f"Sabab: {booking.rejection_reason or 'Sabab kiritilmagan'}",
+                "❌ Bron rad etildi",
+                f"📝 Sabab: {booking.rejection_reason or 'Sabab kiritilmagan'}",
             ),
         }.get(booking.status)
         if status_text:
@@ -297,8 +297,8 @@ class TelegramNotifier:
                 "\n".join(
                     [
                         title,
-                        f"Barber: {booking.barber.display_name}",
-                        f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                        f"💈 Barber: {booking.barber.display_name}",
+                        f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
                         body,
                         *location_lines,
                     ]
@@ -309,10 +309,10 @@ class TelegramNotifier:
             booking.barber.user.telegram_chat_id or booking.barber.telegram_chat_id,
             "\n".join(
                 [
-                    "Bron holati yangilandi",
-                    f"Mijoz: {booking.customer_name}",
-                    f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
-                    f"Holat: {self._label_for_status(booking.status)}",
+                    "🔄 Bron holati yangilandi",
+                    f"🙋 Mijoz: {booking.customer_name}",
+                    f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                    f"{self._status_icon(booking.status)} Holat: {self._label_for_status(booking.status)}",
                     *location_lines,
                 ]
             ),
@@ -322,10 +322,10 @@ class TelegramNotifier:
         await self.send_admin_alert(
             "\n".join(
                 [
-                    "Bron holati o'zgardi",
-                    f"Mijoz: {booking.customer_name}",
-                    f"Barber: {booking.barber.display_name}",
-                    f"Holat: {self._label_for_status(booking.status)}",
+                    "🔄 Bron holati o'zgardi",
+                    f"🙋 Mijoz: {booking.customer_name}",
+                    f"💈 Barber: {booking.barber.display_name}",
+                    f"{self._status_icon(booking.status)} Holat: {self._label_for_status(booking.status)}",
                     *location_lines,
                 ]
             )
@@ -337,10 +337,10 @@ class TelegramNotifier:
             booking.customer_user.telegram_chat_id if booking.customer_user else None,
             "\n".join(
                 [
-                    "Eslatma",
+                    "⏰ Eslatma",
                     "10 daqiqadan keyin navbatingiz bor.",
-                    f"Barber: {booking.barber.display_name}",
-                    f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                    f"💈 Barber: {booking.barber.display_name}",
+                    f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
                     *location_lines,
                 ]
             ),
@@ -350,10 +350,10 @@ class TelegramNotifier:
             booking.barber.user.telegram_chat_id or booking.barber.telegram_chat_id,
             "\n".join(
                 [
-                    "Yaqin navbat",
+                    "⏰ Yaqin navbat",
                     "10 daqiqadan keyin mijoz keladi.",
-                    f"Mijoz: {booking.customer_name}",
-                    f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
+                    f"🙋 Mijoz: {booking.customer_name}",
+                    f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
                     *location_lines,
                 ]
             ),
@@ -364,21 +364,21 @@ class TelegramNotifier:
         location_lines = build_location_lines(discount.barber)
         customer_text = "\n".join(
             [
-                "Yangi skidka",
-                f"Barber: {discount.barber.display_name}",
-                f"Miqdor: {discount.percent}%",
-                f"Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
-                f"Nomi: {discount.title}",
-                discount.description or "Web yoki mobil ilovadan qulay vaqtni tanlang.",
+                "🔥 Yangi skidka",
+                f"💈 Barber: {discount.barber.display_name}",
+                f"🎁 Miqdor: {discount.percent}%",
+                f"🗓 Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
+                f"🏷 Nomi: {discount.title}",
+                discount.description or "📲 Web yoki mobil ilovadan qulay vaqtni tanlang.",
                 *location_lines,
             ]
         )
         barber_text = "\n".join(
             [
-                "Skidka e'lon qilindi",
-                f"Miqdor: {discount.percent}%",
-                f"Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
-                f"Nomi: {discount.title}",
+                "🎁 Skidka e'lon qilindi",
+                f"🔥 Miqdor: {discount.percent}%",
+                f"🗓 Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
+                f"🏷 Nomi: {discount.title}",
                 *location_lines,
             ]
         )
@@ -392,10 +392,10 @@ class TelegramNotifier:
         await self.send_admin_alert(
             "\n".join(
                 [
-                    "Yangi skidka e'lon qilindi",
-                    f"Barber: {discount.barber.display_name}",
-                    f"Miqdor: {discount.percent}%",
-                    f"Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
+                    "🎁 Yangi skidka e'lon qilindi",
+                    f"💈 Barber: {discount.barber.display_name}",
+                    f"🔥 Miqdor: {discount.percent}%",
+                    f"🗓 Vaqt: {format_datetime_label(discount.starts_at)} - {format_time_label(discount.ends_at)}",
                     *location_lines,
                 ]
             )
@@ -495,9 +495,9 @@ class TelegramNotifier:
                 chat_id,
                 "\n".join(
                     [
-                        "Assalomu alaykum.",
-                        "Bu botni web yoki mobil ilovadagi Telegram ulash linki/QR orqali ulang.",
-                        "Avval tizimga kiring, keyin Start bosing.",
+                        "👋 Assalomu alaykum.",
+                        "🔗 Bu botni web yoki mobil ilovadagi Telegram ulash linki/QR orqali ulang.",
+                        "📲 Avval tizimga kiring, keyin Start bosing.",
                     ]
                 ),
             )
@@ -507,7 +507,7 @@ class TelegramNotifier:
             _, role_value, subject_id = payload.split("_", 2)
             role = RoleEnum(role_value)
         except ValueError:
-            await self.send_text(chat_id, "Bu link noto'g'ri yoki eskirgan.")
+            await self.send_text(chat_id, "⚠️ Bu link noto'g'ri yoki eskirgan.")
             return
 
         user = (
@@ -516,7 +516,7 @@ class TelegramNotifier:
             )
         ).scalar_one_or_none()
         if not user:
-            await self.send_text(chat_id, "Foydalanuvchi topilmadi yoki link eskirgan.")
+            await self.send_text(chat_id, "⚠️ Foydalanuvchi topilmadi yoki link eskirgan.")
             return
 
         existing_user = (
@@ -553,9 +553,9 @@ class TelegramNotifier:
                 chat_id,
                 "\n".join(
                     [
-                        "Bot hali ulanmagan.",
-                        "Web yoki mobil ilovadagi Telegram link/QR orqali Start bosing.",
-                        "Shunda bron, eslatma va status xabarlari shu yerga keladi.",
+                        "🔐 Bot hali ulanmagan.",
+                        "🔗 Web yoki mobil ilovadagi Telegram link/QR orqali Start bosing.",
+                        "🔔 Shunda bron, eslatma va status xabarlari shu yerga keladi.",
                     ]
                 ),
             )
@@ -601,12 +601,12 @@ class TelegramNotifier:
                     user.telegram_chat_id,
                     "\n".join(
                         [
-                            "Faol bron topilmadi.",
-                            "Bot ichidan yangi bron yaratishingiz mumkin.",
+                            "📭 Faol bron topilmadi.",
+                            "💈 Bot ichidan yangi bron yaratishingiz mumkin.",
                         ]
                     ),
                     role=RoleEnum.customer,
-                    inline_keyboard=[[{"text": "Bron qilish", "callback_data": "tm:book"}]],
+                    inline_keyboard=[[{"text": "💈 Bron qilish", "callback_data": "tm:book"}]],
                 )
                 return
 
@@ -621,7 +621,7 @@ class TelegramNotifier:
             user.telegram_chat_id,
             "\n".join(
                 [
-                    "Yordam",
+                    "💬 Yordam",
                     f"{CUSTOMER_MENU['my']} - faol broningizni ko'rsatadi.",
                     f"{CUSTOMER_MENU['book']} - bot ichidan bron yaratadi.",
                     f"{CUSTOMER_MENU['discounts']} - faol skidkalarni ko'rsatadi.",
@@ -658,16 +658,16 @@ class TelegramNotifier:
             .all()
         )
         if not discounts:
-            await self.send_text(user.telegram_chat_id, "Hozircha faol skidka yo'q.", role=RoleEnum.customer)
+            await self.send_text(user.telegram_chat_id, "🏷 Hozircha faol skidka yo'q.", role=RoleEnum.customer)
             return
 
         await self.send_text(
             user.telegram_chat_id,
             "\n".join(
                 [
-                    "Hozirgi skidkalar",
+                    "🔥 Hozirgi skidkalar",
                     *[
-                        f"{item.percent}% - {item.barber.display_name} ({format_time_label(item.starts_at)}-{format_time_label(item.ends_at)})"
+                        f"🎁 {item.percent}% - {item.barber.display_name} ({format_time_label(item.starts_at)}-{format_time_label(item.ends_at)})"
                         for item in discounts
                     ],
                 ]
@@ -682,8 +682,8 @@ class TelegramNotifier:
                 user.telegram_chat_id,
                 "\n".join(
                     [
-                        "Sizda faol bron bor.",
-                        "Yangi bron qilish uchun avvalgi bron tugashi yoki rad etilishi kerak.",
+                        "🟡 Sizda faol bron bor.",
+                        "📌 Yangi bron qilish uchun avvalgi bron tugashi yoki rad etilishi kerak.",
                         "",
                         self._format_booking_detail(active_booking, include_customer=False),
                     ]
@@ -705,13 +705,13 @@ class TelegramNotifier:
             .all()
         )
         if not barbers:
-            await self.send_text(user.telegram_chat_id, "Hozircha barber topilmadi.", role=RoleEnum.customer)
+            await self.send_text(user.telegram_chat_id, "📭 Hozircha barber topilmadi.", role=RoleEnum.customer)
             return
 
         rows = [
             [
                 {
-                    "text": f"{barber.display_name} - {barber.rating:.1f}",
+                    "text": f"💈 {barber.display_name} ⭐ {barber.rating:.1f}",
                     "callback_data": f"tb:{barber.id}",
                 }
             ]
@@ -721,8 +721,8 @@ class TelegramNotifier:
             user.telegram_chat_id,
             "\n".join(
                 [
-                    "Barber tanlang",
-                    "Keyingi qadamda xizmat, sana va bo'sh vaqtni tanlaysiz.",
+                    "💈 Barber tanlang",
+                    "✨ Keyingi qadamda xizmat, sana va bo'sh vaqtni tanlaysiz.",
                 ]
             ),
             role=RoleEnum.customer,
@@ -732,7 +732,7 @@ class TelegramNotifier:
     async def _show_service_picker(self, session, chat_id: str, barber_id: str) -> None:
         barber = await self._get_barber(session, barber_id)
         if not barber:
-            await self.send_text(chat_id, "Barber topilmadi.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "📭 Barber topilmadi.", role=RoleEnum.customer)
             return
 
         rows: list[list[dict[str, str]]] = []
@@ -740,7 +740,7 @@ class TelegramNotifier:
             rows.append(
                 [
                     {
-                        "text": f"{label} - {format_price(service_price(barber, key))}",
+                        "text": f"{label} • {format_price(service_price(barber, key))}",
                         "callback_data": f"ts:{barber.id}:{key}",
                     }
                 ]
@@ -750,11 +750,11 @@ class TelegramNotifier:
             chat_id,
             "\n".join(
                 [
-                    f"Barber: {barber.display_name}",
-                    f"Reyting: {barber.rating:.1f}",
+                    f"💈 Barber: {barber.display_name}",
+                    f"⭐ Reyting: {barber.rating:.1f}",
                     *build_location_lines(barber),
                     "",
-                    "Xizmat tanlang",
+                    "✂️ Xizmat tanlang",
                 ]
             ),
             role=RoleEnum.customer,
@@ -765,7 +765,7 @@ class TelegramNotifier:
         barber = await self._get_barber(session, barber_id)
         service_name = service_name_from_key(service_key)
         if not barber or not service_name:
-            await self.send_text(chat_id, "Tanlov topilmadi. Qaytadan bron qiling.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "⚠️ Tanlov topilmadi. Qaytadan bron qiling.", role=RoleEnum.customer)
             return
 
         today = datetime.now(UZBEK_TZ).date()
@@ -774,9 +774,11 @@ class TelegramNotifier:
             selected = today + timedelta(days=offset)
             label = selected.strftime("%d.%m")
             if offset == 0:
-                label = f"Bugun {label}"
+                label = f"📍 Bugun {label}"
             elif offset == 1:
-                label = f"Ertaga {label}"
+                label = f"🌅 Ertaga {label}"
+            else:
+                label = f"📅 {label}"
             rows.append(
                 [
                     {
@@ -790,9 +792,9 @@ class TelegramNotifier:
             chat_id,
             "\n".join(
                 [
-                    f"Xizmat: {service_name}",
-                    f"Narx: {format_price(service_price(barber, service_key))}",
-                    "Sana tanlang",
+                    f"✂️ Xizmat: {service_name}",
+                    f"💵 Narx: {format_price(service_price(barber, service_key))}",
+                    "📅 Sana tanlang",
                 ]
             ),
             role=RoleEnum.customer,
@@ -803,22 +805,22 @@ class TelegramNotifier:
         barber = await self._get_barber(session, barber_id)
         service_name = service_name_from_key(service_key)
         if not barber or not service_name:
-            await self.send_text(chat_id, "Tanlov topilmadi. Qaytadan bron qiling.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "⚠️ Tanlov topilmadi. Qaytadan bron qiling.", role=RoleEnum.customer)
             return
 
         try:
             selected_day = parse_date_token(day_token)
         except ValueError:
-            await self.send_text(chat_id, "Sana noto'g'ri. Qaytadan tanlang.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "⚠️ Sana noto'g'ri. Qaytadan tanlang.", role=RoleEnum.customer)
             return
 
         slots = await self._available_slots_for_day(session, barber, selected_day)
         if not slots:
             await self.send_text(
                 chat_id,
-                "Bu kunda bo'sh vaqt qolmagan. Boshqa sana tanlang.",
+                "📭 Bu kunda bo'sh vaqt qolmagan. Boshqa sana tanlang.",
                 role=RoleEnum.customer,
-                inline_keyboard=[[{"text": "Sana tanlash", "callback_data": f"ts:{barber_id}:{service_key}"}]],
+                inline_keyboard=[[{"text": "📅 Sana tanlash", "callback_data": f"ts:{barber_id}:{service_key}"}]],
             )
             return
 
@@ -841,9 +843,9 @@ class TelegramNotifier:
             chat_id,
             "\n".join(
                 [
-                    f"Sana: {selected_day.strftime('%d.%m.%Y')}",
-                    f"Xizmat: {service_name}",
-                    "Bo'sh vaqtni tanlang",
+                    f"📅 Sana: {selected_day.strftime('%d.%m.%Y')}",
+                    f"✂️ Xizmat: {service_name}",
+                    "🕘 Bo'sh vaqtni tanlang",
                 ]
             ),
             role=RoleEnum.customer,
@@ -902,12 +904,12 @@ class TelegramNotifier:
         await self._answer_callback(callback_id)
         user = await self._get_user_by_chat_id(session, chat_id)
         if not user:
-            await self.send_text(chat_id, "Bot ulanmagan. Ilovadan Telegram link/QR orqali ulang.")
+            await self.send_text(chat_id, "🔐 Bot ulanmagan. Ilovadan Telegram link/QR orqali ulang.")
             return
 
         if data == "tm:book":
             if user.role != RoleEnum.customer:
-                await self.send_text(chat_id, "Bu amal faqat mijoz uchun.", role=user.role)
+                await self.send_text(chat_id, "⚠️ Bu amal faqat mijoz uchun.", role=user.role)
                 return
             await self._show_barber_picker(session, user)
             return
@@ -935,7 +937,7 @@ class TelegramNotifier:
             await self._update_booking_from_callback(session, user, chat_id, action, parts[1])
             return
 
-        await self.send_text(chat_id, "Bu tugma eskirgan. Menyudan qaytadan tanlang.", role=user.role)
+        await self.send_text(chat_id, "⚠️ Bu tugma eskirgan. Menyudan qaytadan tanlang.", role=user.role)
 
     async def _create_booking_from_callback(
         self,
@@ -948,19 +950,19 @@ class TelegramNotifier:
         slot_token: str,
     ) -> None:
         if user.role != RoleEnum.customer:
-            await self.send_text(chat_id, "Bron yaratish faqat mijoz profili orqali ishlaydi.", role=user.role)
+            await self.send_text(chat_id, "⚠️ Bron yaratish faqat mijoz profili orqali ishlaydi.", role=user.role)
             return
 
         service_name = service_name_from_key(service_key)
         if not service_name:
-            await self.send_text(chat_id, "Xizmat topilmadi. Qaytadan tanlang.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "⚠️ Xizmat topilmadi. Qaytadan tanlang.", role=RoleEnum.customer)
             return
 
         phone = (user.phone or "").strip()
         if len(phone) < 7:
             await self.send_text(
                 chat_id,
-                "Bron qilish uchun profilingizda telefon raqam bo'lishi kerak. Ilovada Profil bo'limidan telefonni kiriting.",
+                "📞 Bron qilish uchun profilingizda telefon raqam bo'lishi kerak. Ilovada Profil bo'limidan telefonni kiriting.",
                 role=RoleEnum.customer,
             )
             return
@@ -974,7 +976,7 @@ class TelegramNotifier:
                 tzinfo=UZBEK_TZ,
             )
         except ValueError:
-            await self.send_text(chat_id, "Tanlangan vaqt noto'g'ri. Qaytadan bron qiling.", role=RoleEnum.customer)
+            await self.send_text(chat_id, "⚠️ Tanlangan vaqt noto'g'ri. Qaytadan bron qiling.", role=RoleEnum.customer)
             return
 
         from app.schemas.booking import BookingCreateRequest
@@ -1001,8 +1003,8 @@ class TelegramNotifier:
             chat_id,
             "\n".join(
                 [
-                    "Bron yuborildi.",
-                    "Barber qabul qilganda yoki rad etganda shu yerga xabar keladi.",
+                    "✅ Bron yuborildi.",
+                    "🔔 Barber qabul qilganda yoki rad etganda shu yerga xabar keladi.",
                     "",
                     self._format_booking_detail(booking, include_customer=False),
                 ]
@@ -1019,7 +1021,7 @@ class TelegramNotifier:
         booking_id: str,
     ) -> None:
         if user.role not in {RoleEnum.barber, RoleEnum.admin}:
-            await self.send_text(chat_id, "Bu amal faqat barber yoki admin uchun.", role=user.role)
+            await self.send_text(chat_id, "⚠️ Bu amal faqat barber yoki admin uchun.", role=user.role)
             return
 
         status_by_action = {
@@ -1050,7 +1052,7 @@ class TelegramNotifier:
             chat_id,
             "\n".join(
                 [
-                    "Bron yangilandi.",
+                    "✅ Bron yangilandi.",
                     self._format_booking_detail(booking, include_customer=True),
                 ]
             ),
@@ -1097,8 +1099,8 @@ class TelegramNotifier:
                     user.telegram_chat_id,
                     "\n".join(
                         [
-                            "Bugun bron yo'q.",
-                            "Yangi bron kelganda shu yerga xabar tushadi.",
+                            "📭 Bugun bron yo'q.",
+                            "🔔 Yangi bron kelganda shu yerga xabar tushadi.",
                         ]
                     ),
                     role=RoleEnum.barber,
@@ -1112,9 +1114,9 @@ class TelegramNotifier:
                 user.telegram_chat_id,
                 "\n".join(
                     [
-                        f"Bugungi bronlar: {len(bookings)} ta",
-                        f"Bo'sh vaqtlar: {free_text}",
-                        "Boshqarish uchun pastdagi bron tugmalaridan foydalaning.",
+                        f"📋 Bugungi bronlar: {len(bookings)} ta",
+                        f"🟢 Bo'sh vaqtlar: {free_text}",
+                        "👇 Boshqarish uchun pastdagi bron tugmalaridan foydalaning.",
                     ]
                 ),
                 role=RoleEnum.barber,
@@ -1147,12 +1149,12 @@ class TelegramNotifier:
                 .all()
             )
             if not pending_bookings:
-                await self.send_text(user.telegram_chat_id, "Kutilayotgan bron yo'q.", role=RoleEnum.barber)
+                await self.send_text(user.telegram_chat_id, "📭 Kutilayotgan bron yo'q.", role=RoleEnum.barber)
                 return
 
             await self.send_text(
                 user.telegram_chat_id,
-                f"Kutilayotgan bronlar: {len(pending_bookings)} ta",
+                f"🟡 Kutilayotgan bronlar: {len(pending_bookings)} ta",
                 role=RoleEnum.barber,
             )
             for item in pending_bookings:
@@ -1167,7 +1169,7 @@ class TelegramNotifier:
         if text == BARBER_MENU["next"]:
             next_booking = next((item for item in bookings if to_local_time(item.scheduled_for) >= now_local), None)
             if not next_booking:
-                await self.send_text(user.telegram_chat_id, "Hozircha keyingi bron topilmadi.", role=RoleEnum.barber)
+                await self.send_text(user.telegram_chat_id, "📭 Hozircha keyingi bron topilmadi.", role=RoleEnum.barber)
                 return
 
             await self.send_text(
@@ -1195,16 +1197,16 @@ class TelegramNotifier:
                 .all()
             )
             if not discounts:
-                await self.send_text(user.telegram_chat_id, "Hozircha faol skidka yo'q.", role=RoleEnum.barber)
+                await self.send_text(user.telegram_chat_id, "🏷 Hozircha faol skidka yo'q.", role=RoleEnum.barber)
                 return
 
             await self.send_text(
                 user.telegram_chat_id,
                 "\n".join(
                     [
-                        "Sizning skidkalaringiz",
+                        "🎁 Sizning skidkalaringiz",
                         *[
-                            f"{item.percent}% - {format_datetime_label(item.starts_at)} dan {format_time_label(item.ends_at)} gacha"
+                            f"🔥 {item.percent}% - {format_datetime_label(item.starts_at)} dan {format_time_label(item.ends_at)} gacha"
                             for item in discounts
                         ],
                     ]
@@ -1233,12 +1235,12 @@ class TelegramNotifier:
             user.telegram_chat_id,
             "\n".join(
                 [
-                    "Barber statistikasi",
-                    f"Ism: {barber.display_name}",
-                    f"Bugungi bronlar: {len(bookings)} ta",
-                    f"Tugallangan: {completed_count} ta",
-                    f"Faol bronlar: {active_count} ta",
-                    f"Faol skidkalar: {active_discounts_count} ta",
+                    "📊 Barber statistikasi",
+                    f"💈 Ism: {barber.display_name}",
+                    f"📋 Bugungi bronlar: {len(bookings)} ta",
+                    f"🏁 Tugallangan: {completed_count} ta",
+                    f"🟡 Faol bronlar: {active_count} ta",
+                    f"🎁 Faol skidkalar: {active_discounts_count} ta",
                 ]
             ),
             role=RoleEnum.barber,
@@ -1275,10 +1277,10 @@ class TelegramNotifier:
                 user.telegram_chat_id,
                 "\n".join(
                     [
-                        "Bugungi holat",
-                        f"Barberlar: {barbers} ta",
-                        f"Bronlar: {total} ta",
-                        f"Kutilayotgan: {pending} ta",
+                        "📊 Bugungi holat",
+                        f"💈 Barberlar: {barbers} ta",
+                        f"📋 Bronlar: {total} ta",
+                        f"🟡 Kutilayotgan: {pending} ta",
                     ]
                 ),
                 role=RoleEnum.admin,
@@ -1298,14 +1300,14 @@ class TelegramNotifier:
             .all()
         )
         if not recent:
-            await self.send_text(user.telegram_chat_id, "Hozircha bron topilmadi.", role=RoleEnum.admin)
+            await self.send_text(user.telegram_chat_id, "📭 Hozircha bron topilmadi.", role=RoleEnum.admin)
             return
 
         await self.send_text(
             user.telegram_chat_id,
             "\n".join(
                 [
-                    "So'nggi bronlar",
+                    "🧾 So'nggi bronlar",
                     *[
                         f"{self._status_icon(item.status)} {item.customer_name} -> {item.barber.display_name} ({format_time_label(item.scheduled_for)})"
                         for item in recent
@@ -1319,28 +1321,28 @@ class TelegramNotifier:
         if booking.status == BookingStatusEnum.pending:
             return [
                 [
-                    {"text": "Qabul qilish", "callback_data": f"ba:{booking.id}"},
-                    {"text": "Rad etish", "callback_data": f"br:{booking.id}"},
+                    {"text": "✅ Qabul qilish", "callback_data": f"ba:{booking.id}"},
+                    {"text": "❌ Rad etish", "callback_data": f"br:{booking.id}"},
                 ]
             ]
         if booking.status in {BookingStatusEnum.accepted, BookingStatusEnum.in_service}:
-            return [[{"text": "Tugatish", "callback_data": f"bc:{booking.id}"}]]
+            return [[{"text": "🏁 Tugatish", "callback_data": f"bc:{booking.id}"}]]
         return None
 
     def _format_booking_detail(self, booking: Booking, *, include_customer: bool) -> str:
         lines = [
-            "Bron ma'lumoti",
-            f"Barber: {booking.barber.display_name}",
-            f"Xizmat: {booking.service_name}",
-            f"Vaqt: {format_datetime_label(booking.scheduled_for)}",
-            f"Holat: {self._label_for_status(booking.status)}",
-            f"Narx: {format_price(booking.final_price)}",
+            "💈 Bron ma'lumoti",
+            f"👤 Barber: {booking.barber.display_name}",
+            f"✂️ Xizmat: {booking.service_name}",
+            f"🗓 Vaqt: {format_datetime_label(booking.scheduled_for)}",
+            f"{self._status_icon(booking.status)} Holat: {self._label_for_status(booking.status)}",
+            f"💵 Narx: {format_price(booking.final_price)}",
         ]
         if include_customer:
-            lines.insert(2, f"Mijoz: {booking.customer_name}")
-            lines.insert(3, f"Telefon: {booking.customer_phone}")
+            lines.insert(2, f"🙋 Mijoz: {booking.customer_name}")
+            lines.insert(3, f"📞 Telefon: {booking.customer_phone}")
         if booking.rejection_reason:
-            lines.append(f"Sabab: {booking.rejection_reason}")
+            lines.append(f"📝 Sabab: {booking.rejection_reason}")
         lines.extend(build_location_lines(booking.barber))
         return "\n".join(lines)
 
@@ -1353,9 +1355,9 @@ class TelegramNotifier:
         }[role]
         return "\n".join(
             [
-                f"Assalomu alaykum, {name}",
-                f"Telegram bot {role_label} profilingizga ulandi.",
-                "Endi bron, holat va eslatmalar shu yerga keladi.",
+                f"👋 Assalomu alaykum, {name}",
+                f"✅ Telegram bot {role_label} profilingizga ulandi.",
+                "🔔 Endi bron, holat va eslatmalar shu yerga keladi.",
             ]
         )
 
@@ -1370,11 +1372,11 @@ class TelegramNotifier:
 
     def _status_icon(self, status: BookingStatusEnum) -> str:
         return {
-            BookingStatusEnum.pending: "Kutilmoqda",
-            BookingStatusEnum.accepted: "Qabul qilindi",
-            BookingStatusEnum.in_service: "Jarayonda",
-            BookingStatusEnum.completed: "Tugallandi",
-            BookingStatusEnum.rejected: "Rad etildi",
+            BookingStatusEnum.pending: "🟡",
+            BookingStatusEnum.accepted: "🟢",
+            BookingStatusEnum.in_service: "✂️",
+            BookingStatusEnum.completed: "✅",
+            BookingStatusEnum.rejected: "❌",
         }[status]
 
 
