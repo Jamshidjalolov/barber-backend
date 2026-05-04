@@ -293,6 +293,10 @@ function buildTelegramLink(botUsername: string, role: ApiRole, subjectId: string
   return `https://t.me/${botUsername.replace("@", "")}?start=link_${role}_${subjectId}`;
 }
 
+function buildTelegramQrUrl(link: string) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data=${encodeURIComponent(link)}`;
+}
+
 function AppModal({
   visible,
   title,
@@ -353,6 +357,15 @@ function TelegramConnectCard({
             {linked
               ? user.telegramChatId ? `Chat ID: ${user.telegramChatId}` : "Bron va eslatmalar botga boradi."
               : `Bron holati va ${reminderMinutes} daqiqa oldingi eslatma Telegramga keladi.`}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.telegramQrPanel}>
+        <Image source={{ uri: buildTelegramQrUrl(link) }} style={styles.telegramQrImage} />
+        <View style={styles.grow}>
+          <Text style={styles.telegramQrTitle}>QR orqali tez ulash</Text>
+          <Text style={styles.telegramQrText}>
+            Kameradan skaner qiling yoki pastdagi tugma orqali botga o'ting. Bot ichida bron, status va eslatmalar ishlaydi.
           </Text>
         </View>
       </View>
@@ -2578,6 +2591,34 @@ const styles = StyleSheet.create({
   },
   telegramIconLinked: {
     backgroundColor: colors.green,
+  },
+  telegramQrPanel: {
+    alignItems: "center",
+    backgroundColor: "rgba(2,6,23,0.44)",
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 13,
+    padding: 12,
+  },
+  telegramQrImage: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    height: 96,
+    width: 96,
+  },
+  telegramQrTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  telegramQrText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+    marginTop: 4,
   },
   rowWrap: {
     flexDirection: "row",
