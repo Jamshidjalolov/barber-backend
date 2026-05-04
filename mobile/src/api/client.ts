@@ -7,6 +7,7 @@ import {
   ApiDiscount,
   ApiRole,
   ApiServiceOptions,
+  ApiTelegramMeta,
   ApiTokenResponse,
   AuthSession,
   AuthUser,
@@ -68,6 +69,8 @@ function mapUser(user: ApiAuthUser): AuthUser {
     username: user.username,
     phone: user.phone,
     photoUrl: user.photo_url,
+    telegramChatId: user.telegram_chat_id,
+    telegramConnected: user.telegram_connected,
     barberProfileId: user.barber_profile_id,
   };
 }
@@ -152,28 +155,6 @@ export function registerCustomer(fullName: string, phone: string, password: stri
   return request<ApiTokenResponse>("/auth/customer/register", {
     method: "POST",
     body: JSON.stringify({ full_name: fullName, phone, password }),
-  }).then(mapSession);
-}
-
-export function registerBarber(payload: {
-  fullName: string;
-  specialty: string;
-  username: string;
-  password: string;
-}) {
-  return request<ApiTokenResponse>("/auth/barber/register", {
-    method: "POST",
-    body: JSON.stringify({
-      full_name: payload.fullName,
-      specialty: payload.specialty,
-      username: payload.username,
-      password: payload.password,
-      rating: 4.8,
-      experience_years: 1,
-      photo_url: null,
-      media_url: null,
-      bio: null,
-    }),
   }).then(mapSession);
 }
 
@@ -318,6 +299,17 @@ export function deleteDiscount(token: string, discountId: string) {
 
 export function getServices() {
   return request<ApiServiceOptions>("/meta/services");
+}
+
+export function getTelegramMeta() {
+  return request<ApiTelegramMeta>("/meta/telegram");
+}
+
+export function createRealtimeSocket(role: ApiRole, subjectId: string) {
+  const url = new URL(API_BASE_URL);
+  const wsOrigin = url.origin.replace(/^http/, "ws");
+  const apiPath = url.pathname.replace(/\/$/, "");
+  return new WebSocket(`${wsOrigin}${apiPath}/realtime/ws/${role}/${subjectId}`);
 }
 
 export function createBooking(

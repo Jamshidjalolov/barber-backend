@@ -4,7 +4,6 @@ export type AuthScreen =
   | "customer-login"
   | "customer-register"
   | "barber-login"
-  | "barber-register"
   | "admin-login";
 
 export type ApiRole = "customer" | "barber" | "admin";
@@ -37,6 +36,8 @@ export interface AdminUser {
   name: string;
   username: string;
   role: string;
+  telegramChatId?: string | null;
+  telegramConnected?: boolean;
 }
 
 export interface AdminAccount extends AdminUser {
@@ -250,8 +251,20 @@ export interface ApiDiscount {
 export interface ApiAvailabilityBooking {
   id: string;
   barber_id: string;
+  barber_name?: string;
+  barber_user_id?: string;
+  customer_user_id?: string | null;
+  customer_name?: string;
+  customer_phone?: string;
+  service_name?: string;
+  note?: string | null;
   status: ApiBookingStatus;
   scheduled_for: string;
+  original_price?: number;
+  final_price?: number;
+  applied_discount_percent?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ApiServiceOptions {

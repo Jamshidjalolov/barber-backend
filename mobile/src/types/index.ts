@@ -8,6 +8,8 @@ export type AuthUser = {
   username?: string | null;
   phone?: string | null;
   photoUrl?: string | null;
+  telegramChatId?: string | null;
+  telegramConnected?: boolean;
   barberProfileId?: string | null;
 };
 
@@ -23,6 +25,8 @@ export type ApiAuthUser = {
   username?: string | null;
   phone?: string | null;
   photo_url?: string | null;
+  telegram_chat_id?: string | null;
+  telegram_connected?: boolean;
   barber_profile_id?: string | null;
 };
 
@@ -96,8 +100,26 @@ export type ApiServiceOptions = {
 export type ApiAvailabilityBooking = {
   id: string;
   barber_id: string;
+  barber_name?: string;
+  barber_user_id?: string;
+  customer_user_id?: string | null;
+  customer_name?: string;
+  customer_phone?: string;
+  service_name?: string;
+  note?: string | null;
   status: ApiBookingStatus;
   scheduled_for: string;
+  original_price?: number;
+  final_price?: number;
+  applied_discount_percent?: number | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ApiTelegramMeta = {
+  enabled: boolean;
+  bot_username?: string | null;
+  reminder_minutes_before: number;
 };
 
 export type BarberFormPayload = {

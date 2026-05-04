@@ -81,7 +81,7 @@ async def create_booking(
         await session.execute(
             select(Booking).where(
                 Booking.barber_id == payload.barber_id,
-                Booking.scheduled_for == payload.scheduled_for,
+                Booking.scheduled_for == scheduled_for,
                 Booking.status != BookingStatusEnum.rejected,
             ),
         )
@@ -99,7 +99,7 @@ async def create_booking(
         customer_phone=payload.customer_phone.strip(),
         service_name=payload.service_name.strip(),
         note=payload.note.strip() if payload.note else None,
-        scheduled_for=payload.scheduled_for,
+        scheduled_for=scheduled_for,
         status=BookingStatusEnum.pending,
         original_price=_get_service_price(barber, payload.service_name.strip()),
         final_price=_get_service_price(barber, payload.service_name.strip()),
@@ -110,8 +110,8 @@ async def create_booking(
             select(DiscountOffer)
             .where(
                 DiscountOffer.barber_id == barber.id,
-                DiscountOffer.starts_at <= payload.scheduled_for,
-                DiscountOffer.ends_at >= payload.scheduled_for,
+                DiscountOffer.starts_at <= scheduled_for,
+                DiscountOffer.ends_at >= scheduled_for,
             )
             .order_by(DiscountOffer.percent.desc(), DiscountOffer.created_at.desc())
         )

@@ -17,7 +17,6 @@ import {
   loginAdmin,
   loginBarber,
   loginCustomer,
-  registerBarber,
   registerCustomer,
   uploadMedia,
   updateBarber,
@@ -50,7 +49,6 @@ import {
 import { AdminLayout } from "./layouts/AdminLayout";
 import { BarbersPage } from "./pages/BarbersPage";
 import { BarberPanelPage } from "./pages/BarberPanelPage";
-import { BarberRegisterPage } from "./pages/BarberRegisterPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { CustomerBookingPage } from "./pages/CustomerBookingPage";
 import { CustomerRegisterPage } from "./pages/CustomerRegisterPage";
@@ -112,10 +110,6 @@ function readAuthScreenFromHash(): AuthScreen {
 
   if (hash === "#barber-login") {
     return "barber-login";
-  }
-
-  if (hash === "#barber-register") {
-    return "barber-register";
   }
 
   if (hash === "#admin-login") {
@@ -489,14 +483,6 @@ export default function App() {
     }, remember);
   };
 
-  const handleBarberRegister = async (payload: BarberFormPayload) => {
-    const response = await registerBarber(payload);
-    await applySession({
-      accessToken: response.access_token,
-      user: mapApiUserToAuthUser(response.user),
-    });
-  };
-
   const handleAdminLogin = async (username: string, password: string, remember = true) => {
     const response = await loginAdmin(username, password);
     await applySession({
@@ -783,16 +769,6 @@ export default function App() {
       );
     }
 
-    if (authScreen === "barber-register") {
-      return renderWithNotice(
-        <BarberRegisterPage
-          onBack={() => setAuthScreen("barber-login")}
-          onOpenLogin={() => setAuthScreen("barber-login")}
-          onRegister={handleBarberRegister}
-        />
-      );
-    }
-
     return renderWithNotice(
       <UnifiedLoginPage
         selectedRole="customer"
@@ -864,6 +840,7 @@ export default function App() {
       <AdminLayout
         activePage={activePage}
         currentUser={currentAdmin}
+        telegramBotUsername={telegramBotUsername}
         onLogout={() => switchToAuth("admin-login")}
         onPageChange={setActivePage}
       >

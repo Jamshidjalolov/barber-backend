@@ -56,5 +56,17 @@ class BookingRead(BaseModel):
 class BookingAvailabilityRead(BaseModel):
     id: str
     barber_id: str
+    barber_name: str
+    barber_user_id: str
+    customer_user_id: str | None = None
+    customer_name: str
+    customer_phone: str
+    service_name: str
+    note: str | None = None
     status: BookingStatusEnum
     scheduled_for: datetime
+    original_price: int
+    final_price: int
+    applied_discount_percent: int | None = None
+    created_at: datetime
+    updated_at: datetime

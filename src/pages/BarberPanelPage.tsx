@@ -212,18 +212,14 @@ export function BarberPanelPage({
     const nextStatus =
       booking.status === "Kutilmoqda"
         ? "Tasdiqlandi"
-        : booking.status === "Tasdiqlandi"
-          ? "Jarayonda"
-          : "Tugallandi";
+        : "Tugallandi";
 
     onUpdateBookingStatus(booking.id, nextStatus);
     setFeedback({
       message:
         nextStatus === "Tasdiqlandi"
           ? `${booking.customer} broni qabul qilindi`
-          : nextStatus === "Jarayonda"
-            ? `${booking.customer} uchun xizmat boshlandi`
-            : `${booking.customer} uchun navbat tugatildi`,
+          : `${booking.customer} uchun navbat tugatildi`,
       tone: "success",
     });
   };

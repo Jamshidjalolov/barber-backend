@@ -104,7 +104,11 @@ async def list_booking_availability(
     date_from: datetime | None = Query(default=None),
     date_to: datetime | None = Query(default=None),
 ) -> list[BookingAvailabilityRead]:
-    query: Select[tuple[Booking]] = select(Booking).order_by(Booking.scheduled_for.asc())
+    query: Select[tuple[Booking]] = (
+        select(Booking)
+        .options(*BOOKING_RELATIONS)
+        .order_by(Booking.scheduled_for.asc())
+    )
 
     if date_from is not None:
         query = query.where(Booking.scheduled_for >= date_from)
@@ -116,8 +120,20 @@ async def list_booking_availability(
         BookingAvailabilityRead(
             id=item.id,
             barber_id=item.barber_id,
+            barber_name=item.barber.display_name,
+            barber_user_id=item.barber.user_id,
+            customer_user_id=item.customer_user_id,
+            customer_name=item.customer_name,
+            customer_phone=item.customer_phone,
+            service_name=item.service_name,
+            note=item.note,
             status=item.status,
             scheduled_for=item.scheduled_for,
+            original_price=item.original_price,
+            final_price=item.final_price,
+            applied_discount_percent=item.applied_discount_percent,
+            created_at=item.created_at,
+            updated_at=item.updated_at,
         )
         for item in result.scalars().all()
         if item.status != BookingStatusEnum.rejected

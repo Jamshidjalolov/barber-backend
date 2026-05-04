@@ -3,12 +3,14 @@ import { alpha, AppBar, Box, Drawer, IconButton, Toolbar } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode, useState } from "react";
 import { BrandLogo } from "../components/common/BrandLogo";
+import { TelegramQRCode } from "../components/common/TelegramQRCode";
 import { Sidebar } from "../components/navigation/Sidebar";
 import { AdminUser, PageKey } from "../types";
 
 interface AdminLayoutProps {
   activePage: PageKey;
   currentUser: AdminUser;
+  telegramBotUsername?: string;
   onLogout: () => void;
   onPageChange: (page: PageKey) => void;
   children: ReactNode;
@@ -20,6 +22,7 @@ const mobileDrawerWidth = "min(84vw, 300px)";
 export function AdminLayout({
   activePage,
   currentUser,
+  telegramBotUsername,
   onLogout,
   onPageChange,
   children,
@@ -127,6 +130,25 @@ export function AdminLayout({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
+            {telegramBotUsername ? (
+              <Box sx={{ mb: 2 }}>
+                <TelegramQRCode
+                  botUsername={telegramBotUsername}
+                  role="admin"
+                  subjectId={currentUser.id}
+                  linked={Boolean(currentUser.telegramConnected)}
+                  chatId={currentUser.telegramChatId ?? undefined}
+                  compact
+                  size={108}
+                  title={currentUser.telegramConnected ? "Admin Telegram ulangan" : "Admin Telegram ulash"}
+                  description={
+                    currentUser.telegramConnected
+                      ? "Admin xabarlari va umumiy bron bildirishnomalari shu botga boradi."
+                      : "Botni ochib Start bosing, admin xabarlari Telegramga keladi."
+                  }
+                />
+              </Box>
+            ) : null}
             {children}
           </Box>
         </AnimatePresence>

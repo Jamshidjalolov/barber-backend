@@ -7,6 +7,7 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Linking,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
@@ -23,6 +24,7 @@ import {
   createBarber,
   createBooking,
   createDiscount,
+  createRealtimeSocket,
   deleteBarber,
   deleteBooking,
   deleteDiscount,
@@ -30,10 +32,11 @@ import {
   getBarbers,
   getBookings,
   getDiscounts,
+  getMe,
   getMyBarberProfile,
   getServices,
+  getTelegramMeta,
   login,
-  registerBarber,
   registerCustomer,
   uploadMedia,
   updateMe,
@@ -171,8 +174,7 @@ function initials(name: string) {
 
 function nextStatus(status: ApiBookingStatus): { status: ApiBookingStatus; label: string } | null {
   if (status === "pending") return { status: "accepted", label: "Qabul qilish" };
-  if (status === "accepted") return { status: "in_service", label: "Boshlash" };
-  if (status === "in_service") return { status: "completed", label: "Tugatish" };
+  if (status === "accepted" || status === "in_service") return { status: "completed", label: "Tugatish" };
   return null;
 }
 
@@ -287,6 +289,82 @@ async function openSms(phone: string, body: string) {
   await Linking.openURL(url);
 }
 
+function buildTelegramLink(botUsername: string, role: ApiRole, subjectId: string) {
+  return `https://t.me/${botUsername.replace("@", "")}?start=link_${role}_${subjectId}`;
+}
+
+function AppModal({
+  visible,
+  title,
+  subtitle,
+  children,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCard}>
+          <View style={styles.rowBetween}>
+            <View style={styles.grow}>
+              <Text style={styles.modalTitle}>{title}</Text>
+              {subtitle ? <Text style={styles.modalSubtitle}>{subtitle}</Text> : null}
+            </View>
+            <Pressable onPress={onClose} style={({ pressed }) => [styles.modalClose, pressed && styles.pressed]}>
+              <Ionicons name="close" size={20} color={colors.text} />
+            </Pressable>
+          </View>
+          {children}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function TelegramConnectCard({
+  botUsername,
+  role,
+  user,
+  reminderMinutes,
+}: {
+  botUsername: string | null;
+  role: ApiRole;
+  user: AuthUser;
+  reminderMinutes: number;
+}) {
+  if (!botUsername) return null;
+  const linked = Boolean(user.telegramConnected);
+  const link = buildTelegramLink(botUsername, role, user.id);
+
+  return (
+    <Card style={[styles.telegramCard, linked && styles.telegramCardLinked]}>
+      <View style={styles.row}>
+        <View style={[styles.telegramIcon, linked && styles.telegramIconLinked]}>
+          <Ionicons name={linked ? "checkmark" : "paper-plane-outline"} size={22} color={linked ? "#07110d" : "#fff"} />
+        </View>
+        <View style={styles.grow}>
+          <Text style={styles.cardTitle}>{linked ? "Telegram ulangan" : "Telegram ulash"}</Text>
+          <Text style={styles.muted}>
+            {linked
+              ? user.telegramChatId ? `Chat ID: ${user.telegramChatId}` : "Bron va eslatmalar botga boradi."
+              : `Bron holati va ${reminderMinutes} daqiqa oldingi eslatma Telegramga keladi.`}
+          </Text>
+        </View>
+      </View>
+      <PrimaryButton
+        label={linked ? "Botni ochish" : "Telegram botni ulash"}
+        tone={linked ? "ghost" : "gold"}
+        onPress={() => Linking.openURL(link)}
+      />
+    </Card>
+  );
+}
+
 async function sendBookingSms(booking: ApiBooking) {
   await openSms(
     booking.customer_phone,
@@ -298,14 +376,13 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
   const [role, setRole] = useState<ApiRole>("customer");
   const [mode, setMode] = useState<AuthMode>("login");
   const [fullName, setFullName] = useState("");
-  const [specialty, setSpecialty] = useState("");
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const canRegister = role !== "admin";
+  const canRegister = role === "customer";
   const identityLabel = role === "customer" ? "Telefon raqam" : "Username";
   const accent = roleAccent(role);
   const roleName = role === "customer" ? "BARBERSHOP" : role.toUpperCase();
@@ -316,8 +393,6 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
     try {
       if (mode === "register" && role === "customer") {
         onAuthenticated(await registerCustomer(fullName, identity, password));
-      } else if (mode === "register" && role === "barber") {
-        onAuthenticated(await registerBarber({ fullName, specialty, username: identity, password }));
       } else {
         onAuthenticated(await login(role, identity, password));
       }
@@ -411,18 +486,6 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
                 />
               </View>
             ) : null}
-            {mode === "register" && role === "barber" ? (
-              <View style={styles.authField}>
-                <MaterialCommunityIcons name="content-cut" size={18} color={colors.muted} />
-                <TextInput
-                  value={specialty}
-                  onChangeText={setSpecialty}
-                  placeholder="Mutaxassislik"
-                  placeholderTextColor="rgba(203,213,225,0.52)"
-                  style={styles.authInput}
-                />
-              </View>
-            ) : null}
             <View style={styles.authField}>
               <Ionicons name={role === "customer" ? "call-outline" : "person-circle-outline"} size={18} color={colors.muted} />
               <TextInput
@@ -473,16 +536,17 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (session: AuthSessio
               ))}
             </View>
 
-            <Pressable
-              onPress={() => canRegister && setMode(mode === "login" ? "register" : "login")}
-              disabled={!canRegister}
-              style={styles.authSwitch}
-            >
-              <Text style={styles.authSwitchText}>
-                {mode === "login" ? "Hisobingiz yo'qmi? " : "Hisobingiz bormi? "}
-                <Text style={{ color: accent }}>{mode === "login" ? "Ro'yxatdan o'tish" : "Kirish"}</Text>
-              </Text>
-            </Pressable>
+            {canRegister ? (
+              <Pressable
+                onPress={() => setMode(mode === "login" ? "register" : "login")}
+                style={styles.authSwitch}
+              >
+                <Text style={styles.authSwitchText}>
+                  {mode === "login" ? "Hisobingiz yo'qmi? " : "Hisobingiz bormi? "}
+                  <Text style={{ color: accent }}>{mode === "login" ? "Ro'yxatdan o'tish" : "Kirish"}</Text>
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -764,6 +828,10 @@ export default function App() {
   const [searchText, setSearchText] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState<BookingSuccess | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [barberModalOpen, setBarberModalOpen] = useState(false);
+  const [telegramBotUsername, setTelegramBotUsername] = useState<string | null>(null);
+  const [reminderMinutes, setReminderMinutes] = useState(10);
 
   const role = session?.user.role ?? "customer";
   const visibleTabs = getTabs(role);
@@ -866,16 +934,28 @@ export default function App() {
         setSelectedBarberId(barberItems[0].id);
       }
       if (session) {
-        const [bookingItems, discountItems, profile] = await Promise.all([
+        const [bookingItems, discountItems, profile, latestUser] = await Promise.all([
           getBookings(session.accessToken),
           getDiscounts(session.accessToken).catch(() => []),
           session.user.role === "barber"
             ? getMyBarberProfile(session.accessToken).catch(() => null)
             : Promise.resolve(null),
+          getMe(session.accessToken).catch(() => session.user),
         ]);
         setBookings(bookingItems);
         setDiscounts(discountItems);
         setBarberProfile(profile);
+        setSession((current) => {
+          if (!current) return current;
+          const unchanged =
+            current.user.fullName === latestUser.fullName &&
+            current.user.username === latestUser.username &&
+            current.user.phone === latestUser.phone &&
+            current.user.photoUrl === latestUser.photoUrl &&
+            current.user.telegramChatId === latestUser.telegramChatId &&
+            current.user.telegramConnected === latestUser.telegramConnected;
+          return unchanged ? current : { ...current, user: latestUser };
+        });
         if (profile && !editingBarberId) {
           setBarberForm(formFromBarber(profile));
         }
@@ -892,6 +972,46 @@ export default function App() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    let active = true;
+    getTelegramMeta()
+      .then((meta) => {
+        if (!active) return;
+        setTelegramBotUsername(meta.bot_username ?? null);
+        setReminderMinutes(meta.reminder_minutes_before);
+      })
+      .catch(() => {
+        if (active) {
+          setTelegramBotUsername(null);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const subjectId = session.user.role === "admin" ? "global" : session.user.id;
+    const socket = createRealtimeSocket(session.user.role, subjectId);
+
+    socket.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as { message?: string; status?: ApiBookingStatus };
+        if (payload.message) {
+          setShowNotifications(false);
+        }
+        void loadData();
+      } catch {
+        void loadData();
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [loadData, session]);
 
   useEffect(() => {
     const slots = buildTimeSlots(9, 16);
@@ -1022,6 +1142,7 @@ export default function App() {
       }
       setEditingBarberId("");
       setBarberForm(defaultBarberForm());
+      setBarberModalOpen(false);
       await loadData();
       Alert.alert("Tayyor", "Barber malumoti saqlandi.");
     } catch (error) {
@@ -1246,10 +1367,7 @@ export default function App() {
   }
 
   function confirmLogout() {
-    Alert.alert("Chiqmoqchimisiz?", "Tasdiqlasangiz, akkauntingizdan chiqasiz.", [
-      { text: "Bekor qilish", style: "cancel" },
-      { text: "Chiqish", style: "destructive", onPress: logoutNow },
-    ]);
+    setLogoutModalOpen(true);
   }
 
   if (!session) {
@@ -1263,25 +1381,6 @@ export default function App() {
       />
     );
   }
-
-  const renderHero = () => (
-    <Card dark style={styles.hero}>
-      <Text style={styles.heroKicker}>{roleLabels[role]} panel</Text>
-      <Text style={styles.heroTitle}>Salom, {session.user.fullName.split(" ")[0]}</Text>
-      <Text style={styles.heroCopy}>
-        {role === "customer"
-          ? "Bugungi qulay vaqtni tanlang va navbatni bir necha soniyada bron qiling."
-          : role === "barber"
-            ? "Navbatlarni boshqaring, statuslarni tez yangilang va mijoz oqimini kuzating."
-            : "Barberlar, navbatlar va kunlik natijalarni mobil paneldan kuzating."}
-      </Text>
-      <View style={styles.statsRow}>
-        <Stat label={role === "admin" ? "Barber" : "Bugun"} value={role === "admin" ? barbers.length : todayBookings.length} tone="gold" />
-        <Stat label={role === "admin" ? "Mijoz" : "Faol"} value={role === "admin" ? uniqueClients : upcomingBookings.length} tone="green" />
-        <Stat label={role === "admin" ? "Daromad" : "Tugagan"} value={role === "admin" ? `${Math.round(revenue / 1000)}k` : completedToday} />
-      </View>
-    </Card>
-  );
 
   const renderBookingComposer = () => (
     <View style={styles.stack}>
@@ -1514,6 +1613,13 @@ export default function App() {
         </View>
       </ImageBackground>
 
+      <TelegramConnectCard
+        botUsername={telegramBotUsername}
+        role={role}
+        user={session.user}
+        reminderMinutes={reminderMinutes}
+      />
+
       <SectionHeaderRow title="Xizmatlarimiz" action="Barchasi" />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tileStrip}>
         {services.slice(0, 5).map((service) => (
@@ -1588,6 +1694,13 @@ export default function App() {
         </View>
       </Card>
 
+      <TelegramConnectCard
+        botUsername={telegramBotUsername}
+        role={role}
+        user={session.user}
+        reminderMinutes={reminderMinutes}
+      />
+
       <Card style={styles.panelCard}>
         <View style={styles.rowBetween}>
           <Text style={styles.panelCardTitle}>Bugungi bronlar</Text>
@@ -1633,6 +1746,13 @@ export default function App() {
         </View>
       </Card>
 
+      <TelegramConnectCard
+        botUsername={telegramBotUsername}
+        role={role}
+        user={session.user}
+        reminderMinutes={reminderMinutes}
+      />
+
       <SectionHeaderRow title="So'nggi bronlar" action="Barchasi" />
       <Card style={styles.panelCard}>
         {bookings.slice(0, 5).map((booking) => (
@@ -1663,135 +1783,17 @@ export default function App() {
       {initialLoading ? <LoadingCard label="Barberlar yuklanmoqda..." /> : null}
       {role === "admin" ? (
         <Card style={styles.formCard}>
-          <Text style={styles.cardTitle}>{editingBarberId ? "Barberni tahrirlash" : "Yangi barber qo'shish"}</Text>
-          <Field
-            label="Ism"
-            value={barberForm.fullName}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, fullName: value }))}
-            placeholder="Barber ismi"
+          <Text style={styles.cardTitle}>Barber boshqaruvi</Text>
+          <Text style={styles.muted}>Yangi barber qo'shish va tahrirlash alohida modalda ochiladi.</Text>
+          <PrimaryButton
+            label="Yangi barber qo'shish"
+            tone="gold"
+            onPress={() => {
+              setEditingBarberId("");
+              setBarberForm(defaultBarberForm());
+              setBarberModalOpen(true);
+            }}
           />
-          <Field
-            label="Username"
-            value={barberForm.username}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, username: value }))}
-            placeholder="username"
-          />
-          <Field
-            label={editingBarberId ? "Yangi parol (ixtiyoriy)" : "Parol"}
-            value={barberForm.password}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, password: value }))}
-            secureTextEntry
-            placeholder="barber123"
-          />
-          <Field
-            label="Mutaxassislik"
-            value={barberForm.specialty}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, specialty: value }))}
-            placeholder="Fade master"
-          />
-          <View style={styles.uploadRow}>
-            <PrimaryButton
-              label={barberForm.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"}
-              tone="ghost"
-              onPress={() => pickAndUploadMedia("image", (url) => setBarberForm((current) => ({ ...current, photoUrl: url })))}
-              loading={busy}
-            />
-            <PrimaryButton
-              label={barberForm.mediaUrl ? "Mediani almashtirish" : "Video/Rasm tanlash"}
-              tone="ghost"
-              onPress={() => pickAndUploadMedia("media", (url) => setBarberForm((current) => ({ ...current, mediaUrl: url })))}
-              loading={busy}
-            />
-          </View>
-          {barberForm.photoUrl ? <Image source={{ uri: barberForm.photoUrl }} style={styles.settingsPhotoPreview} /> : null}
-          {barberForm.mediaUrl ? (
-            <Text style={styles.uploadedFileText} numberOfLines={1}>Media yuklandi: {barberForm.mediaUrl}</Text>
-          ) : null}
-          <Field
-            label="Bio"
-            value={barberForm.bio}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, bio: value }))}
-            placeholder="Barber haqida qisqa ma'lumot"
-          />
-          <View style={styles.twoColumn}>
-            <Field
-              label="Tajriba"
-              value={String(barberForm.yearsExp)}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, yearsExp: toNumber(value, current.yearsExp) }))}
-              keyboardType="numeric"
-            />
-            <Field
-              label="Reyting"
-              value={String(barberForm.rating)}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, rating: toNumber(value, current.rating) }))}
-              keyboardType="decimal-pad"
-            />
-          </View>
-          <Field
-            label="Manzil"
-            value={barberForm.address}
-            onChangeText={(value) => setBarberForm((current) => ({ ...current, address: value }))}
-            placeholder="Salon manzili"
-          />
-          <PrimaryButton label="Lokatsiyani olish" tone="ghost" onPress={fillBarberLocation} loading={busy} />
-          <View style={styles.twoColumn}>
-            <Field
-              label="Latitude"
-              value={barberForm.latitude == null ? "" : String(barberForm.latitude)}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, latitude: value ? Number(value) : null }))}
-              keyboardType="decimal-pad"
-            />
-            <Field
-              label="Longitude"
-              value={barberForm.longitude == null ? "" : String(barberForm.longitude)}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, longitude: value ? Number(value) : null }))}
-              keyboardType="decimal-pad"
-            />
-          </View>
-          <View style={styles.twoColumn}>
-            <Field
-              label="Ish boshlanishi"
-              value={barberForm.workStartTime}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, workStartTime: value }))}
-              placeholder="09:00"
-            />
-            <Field
-              label="Ish tugashi"
-              value={barberForm.workEndTime}
-              onChangeText={(value) => setBarberForm((current) => ({ ...current, workEndTime: value }))}
-              placeholder="18:30"
-            />
-          </View>
-          <View style={styles.priceGrid}>
-            {([
-              ["priceHaircut", "Soch"],
-              ["priceFade", "Fade"],
-              ["priceHairBeard", "Combo"],
-              ["pricePremium", "Premium"],
-              ["priceBeard", "Soqol"],
-            ] as Array<[keyof BarberFormPayload, string]>).map(([key, label]) => (
-              <Field
-                key={key}
-                label={label}
-                value={String(barberForm[key] ?? "")}
-                onChangeText={(value) => setBarberForm((current) => ({ ...current, [key]: toNumber(value, Number(current[key]) || 0) }))}
-                keyboardType="numeric"
-              />
-            ))}
-          </View>
-          <View style={styles.actionRow}>
-            <PrimaryButton label={editingBarberId ? "Saqlash" : "Qo'shish"} onPress={saveBarberForm} loading={busy} />
-            {editingBarberId ? (
-              <PrimaryButton
-                label="Bekor"
-                tone="ghost"
-                onPress={() => {
-                  setEditingBarberId("");
-                  setBarberForm(defaultBarberForm());
-                }}
-              />
-            ) : null}
-          </View>
         </Card>
       ) : null}
       {barbers.map((barber) => (
@@ -1808,6 +1810,7 @@ export default function App() {
                 onPress={() => {
                   setEditingBarberId(barber.id);
                   setBarberForm(formFromBarber(barber));
+                  setBarberModalOpen(true);
                 }}
               />
               <PrimaryButton label="Ochirish" tone="ghost" onPress={() => removeBarber(barber)} />
@@ -1961,6 +1964,13 @@ export default function App() {
           </View>
         </View>
       </Card>
+
+      <TelegramConnectCard
+        botUsername={telegramBotUsername}
+        role={role}
+        user={session.user}
+        reminderMinutes={reminderMinutes}
+      />
 
       <Card style={styles.formCard}>
         <Text style={styles.cardTitle}>Sozlamalar</Text>
@@ -2200,6 +2210,87 @@ export default function App() {
         {busy ? <LoadingCard label="Amal bajarilmoqda..." /> : null}
         {content}
       </ScrollView>
+      <AppModal
+        visible={logoutModalOpen}
+        title="Chiqmoqchimisiz?"
+        subtitle="Tasdiqlasangiz, akkauntingizdan chiqasiz."
+        onClose={() => setLogoutModalOpen(false)}
+      >
+        <View style={styles.modalActions}>
+          <PrimaryButton label="Bekor qilish" tone="ghost" onPress={() => setLogoutModalOpen(false)} />
+          <PrimaryButton
+            label="Chiqish"
+            tone="gold"
+            onPress={() => {
+              setLogoutModalOpen(false);
+              logoutNow();
+            }}
+          />
+        </View>
+      </AppModal>
+      <AppModal
+        visible={barberModalOpen}
+        title={editingBarberId ? "Barberni tahrirlash" : "Yangi barber qo'shish"}
+        subtitle="Rasm, media, lokatsiya, ish vaqti va narxlarni bir joyda sozlang."
+        onClose={() => {
+          setBarberModalOpen(false);
+          setEditingBarberId("");
+          setBarberForm(defaultBarberForm());
+        }}
+      >
+        <ScrollView style={styles.modalScroll} keyboardShouldPersistTaps="handled">
+          <View style={styles.modalForm}>
+            <Field label="Ism" value={barberForm.fullName} onChangeText={(value) => setBarberForm((current) => ({ ...current, fullName: value }))} placeholder="Barber ismi" />
+            <Field label="Username" value={barberForm.username} onChangeText={(value) => setBarberForm((current) => ({ ...current, username: value }))} placeholder="username" />
+            <Field label={editingBarberId ? "Yangi parol (ixtiyoriy)" : "Parol"} value={barberForm.password} onChangeText={(value) => setBarberForm((current) => ({ ...current, password: value }))} secureTextEntry placeholder="barber123" />
+            <Field label="Mutaxassislik" value={barberForm.specialty} onChangeText={(value) => setBarberForm((current) => ({ ...current, specialty: value }))} placeholder="Fade master" />
+            <View style={styles.uploadRow}>
+              <PrimaryButton label={barberForm.photoUrl ? "Rasmni almashtirish" : "Rasm tanlash"} tone="ghost" onPress={() => pickAndUploadMedia("image", (url) => setBarberForm((current) => ({ ...current, photoUrl: url })))} loading={busy} />
+              <PrimaryButton label={barberForm.mediaUrl ? "Mediani almashtirish" : "Video/Rasm tanlash"} tone="ghost" onPress={() => pickAndUploadMedia("media", (url) => setBarberForm((current) => ({ ...current, mediaUrl: url })))} loading={busy} />
+            </View>
+            {barberForm.photoUrl ? <Image source={{ uri: barberForm.photoUrl }} style={styles.settingsPhotoPreview} /> : null}
+            {barberForm.mediaUrl ? <Text style={styles.uploadedFileText} numberOfLines={1}>Media yuklandi: {barberForm.mediaUrl}</Text> : null}
+            <Field label="Bio" value={barberForm.bio} onChangeText={(value) => setBarberForm((current) => ({ ...current, bio: value }))} placeholder="Barber haqida qisqa ma'lumot" />
+            <View style={styles.twoColumn}>
+              <Field label="Tajriba" value={String(barberForm.yearsExp)} onChangeText={(value) => setBarberForm((current) => ({ ...current, yearsExp: toNumber(value, current.yearsExp) }))} keyboardType="numeric" />
+              <Field label="Reyting" value={String(barberForm.rating)} onChangeText={(value) => setBarberForm((current) => ({ ...current, rating: toNumber(value, current.rating) }))} keyboardType="decimal-pad" />
+            </View>
+            <Field label="Manzil" value={barberForm.address} onChangeText={(value) => setBarberForm((current) => ({ ...current, address: value }))} placeholder="Salon manzili" />
+            <PrimaryButton label="Lokatsiyani olish" tone="ghost" onPress={fillBarberLocation} loading={busy} />
+            <View style={styles.twoColumn}>
+              <Field label="Latitude" value={barberForm.latitude == null ? "" : String(barberForm.latitude)} onChangeText={(value) => setBarberForm((current) => ({ ...current, latitude: value ? Number(value) : null }))} keyboardType="decimal-pad" />
+              <Field label="Longitude" value={barberForm.longitude == null ? "" : String(barberForm.longitude)} onChangeText={(value) => setBarberForm((current) => ({ ...current, longitude: value ? Number(value) : null }))} keyboardType="decimal-pad" />
+            </View>
+            <View style={styles.twoColumn}>
+              <Field label="Ish boshlanishi" value={barberForm.workStartTime} onChangeText={(value) => setBarberForm((current) => ({ ...current, workStartTime: value }))} placeholder="09:00" />
+              <Field label="Ish tugashi" value={barberForm.workEndTime} onChangeText={(value) => setBarberForm((current) => ({ ...current, workEndTime: value }))} placeholder="18:30" />
+            </View>
+            <View style={styles.priceGrid}>
+              {([
+                ["priceHaircut", "Soch"],
+                ["priceFade", "Fade"],
+                ["priceHairBeard", "Combo"],
+                ["pricePremium", "Premium"],
+                ["priceBeard", "Soqol"],
+              ] as Array<[keyof BarberFormPayload, string]>).map(([key, label]) => (
+                <Field key={key} label={label} value={String(barberForm[key] ?? "")} onChangeText={(value) => setBarberForm((current) => ({ ...current, [key]: toNumber(value, Number(current[key]) || 0) }))} keyboardType="numeric" />
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <PrimaryButton
+                label="Bekor"
+                tone="ghost"
+                onPress={() => {
+                  setBarberModalOpen(false);
+                  setEditingBarberId("");
+                  setBarberForm(defaultBarberForm());
+                }}
+              />
+              <PrimaryButton label={editingBarberId ? "Saqlash" : "Qo'shish"} onPress={saveBarberForm} loading={busy} />
+            </View>
+          </View>
+        </ScrollView>
+      </AppModal>
       {!bookingSuccess ? <View style={styles.bottomNav}>
         {visibleTabs.map((item) => (
           <Pressable
@@ -2417,6 +2508,76 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     fontWeight: "800",
+  },
+  modalBackdrop: {
+    backgroundColor: "rgba(0,0,0,0.72)",
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 14,
+  },
+  modalCard: {
+    backgroundColor: "rgba(16,19,24,0.98)",
+    borderColor: colors.lineStrong,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 16,
+    maxHeight: "88%",
+    padding: 16,
+    ...shadows.soft,
+  },
+  modalTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  modalSubtitle: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  modalClose: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderColor: colors.line,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "flex-end",
+  },
+  modalScroll: {
+    maxHeight: 620,
+  },
+  modalForm: {
+    gap: 13,
+    paddingBottom: 4,
+  },
+  telegramCard: {
+    backgroundColor: "rgba(34,158,217,0.12)",
+    borderColor: "rgba(34,158,217,0.24)",
+    gap: 13,
+  },
+  telegramCardLinked: {
+    backgroundColor: "rgba(74,222,128,0.11)",
+    borderColor: "rgba(74,222,128,0.22)",
+  },
+  telegramIcon: {
+    alignItems: "center",
+    backgroundColor: "#229ed9",
+    borderRadius: 16,
+    height: 52,
+    justifyContent: "center",
+    width: 52,
+  },
+  telegramIconLinked: {
+    backgroundColor: colors.green,
   },
   rowWrap: {
     flexDirection: "row",

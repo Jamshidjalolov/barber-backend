@@ -67,6 +67,8 @@ export function mapAuthUserToAdmin(user: AuthUser): AdminUser {
     name: user.fullName,
     username: user.username ?? "",
     role: "Administrator",
+    telegramChatId: user.telegramChatId,
+    telegramConnected: user.telegramConnected,
   };
 }
 
@@ -206,15 +208,23 @@ export function mapApiAvailabilityToItem(item: ApiAvailabilityBooking): BookingI
   const { localDate, localTime } = toLocalDateAndTime(item.scheduled_for);
   return {
     id: item.id,
-    customer: "",
-    phone: "",
-    service: "",
-    barber: "",
+    customer: item.customer_name ?? "",
+    customerId: item.customer_user_id ?? undefined,
+    phone: item.customer_phone ?? "",
+    service: item.service_name ?? "",
+    barber: item.barber_name ?? "",
     barberId: item.barber_id,
+    barberUserId: item.barber_user_id,
     date: localDate,
     time: localTime,
     status: mapApiStatusToUi(item.status),
     payment: "-",
+    note: item.note ?? undefined,
+    originalPrice: item.original_price,
+    finalPrice: item.final_price,
+    appliedDiscountPercent: item.applied_discount_percent ?? undefined,
+    updatedAt: item.updated_at,
+    createdAt: item.created_at,
   };
 }
 

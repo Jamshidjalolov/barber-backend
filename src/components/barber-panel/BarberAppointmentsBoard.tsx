@@ -463,7 +463,7 @@ function getActionLabel(status: BookingStatus) {
   }
 
   if (status === "Tasdiqlandi") {
-    return "Boshlash";
+    return "Tugatish";
   }
 
   return "Tugatish";
