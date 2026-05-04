@@ -89,6 +89,7 @@ const roleLabels: Record<ApiRole, string> = {
 const defaultServices = ["Soch olish", "Fade", "Soch + soqol", "Premium"];
 const HERO_IMAGE_URL = "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?auto=format&fit=crop&w=900&q=80";
 const SALON_IMAGE_URL = "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80";
+const DEFAULT_TELEGRAM_BOT_USERNAME = "Barber_shop_001_bot";
 
 const serviceIcons: Record<string, keyof typeof MaterialCommunityIcons.glyphMap> = {
   "Soch olish": "content-cut",
@@ -341,9 +342,9 @@ function TelegramConnectCard({
   user: AuthUser;
   reminderMinutes: number;
 }) {
-  if (!botUsername) return null;
   const linked = Boolean(user.telegramConnected);
-  const link = buildTelegramLink(botUsername, role, user.id);
+  const resolvedBotUsername = botUsername || DEFAULT_TELEGRAM_BOT_USERNAME;
+  const link = buildTelegramLink(resolvedBotUsername, role, user.id);
 
   return (
     <Card style={[styles.telegramCard, linked && styles.telegramCardLinked]}>
@@ -843,7 +844,7 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [barberModalOpen, setBarberModalOpen] = useState(false);
-  const [telegramBotUsername, setTelegramBotUsername] = useState<string | null>(null);
+  const [telegramBotUsername, setTelegramBotUsername] = useState<string | null>(DEFAULT_TELEGRAM_BOT_USERNAME);
   const [reminderMinutes, setReminderMinutes] = useState(10);
 
   const role = session?.user.role ?? "customer";
@@ -991,12 +992,12 @@ export default function App() {
     getTelegramMeta()
       .then((meta) => {
         if (!active) return;
-        setTelegramBotUsername(meta.bot_username ?? null);
+        setTelegramBotUsername(meta.bot_username ?? DEFAULT_TELEGRAM_BOT_USERNAME);
         setReminderMinutes(meta.reminder_minutes_before);
       })
       .catch(() => {
         if (active) {
-          setTelegramBotUsername(null);
+          setTelegramBotUsername(DEFAULT_TELEGRAM_BOT_USERNAME);
         }
       });
     return () => {

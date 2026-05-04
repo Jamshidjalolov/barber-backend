@@ -71,6 +71,8 @@ import {
   PageKey,
 } from "./types";
 
+const DEFAULT_TELEGRAM_BOT_USERNAME = "Barber_shop_001_bot";
+
 function isTerminalStatus(status: BookingStatus) {
   return status === "Tugallandi" || status === "Rad etildi";
 }
@@ -182,7 +184,7 @@ export default function App() {
   const [booting, setBooting] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [globalError, setGlobalError] = useState("");
-  const [telegramBotUsername, setTelegramBotUsername] = useState<string | undefined>(undefined);
+  const [telegramBotUsername, setTelegramBotUsername] = useState<string | undefined>(DEFAULT_TELEGRAM_BOT_USERNAME);
   const [reminderMinutes, setReminderMinutes] = useState(10);
   const [realtimeNotice, setRealtimeNotice] = useState<{
     message: string;
@@ -377,11 +379,11 @@ export default function App() {
         if (!active) {
           return;
         }
-        setTelegramBotUsername(meta.bot_username ?? undefined);
+        setTelegramBotUsername(meta.bot_username ?? DEFAULT_TELEGRAM_BOT_USERNAME);
         setReminderMinutes(meta.reminder_minutes_before);
       } catch {
         if (active) {
-          setTelegramBotUsername(undefined);
+          setTelegramBotUsername(DEFAULT_TELEGRAM_BOT_USERNAME);
         }
       }
     };
